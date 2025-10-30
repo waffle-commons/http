@@ -34,10 +34,10 @@ class ResponseEmitter
                 'HTTP/%s %d%s',
                 $response->getProtocolVersion(),
                 $statusCode,
-                $reasonPhrase ? ' ' . $reasonPhrase : '',
+                $reasonPhrase ? ' ' . $reasonPhrase : '', // Don't add space if phrase is empty
             ),
             true, // Replace any existing status line
-            $statusCode,
+            $statusCode, // Force the HTTP response code
         );
 
         // 2. Send Headers
@@ -55,20 +55,24 @@ class ResponseEmitter
     private function emitHeaders(array $headers): void
     {
         foreach ($headers as $name => $values) {
+            // Normalizes header name for display (e.g., 'content-type' -> 'Content-Type')
             $name = str_replace(' ', '-', ucwords(str_replace('-', ' ', $name)));
-            $first = true;
+            $first = true; // For replacement vs. add logic
 
-            // Handle special 'Set-Cookie' case, which cannot be combined
+            // Special case: Set-Cookie cannot be combined into one line
             if (strcasecmp($name, 'Set-Cookie') === 0) {
                 foreach ($values as $value) {
-                    header(sprintf('%s: %s', $name, $value), false);
+                    header(sprintf('%s: %s', $name, $value), false); // 'false' to add, not replace
                 }
-                continue;
+                continue; // Continue to next header
             }
 
             // Combine other headers
             foreach ($values as $value) {
-                header(sprintf('%s: %s', $name, $value), $first); // Replace previous header on first value
+                header(
+                    sprintf('%s: %s', $name, $value),
+                    $first // Replaces header on first value, adds for subsequent ones
+                );
                 $first = false;
             }
         }
@@ -81,10 +85,12 @@ class ResponseEmitter
     {
         $body = $response->getBody();
 
+        // If the body is seekable, ensure it's at the beginning
         if ($body->isSeekable()) {
             $body->rewind();
         }
 
+        // Reads the stream in chunks to handle large files
         while (!$body->eof()) {
             echo $body->read(8192); // Read in 8KB chunks
         }

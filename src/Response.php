@@ -10,11 +10,19 @@ use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 use Waffle\Commons\Http\Abstract\AbstractMessage;
 
+/**
+ * PSR-7 ResponseInterface implementation.
+ *
+ * @see https://www.php-fig.org/psr/psr-7/#33-psrhttpmessageresponseinterface
+ */
 class Response extends AbstractMessage implements ResponseInterface
 {
     private int $statusCode = 200;
     private string $reasonPhrase = 'OK';
 
+    /**
+     * @var array<int, string> Map of standard HTTP status codes and their reason phrases.
+     */
     private const REASON_PHRASES = [
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -56,7 +64,7 @@ class Response extends AbstractMessage implements ResponseInterface
         415 => 'Unsupported Media Type',
         416 => 'Range Not Satisfiable',
         417 => 'Expectation Failed',
-        418 => 'I\'m a teapot',
+        418 => 'I\'m a teapot', // RFC 2324
         421 => 'Misdirected Request',
         422 => 'Unprocessable Entity',
         423 => 'Locked',
@@ -81,11 +89,12 @@ class Response extends AbstractMessage implements ResponseInterface
     ];
 
     /**
-     * @param int $statusCode
-     * @param array $headers
-     * @param StreamInterface|resource|string|null $body
-     * @param string $version
-     * @param string|null $reasonPhrase
+     * @param int $statusCode HTTP status code.
+     * @param array $headers Response headers.
+     * @param StreamInterface|resource|string|null $body Response body.
+     * @param string $version HTTP protocol version.
+     * @param string|null $reasonPhrase Reason phrase (if null, auto-detected).
+     * @throws InvalidArgumentException For invalid status code.
      */
     public function __construct(
         int $statusCode = 200,
@@ -99,12 +108,17 @@ class Response extends AbstractMessage implements ResponseInterface
         $this->protocolVersion = $version;
         $this->headers = $this->normalizeHeaders($headers);
         $this->body = $this->createStreamBody($body);
+        // Sets the reason phrase: uses provided, otherwise standard, otherwise 'Unknown'
         $this->reasonPhrase = $reasonPhrase ?? self::REASON_PHRASES[$statusCode] ?? 'Unknown';
     }
 
     /**
-     * @param $body
+     * Creates a Stream instance for the response body.
+     *
+     * @param StreamInterface|resource|string|null $body
      * @return StreamInterface
+     * @throws RuntimeException If php://temp cannot be opened.
+     * @throws InvalidArgumentException If body type is invalid.
      */
     private function createStreamBody($body): StreamInterface
     {
@@ -119,7 +133,7 @@ class Response extends AbstractMessage implements ResponseInterface
             }
             if (is_string($body) && '' !== $body) {
                 fwrite($resource, $body);
-                fseek($resource, 0);
+                fseek($resource, 0); // Rewind after writing
             }
             return new Stream($resource);
         }
@@ -131,11 +145,17 @@ class Response extends AbstractMessage implements ResponseInterface
         throw new InvalidArgumentException('Invalid body type; must be string, resource, null, or StreamInterface.');
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getStatusCode(): int
     {
         return $this->statusCode;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withStatus(int $code, string $reasonPhrase = ''): ResponseInterface
     {
         $this->validateStatusCode($code);
@@ -146,11 +166,20 @@ class Response extends AbstractMessage implements ResponseInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getReasonPhrase(): string
     {
         return $this->reasonPhrase;
     }
 
+    /**
+     * Validates an HTTP status code.
+     *
+     * @param int $code
+     * @throws InvalidArgumentException
+     */
     private function validateStatusCode(int $code): void
     {
         if ($code < 100 || $code > 599) {

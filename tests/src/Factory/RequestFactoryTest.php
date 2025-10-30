@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WaffleTests\Commons\Http\Factory;
 
+use InvalidArgumentException;
 use Psr\Http\Message\UploadedFileInterface;
 use Waffle\Commons\Http\Factory\RequestFactory;
 use Waffle\Commons\Http\UploadedFile;
@@ -45,12 +46,12 @@ class RequestFactoryTest extends AbstractTestCase
         array $files = [],
     ): void {
         $_SERVER = $server
-        + [
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/',
-            'SERVER_PROTOCOL' => 'HTTP/1.1',
-            'HTTP_HOST' => 'localhost',
-        ];
+            + [
+                'REQUEST_METHOD' => 'GET',
+                'REQUEST_URI' => '/',
+                'SERVER_PROTOCOL' => 'HTTP/1.1',
+                'HTTP_HOST' => 'localhost',
+            ];
         $_GET = $get;
         $_POST = $post;
         $_COOKIE = $cookie;
@@ -63,6 +64,7 @@ class RequestFactoryTest extends AbstractTestCase
             server: [
                 'REQUEST_METHOD' => 'POST',
                 'REQUEST_URI' => '/test?foo=bar',
+                'QUERY_STRING' => 'foo=bar',
                 'HTTP_HOST' => 'example.com',
                 'HTTP_CONTENT_TYPE' => 'application/json',
                 'HTTP_X_TEST' => 'Waffle',
@@ -83,6 +85,19 @@ class RequestFactoryTest extends AbstractTestCase
         $this->assertSame('example.com', $request->getHeaderLine('Host'));
     }
 
+    public function testCreateFromGlobalsThrowsExceptionForInvalidFiles(): void
+    {
+        $this->setGlobals(
+            files: ['invalid_upload' => 'this is just a string, not an array']
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid value in $_FILES array');
+
+        $factory = new RequestFactory();
+        $factory->createFromGlobals();
+    }
+
     public function testHttpsDetection(): void
     {
         $this->setGlobals(server: ['HTTPS' => 'on', 'HTTP_HOST' => 'secure.com']);
@@ -101,11 +116,11 @@ class RequestFactoryTest extends AbstractTestCase
     public function testParsedBodyForJson(): void
     {
         $this->setGlobals(
-            server: ['CONTENT_TYPE' => 'application/json'],
+            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'application/json'],
             post: ['user' => 'waffle'], // Ignored for JSON
         );
 
-        // Mock php://input
+        // Simulates php://input
         $factory = new RequestFactory(fn() => $this->createStream('{"user":"test"}'));
         $request = $factory->createFromGlobals();
 
@@ -115,7 +130,7 @@ class RequestFactoryTest extends AbstractTestCase
     public function testParsedBodyForUrlEncoded(): void
     {
         $this->setGlobals(
-            server: ['CONTENT_TYPE' => 'application/x-www-form-urlencoded'],
+            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'],
             post: ['user' => 'waffle'],
         );
 
@@ -126,7 +141,7 @@ class RequestFactoryTest extends AbstractTestCase
     public function testParsedBodyForFormData(): void
     {
         $this->setGlobals(
-            server: ['CONTENT_TYPE' => 'multipart/form-data'],
+            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'],
             post: ['user' => 'waffle'],
         );
 
@@ -136,8 +151,11 @@ class RequestFactoryTest extends AbstractTestCase
 
     public function testUploadedFiles(): void
     {
-        // Mock a file upload
+        // Simulates file upload
         $tempFile = tempnam(sys_get_temp_dir(), 'wfl_test_upload');
+        if ($tempFile === false) {
+            $this->fail('Unable to create temporary file');
+        }
         file_put_contents($tempFile, 'test');
 
         $files = [
@@ -164,7 +182,7 @@ class RequestFactoryTest extends AbstractTestCase
 
     public function testUploadedFilesNested(): void
     {
-        // Mock nested file uploads
+        // Simulates nested file uploads
         $tempFile1 = tempnam(sys_get_temp_dir(), 'wfl_test_upload1');
         file_put_contents($tempFile1, 'file1');
         $tempFile2 = tempnam(sys_get_temp_dir(), 'wfl_test_upload2');
@@ -205,7 +223,7 @@ class RequestFactoryTest extends AbstractTestCase
 
     public function testRedirectAuthorizationHeader(): void
     {
-        // Test for REDIRECT_HTTP_AUTHORIZATION (used by Apache + mod_rewrite)
+        // Tests REDIRECT_HTTP_AUTHORIZATION (used by Apache + mod_rewrite)
         $this->setGlobals(server: ['REDIRECT_HTTP_AUTHORIZATION' => 'Bearer 67890']);
         $request = new RequestFactory()->createFromGlobals();
         $this->assertSame('Bearer 67890', $request->getHeaderLine('Authorization'));

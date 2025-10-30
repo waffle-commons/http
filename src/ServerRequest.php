@@ -4,24 +4,42 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http;
 
+use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-use InvalidArgumentException;
 use Waffle\Commons\Http\Abstract\AbstractMessage;
 
+/**
+ * PSR-7 ServerRequestInterface implementation.
+ *
+ * @see https://www.php-fig.org/psr/psr-7/#321-psrhttpmessageserverrequestinterface
+ */
 class ServerRequest extends AbstractMessage implements ServerRequestInterface
 {
     private array $attributes = [];
     private array $cookieParams = [];
-    private ?array $parsedBody = null;
+    /** @var null|array|object */
+    private $parsedBody = null;
     private array $queryParams = [];
     private array $serverParams = [];
     private array $uploadedFiles = [];
-    private ?string $requestTarget = null;
+    private null|string $requestTarget = null;
     private string $method;
     private UriInterface $uri;
 
+    /**
+     * @param string $method HTTP method.
+     * @param UriInterface $uri URI instance.
+     * @param array $headers Request headers.
+     * @param StreamInterface|resource|string|null $body Request body.
+     * @param string $version Protocol version.
+     * @param array $serverParams SAPI parameters (typically $_SERVER).
+     * @param array $cookieParams Cookies (typically $_COOKIE).
+     * @param array $queryParams Query parameters (typically $_GET).
+     * @param array|object|null $parsedBody Parsed body (typically $_POST or decoded JSON).
+     * @param array $uploadedFiles Uploaded files (typically $_FILES).
+     */
     public function __construct(
         string $method,
         UriInterface $uri,
@@ -32,7 +50,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         array $cookieParams = [],
         array $queryParams = [],
         $parsedBody = null,
-        array $uploadedFiles = []
+        array $uploadedFiles = [],
     ) {
         $this->method = $method;
         $this->uri = $uri;
@@ -47,7 +65,9 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     }
 
     /**
-     * @param $body
+     * Creates a Stream instance for the request body.
+     *
+     * @param StreamInterface|resource|string|null $body
      * @return StreamInterface
      */
     private function createStreamBody($body): StreamInterface
@@ -75,12 +95,16 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         throw new InvalidArgumentException('Invalid body type; must be string, resource, null, or StreamInterface.');
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getRequestTarget(): string
     {
         if (null !== $this->requestTarget) {
             return $this->requestTarget;
         }
 
+        // Builds target from URI if not set
         $target = $this->uri->getPath();
         if ($target === '') {
             $target = '/';
@@ -92,8 +116,12 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         return $target;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withRequestTarget(string $requestTarget): ServerRequestInterface
     {
+        // Validates that there is no whitespace (PSR-7 section 3.2.1)
         if (preg_match('/\s/', $requestTarget)) {
             throw new InvalidArgumentException('Invalid request target provided; must not contain whitespace.');
         }
@@ -102,60 +130,84 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getMethod(): string
     {
         return $this->method;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withMethod(string $method): ServerRequestInterface
     {
         if ($method === $this->method) {
             return clone $this;
         }
+        // NOTE: Method validation (e.g., RFC 7230 token format) could be added here.
         $new = clone $this;
         $new->method = $method;
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getUri(): UriInterface
     {
         return $this->uri;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withUri(UriInterface $uri, bool $preserveHost = false): ServerRequestInterface
     {
         $new = clone $this;
         $new->uri = $uri;
 
         if ($preserveHost && $this->hasHeader('Host')) {
-            // Host header is preserved
+            // Host header is preserved, do nothing more.
             return $new;
         }
 
-        // Update Host header from new URI
+        // Updates Host header from new URI
         $host = $uri->getHost();
         if ($host !== '') {
             $port = $uri->getPort();
             if (null !== $port) {
                 $host .= ':' . $port;
             }
-            // Use withHeader to maintain case-insensitivity logic
+            // Use withHeader to replace existing Host header
+            // (case logic is handled in AbstractMessage)
             return $new->withHeader('Host', $host);
         }
 
+        // If the new URI has no host, don't set the Host header.
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getServerParams(): array
     {
         return $this->serverParams;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getCookieParams(): array
     {
         return $this->cookieParams;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withCookieParams(array $cookies): ServerRequestInterface
     {
         $new = clone $this;
@@ -163,11 +215,17 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getQueryParams(): array
     {
         return $this->queryParams;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withQueryParams(array $query): ServerRequestInterface
     {
         $new = clone $this;
@@ -175,40 +233,67 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getUploadedFiles(): array
     {
         return $this->uploadedFiles;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withUploadedFiles(array $uploadedFiles): ServerRequestInterface
     {
+        // NOTE: Deep validation to ensure array only contains
+        // UploadedFileInterface instances could be added here.
         $new = clone $this;
         $new->uploadedFiles = $uploadedFiles;
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getParsedBody()
     {
         return $this->parsedBody;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withParsedBody($data): ServerRequestInterface
     {
+        // Validates $data type according to PSR-7
+        if (!is_array($data) && !is_object($data) && null !== $data) {
+            throw new InvalidArgumentException('Parsed body must be an array, object, or null.');
+        }
         $new = clone $this;
         $new->parsedBody = $data;
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getAttributes(): array
     {
         return $this->attributes;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getAttribute(string $name, $default = null)
     {
         return $this->attributes[$name] ?? $default;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withAttribute(string $name, $value): ServerRequestInterface
     {
         $new = clone $this;
@@ -216,10 +301,13 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withoutAttribute(string $name): ServerRequestInterface
     {
         if (!array_key_exists($name, $this->attributes)) {
-            return clone $this;
+            return clone $this; // No need to clone if attribute doesn't exist
         }
         $new = clone $this;
         unset($new->attributes[$name]);

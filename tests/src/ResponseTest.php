@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WaffleTests\Commons\Http;
 
+use InvalidArgumentException;
 use Waffle\Commons\Http\Response;
 use Waffle\Commons\Http\Stream;
 
@@ -41,6 +42,46 @@ class ResponseTest extends AbstractTestCase
         $this->assertSame('Hello World', (string) $response->getBody());
     }
 
+    public function testConstructorAcceptsResourceBody(): void
+    {
+        $resource = fopen('php://memory', 'r+');
+        fwrite($resource, 'Resource Content');
+
+        $response = new Response(200, [], $resource);
+
+        $this->assertInstanceOf(Stream::class, $response->getBody());
+        $this->assertSame('Resource Content', (string) $response->getBody());
+    }
+
+    public function testConstructorAcceptsStreamInterfaceBody(): void
+    {
+        $stream = $this->createStream('Stream Content');
+        $response = new Response(200, [], $stream);
+
+        // Should use the exact same instance
+        $this->assertSame($stream, $response->getBody());
+    }
+
+    public function testConstructorThrowsExceptionForInvalidBodyType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid body type');
+
+        new Response(200, [], 12345); // Int is invalid
+    }
+
+    public function testConstructorThrowsExceptionForInvalidStatusCodeLow(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new Response(99);
+    }
+
+    public function testConstructorThrowsExceptionForInvalidStatusCodeHigh(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new Response(600);
+    }
+
     public function testWithStatus(): void
     {
         $r1 = new Response();
@@ -56,6 +97,13 @@ class ResponseTest extends AbstractTestCase
 
         $this->assertSame(500, $r3->getStatusCode());
         $this->assertSame('Server Error', $r3->getReasonPhrase());
+    }
+
+    public function testWithStatusThrowsExceptionForInvalidCode(): void
+    {
+        $response = new Response();
+        $this->expectException(InvalidArgumentException::class);
+        $response->withStatus(999);
     }
 
     public function testHeaderMethodsAreCaseInsensitive(): void

@@ -7,6 +7,11 @@ namespace Waffle\Commons\Http;
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
 
+/**
+ * PSR-7 UriInterface implementation.
+ *
+ * @see https://www.php-fig.org/psr/psr-7/#35-psrhttpmessageuriinterface
+ */
 class Uri implements UriInterface
 {
     private string $scheme = '';
@@ -17,6 +22,10 @@ class Uri implements UriInterface
     private string $query = '';
     private string $fragment = '';
 
+    /**
+     * Standard ports for various schemes.
+     * @var array<string, int>
+     */
     private const STANDARD_PORTS = [
         'http' => 80,
         'https' => 443,
@@ -32,7 +41,8 @@ class Uri implements UriInterface
     ];
 
     /**
-     * @param string $uri
+     * @param string $uri The URI string to parse.
+     * @throws InvalidArgumentException If the URI cannot be parsed.
      */
     public function __construct(string $uri = '')
     {
@@ -41,13 +51,15 @@ class Uri implements UriInterface
             if (false === $parts) {
                 throw new InvalidArgumentException(sprintf('Unable to parse URI: "%s".', $uri));
             }
+            // Applies the parsed parts to the object properties
             $this->applyParts($parts);
         }
     }
 
     /**
-     * @param array $parts
-     * @return void
+     * Applies parsed parts (from parse_url) to the instance properties.
+     *
+     * @param array $parts Associative array from parse_url.
      */
     private function applyParts(array $parts): void
     {
@@ -60,9 +72,10 @@ class Uri implements UriInterface
         $this->fragment = isset($parts['fragment']) ? $this->filterFragment($parts['fragment']) : '';
     }
 
+    // --- Filter Methods for normalization ---
+
     /**
-     * @param string $scheme
-     * @return string
+     * Filters and normalizes the scheme (lowercase).
      */
     private function filterScheme(string $scheme): string
     {
@@ -70,9 +83,7 @@ class Uri implements UriInterface
     }
 
     /**
-     * @param string $user
-     * @param string|null $password
-     * @return string
+     * Filters and assembles user info.
      */
     private function filterUserInfo(string $user, null|string $password = null): string
     {
@@ -84,8 +95,7 @@ class Uri implements UriInterface
     }
 
     /**
-     * @param string $host
-     * @return string
+     * Filters and normalizes the host (lowercase).
      */
     private function filterHost(string $host): string
     {
@@ -93,9 +103,8 @@ class Uri implements UriInterface
     }
 
     /**
-     * @param int|null $port
-     * @return int|null
-     * @throws InvalidArgumentException
+     * Validates the port.
+     * @throws InvalidArgumentException For invalid ports.
      */
     private function filterPort(null|int $port): null|int
     {
@@ -111,80 +120,93 @@ class Uri implements UriInterface
     }
 
     /**
-     * @param string $path
-     * @return string
+     * Filters and encodes the path.
      */
     private function filterPath(string $path): string
     {
-        // Don't encode /
+        // Encodes unauthorized characters in a path, except '/'
         $path = preg_replace_callback(
             '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/%]+|%(?![A-Fa-f0-9]{2}))/',
             fn(array $matches): string => rawurlencode($matches[0]),
             $path,
         );
+        // Ensures a non-empty path starts with a '/'
         return $path === '' || str_starts_with($path, '/') ? $path : '/' . $path;
     }
 
     /**
-     * @param string $query
-     * @return string
+     * Filters and encodes the query string.
      */
     private function filterQuery(string $query): string
     {
-        // Don't encode ? or /
+        // Encodes unauthorized characters, except '/' and '?'
         $query = preg_replace_callback(
             '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/\?%]+|%(?![A-Fa-f0-9]{2}))/',
             fn(array $matches): string => rawurlencode($matches[0]),
             $query,
         );
+        // Removes leading '?' if present
         return ltrim($query, '?');
     }
 
     /**
-     * @param string $fragment
-     * @return string
+     * Filters and encodes the fragment.
      */
     private function filterFragment(string $fragment): string
     {
-        // Don't encode # or / or ?
+        // Encodes unauthorized characters, except '/', '?' and '#'
         $fragment = preg_replace_callback(
             '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/\?%]+|%(?![A-Fa-f0-9]{2}))/',
             fn(array $matches): string => rawurlencode($matches[0]),
             $fragment,
         );
+        // Removes leading '#' if present
         return ltrim($fragment, '#');
     }
 
+    // --- Public Methods ---
+
+    /**
+     * {@inheritdoc}
+     */
     public function __toString(): string
     {
         $uri = '';
 
+        // 1. Scheme
         if ('' !== $this->scheme) {
             $uri .= $this->scheme . ':';
         }
 
+        // 2. Authority
         $authority = $this->getAuthority();
         if ('' !== $authority || 'file' === $this->scheme) {
             $uri .= '//' . $authority;
         }
 
+        // 3. Path
         $path = $this->path;
+        // Path normalization logic (PSR-7 section 4.1)
         if ('' !== $authority && $path !== '' && !str_starts_with($path, '/')) {
-            $path = '/' . $path; // Path must be prefixed with / if authority is present
+            // Path MUST start with / if authority is present
+            $path = '/' . $path;
         } elseif ('' === $authority && str_starts_with($path, '//')) {
-            $path = '/' . ltrim($path, '/'); // Path must not start with // if no authority
+            // Path MUST NOT start with // if no authority is present
+            $path = '/' . ltrim($path, '/');
         }
-
+        // If authority is present but path is empty, it must be '/'
         if ($path === '' && '' !== $authority) {
-            $path = '/'; // Add root path if authority is present but path is empty
+            $path = '/';
         }
 
         $uri .= $path;
 
+        // 4. Query
         if ('' !== $this->query) {
             $uri .= '?' . $this->query;
         }
 
+        // 5. Fragment
         if ('' !== $this->fragment) {
             $uri .= '#' . $this->fragment;
         }
@@ -192,23 +214,31 @@ class Uri implements UriInterface
         return $uri;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getScheme(): string
     {
         return $this->scheme;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getAuthority(): string
     {
         $authority = $this->host;
         if ('' === $authority) {
-            return '';
+            return ''; // No authority if no host
         }
 
+        // Adds user info if present
         if ('' !== $this->userInfo) {
             $authority = $this->userInfo . '@' . $authority;
         }
 
-        $port = $this->getPort(); // This now correctly returns null for standard ports
+        // Adds port if defined AND non-standard
+        $port = $this->getPort();
         if (null !== $port) {
             $authority .= ':' . $port;
         }
@@ -216,54 +246,79 @@ class Uri implements UriInterface
         return $authority;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getUserInfo(): string
     {
         return $this->userInfo;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getHost(): string
     {
         return $this->host;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getPort(): null|int
     {
         if (null === $this->port) {
-            return null;
+            return null; // Port not defined
         }
 
-        // Return null if port is standard for the scheme
+        // If a standard port is defined for the scheme and it matches, return null
         if (isset(self::STANDARD_PORTS[$this->scheme]) && $this->port === self::STANDARD_PORTS[$this->scheme]) {
             return null;
         }
 
+        // Returns the non-standard port
         return $this->port;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getPath(): string
     {
         return $this->path;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getQuery(): string
     {
         return $this->query;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getFragment(): string
     {
         return $this->fragment;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withScheme(string $scheme): UriInterface
     {
         $new = clone $this;
         $new->scheme = $this->filterScheme($scheme);
-        // Re-validate port against new scheme
+        // Re-validates port against new scheme
         $new->port = $this->filterPort($this->port);
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withUserInfo(string $user, null|string $password = null): UriInterface
     {
         $new = clone $this;
@@ -271,6 +326,9 @@ class Uri implements UriInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withHost(string $host): UriInterface
     {
         if ($host === $this->host) {
@@ -281,6 +339,9 @@ class Uri implements UriInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withPort(null|int $port): UriInterface
     {
         $new = clone $this;
@@ -288,6 +349,9 @@ class Uri implements UriInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withPath(string $path): UriInterface
     {
         if ($path === $this->path) {
@@ -298,6 +362,9 @@ class Uri implements UriInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withQuery(string $query): UriInterface
     {
         if ($query === $this->query) {
@@ -308,6 +375,9 @@ class Uri implements UriInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withFragment(string $fragment): UriInterface
     {
         if ($fragment === $this->fragment) {

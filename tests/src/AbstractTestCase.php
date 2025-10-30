@@ -15,8 +15,6 @@ use Waffle\Commons\Http\Stream;
  */
 abstract class AbstractTestCase extends TestCase
 {
-    // You can add helper methods here, for example:
-
     /**
      * Helper to create a new Stream with the given content.
      *

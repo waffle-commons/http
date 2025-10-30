@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http\Abstract;
 
+use InvalidArgumentException;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
-use InvalidArgumentException;
 
 /**
  * Abstract implementation of PSR-7 MessageInterface.
@@ -16,56 +16,82 @@ use InvalidArgumentException;
  */
 abstract class AbstractMessage implements MessageInterface
 {
+    /** @var string $protocolVersion Protocol version. */
     protected string $protocolVersion = '1.1';
 
     /**
-     * @var array Map of normalized header names to original casing.
+     * @var array<string, string> Map of normalized header names to their original casing.
      */
     protected array $headerNames = [];
 
     /**
-     * @var array Map of original header names to array of values.
+     * @var array<string, string[]> Map of original header names to an array of values.
      */
     protected array $headers = [];
 
+    /** @var StreamInterface $body Message body. */
     protected StreamInterface $body;
 
+    /**
+     * {@inheritdoc}
+     */
     public function getProtocolVersion(): string
     {
         return $this->protocolVersion;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withProtocolVersion(string $version): MessageInterface
     {
         if (!in_array($version, ['1.0', '1.1', '2.0', '2', '3.0'])) {
             throw new InvalidArgumentException(sprintf('Unsupported protocol version "%s".', $version));
+        }
+        if ($this->protocolVersion === $version) {
+            return $this;
         }
         $new = clone $this;
         $new->protocolVersion = $version;
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getHeaders(): array
     {
         return $this->headers;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasHeader(string $name): bool
     {
         return isset($this->headerNames[strtolower($name)]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getHeader(string $name): array
     {
         $normalizedName = $this->headerNames[strtolower($name)] ?? null;
         return $this->headers[$normalizedName] ?? [];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getHeaderLine(string $name): string
     {
         return implode(', ', $this->getHeader($name));
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withHeader(string $name, $value): MessageInterface
     {
         $this->validateHeaderName($name);
@@ -73,16 +99,21 @@ abstract class AbstractMessage implements MessageInterface
         $normalizedName = strtolower($name);
 
         $new = clone $this;
+        // If the header exists (even with different case), remove it first
         if ($new->hasHeader($name)) {
             unset($new->headers[$new->headerNames[$normalizedName]]);
         }
 
+        // Store the new case and value
         $new->headerNames[$normalizedName] = $name;
         $new->headers[$name] = $value;
 
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withAddedHeader(string $name, $value): MessageInterface
     {
         $this->validateHeaderName($name);
@@ -91,9 +122,11 @@ abstract class AbstractMessage implements MessageInterface
 
         $new = clone $this;
         if (!$new->hasHeader($name)) {
+            // Simple add if header does not exist
             $new->headerNames[$normalizedName] = $name;
             $new->headers[$name] = $value;
         } else {
+            // Merge if header already exists
             $originalName = $this->headerNames[$normalizedName];
             $new->headers[$originalName] = array_merge($this->headers[$originalName], $value);
         }
@@ -101,28 +134,38 @@ abstract class AbstractMessage implements MessageInterface
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withoutHeader(string $name): MessageInterface
     {
         $normalizedName = strtolower($name);
         if (!isset($this->headerNames[$normalizedName])) {
-            return clone $this;
+            return $this; // No change, return same instance
         }
 
+        // Remove header from both maps
         $originalName = $this->headerNames[$normalizedName];
         $new = clone $this;
         unset($new->headers[$originalName], $new->headerNames[$normalizedName]);
         return $new;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getBody(): StreamInterface
     {
         return $this->body;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function withBody(StreamInterface $body): MessageInterface
     {
         if ($body === $this->body) {
-            return clone $this;
+            return $this; // No change, return same instance
         }
         $new = clone $this;
         $new->body = $body;
@@ -137,6 +180,7 @@ abstract class AbstractMessage implements MessageInterface
      */
     protected function validateHeaderName(string $name): void
     {
+        // Complies with RFC 7230, section 3.2.
         if (1 !== preg_match('/^[a-zA-Z0-9\'`#$%&*+.^~_|-]+$/', $name)) {
             throw new InvalidArgumentException(sprintf('Invalid header name "%s".', $name));
         }
@@ -161,11 +205,13 @@ abstract class AbstractMessage implements MessageInterface
 
         $normalized = [];
         foreach ($value as $v) {
+            // Validates that each value is scalar or null
             if (!is_scalar($v) && null !== $v) {
                 throw new InvalidArgumentException('Header value must be a string or array of strings.');
             }
             $v = (string) $v;
 
+            // Validates header value characters (RFC 7230, section 3.2)
             if (1 !== preg_match('/^[ \t\x21-\x7E\x80-\xFF]*$/', $v)) {
                 throw new InvalidArgumentException(sprintf('Invalid header value: "%s".', $v));
             }
@@ -178,8 +224,8 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * Normalizes an array of headers.
      *
-     * @param array $headers
-     * @return array
+     * @param array $headers Associative array of headers.
+     * @return array<string, string[]> Normalized array of headers.
      */
     protected function normalizeHeaders(array $headers): array
     {
@@ -188,14 +234,16 @@ abstract class AbstractMessage implements MessageInterface
 
         foreach ($headers as $name => $value) {
             if (!is_string($name)) {
-                throw new InvalidArgumentException(
-                    sprintf('Header name must be a string but %s provided.', gettype($name))
-                );
+                throw new InvalidArgumentException(sprintf(
+                    'Header name must be a string, %s provided.',
+                    gettype($name),
+                ));
             }
             $this->validateHeaderName($name);
             $value = $this->normalizeHeaderValue($value);
             $normalizedName = strtolower($name);
 
+            // Stores the original case and values
             $this->headerNames[$normalizedName] = $name;
             $normalizedHeaders[$name] = $value;
         }
