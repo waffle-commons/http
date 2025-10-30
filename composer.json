@@ -6,12 +6,12 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Waffle\\Commons\\Http": "src/"
+            "Waffle\\Commons\\Http\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "WaffleTests\\Commons\\Http": "tests/src/"
+            "WaffleTests\\Commons\\Http\\": "tests/src/"
         }
     },
     "authors": [
