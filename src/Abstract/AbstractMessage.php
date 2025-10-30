@@ -1,0 +1,205 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Waffle\Commons\Http\Abstract;
+
+use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\StreamInterface;
+use InvalidArgumentException;
+
+/**
+ * Abstract implementation of PSR-7 MessageInterface.
+ *
+ * Provides the common logic for managing protocol version, headers, and body,
+ * as shared by Request, ServerRequest, and Response.
+ */
+abstract class AbstractMessage implements MessageInterface
+{
+    protected string $protocolVersion = '1.1';
+
+    /**
+     * @var array Map of normalized header names to original casing.
+     */
+    protected array $headerNames = [];
+
+    /**
+     * @var array Map of original header names to array of values.
+     */
+    protected array $headers = [];
+
+    protected StreamInterface $body;
+
+    public function getProtocolVersion(): string
+    {
+        return $this->protocolVersion;
+    }
+
+    public function withProtocolVersion(string $version): MessageInterface
+    {
+        if (!in_array($version, ['1.0', '1.1', '2.0', '2', '3.0'])) {
+            throw new InvalidArgumentException(sprintf('Unsupported protocol version "%s".', $version));
+        }
+        $new = clone $this;
+        $new->protocolVersion = $version;
+        return $new;
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    public function hasHeader(string $name): bool
+    {
+        return isset($this->headerNames[strtolower($name)]);
+    }
+
+    public function getHeader(string $name): array
+    {
+        $normalizedName = $this->headerNames[strtolower($name)] ?? null;
+        return $this->headers[$normalizedName] ?? [];
+    }
+
+    public function getHeaderLine(string $name): string
+    {
+        return implode(', ', $this->getHeader($name));
+    }
+
+    public function withHeader(string $name, $value): MessageInterface
+    {
+        $this->validateHeaderName($name);
+        $value = $this->normalizeHeaderValue($value);
+        $normalizedName = strtolower($name);
+
+        $new = clone $this;
+        if ($new->hasHeader($name)) {
+            unset($new->headers[$new->headerNames[$normalizedName]]);
+        }
+
+        $new->headerNames[$normalizedName] = $name;
+        $new->headers[$name] = $value;
+
+        return $new;
+    }
+
+    public function withAddedHeader(string $name, $value): MessageInterface
+    {
+        $this->validateHeaderName($name);
+        $value = $this->normalizeHeaderValue($value);
+        $normalizedName = strtolower($name);
+
+        $new = clone $this;
+        if (!$new->hasHeader($name)) {
+            $new->headerNames[$normalizedName] = $name;
+            $new->headers[$name] = $value;
+        } else {
+            $originalName = $this->headerNames[$normalizedName];
+            $new->headers[$originalName] = array_merge($this->headers[$originalName], $value);
+        }
+
+        return $new;
+    }
+
+    public function withoutHeader(string $name): MessageInterface
+    {
+        $normalizedName = strtolower($name);
+        if (!isset($this->headerNames[$normalizedName])) {
+            return clone $this;
+        }
+
+        $originalName = $this->headerNames[$normalizedName];
+        $new = clone $this;
+        unset($new->headers[$originalName], $new->headerNames[$normalizedName]);
+        return $new;
+    }
+
+    public function getBody(): StreamInterface
+    {
+        return $this->body;
+    }
+
+    public function withBody(StreamInterface $body): MessageInterface
+    {
+        if ($body === $this->body) {
+            return clone $this;
+        }
+        $new = clone $this;
+        $new->body = $body;
+        return $new;
+    }
+
+    /**
+     * Validates a header name.
+     *
+     * @param string $name
+     * @throws InvalidArgumentException
+     */
+    protected function validateHeaderName(string $name): void
+    {
+        if (1 !== preg_match('/^[a-zA-Z0-9\'`#$%&*+.^~_|-]+$/', $name)) {
+            throw new InvalidArgumentException(sprintf('Invalid header name "%s".', $name));
+        }
+    }
+
+    /**
+     * Normalizes a header value to an array of strings.
+     *
+     * @param string|string[] $value
+     * @return string[]
+     * @throws InvalidArgumentException
+     */
+    protected function normalizeHeaderValue($value): array
+    {
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        if (empty($value)) {
+            throw new InvalidArgumentException('Header value must not be an empty array.');
+        }
+
+        $normalized = [];
+        foreach ($value as $v) {
+            if (!is_scalar($v) && null !== $v) {
+                throw new InvalidArgumentException('Header value must be a string or array of strings.');
+            }
+            $v = (string) $v;
+
+            if (1 !== preg_match('/^[ \t\x21-\x7E\x80-\xFF]*$/', $v)) {
+                throw new InvalidArgumentException(sprintf('Invalid header value: "%s".', $v));
+            }
+            $normalized[] = $v;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Normalizes an array of headers.
+     *
+     * @param array $headers
+     * @return array
+     */
+    protected function normalizeHeaders(array $headers): array
+    {
+        $normalizedHeaders = [];
+        $this->headerNames = [];
+
+        foreach ($headers as $name => $value) {
+            if (!is_string($name)) {
+                throw new InvalidArgumentException(
+                    sprintf('Header name must be a string but %s provided.', gettype($name))
+                );
+            }
+            $this->validateHeaderName($name);
+            $value = $this->normalizeHeaderValue($value);
+            $normalizedName = strtolower($name);
+
+            $this->headerNames[$normalizedName] = $name;
+            $normalizedHeaders[$name] = $value;
+        }
+
+        return $normalizedHeaders;
+    }
+}

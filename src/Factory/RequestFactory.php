@@ -4,193 +4,245 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http\Factory;
 
+use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use Psr\Http\Message\UriInterface;
+use RuntimeException;
 use Waffle\Commons\Http\ServerRequest;
 use Waffle\Commons\Http\Stream;
 use Waffle\Commons\Http\UploadedFile;
 use Waffle\Commons\Http\Uri;
 
-/**
- * Factory to create PSR-7 ServerRequest objects.
- *
- * This class reads PHP superglobals (or provided data) to construct
- * a complete ServerRequestInterface object.
- */
 class RequestFactory
 {
     /**
-     * Creates a new server request from PHP's superglobals.
+     * @var callable
      */
+    private $bodyStreamFactory;
+
+    /**
+     * @param callable|null $bodyStreamFactory Factory to create a Stream for php://input.
+     */
+    public function __construct(null|callable $bodyStreamFactory = null)
+    {
+        $this->bodyStreamFactory = $bodyStreamFactory ?? function (): Stream {
+            $resource = fopen('php://input', 'r');
+            if (false === $resource) {
+                throw new RuntimeException('Failed to open php://input stream.');
+            }
+            return new Stream($resource);
+        };
+    }
+
     public function createFromGlobals(): ServerRequestInterface
     {
-        $serverParams = $_SERVER;
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $headers = $this->normalizeHeaders($serverParams);
-        $uri = $this->createUriFromGlobals($serverParams);
-        $body = new Stream(fopen('php://input', 'r') ?: 'php://temp');
-        $protocolVersion = isset($serverParams['SERVER_PROTOCOL'])
-            ? str_replace('HTTP/', '', $serverParams['SERVER_PROTOCOL'])
-            : '1.1';
-        $cookieParams = $_COOKIE;
-        $queryParams = $_GET;
-        $uploadedFiles = $this->normalizeUploadedFiles($_FILES);
-        $parsedBody = $this->parseBody($headers, $body, $_POST);
+        $uri = $this->createUriFromGlobals();
+        $headers = $this->getHeadersFromGlobals();
+        $body = ($this->bodyStreamFactory)();
+        $protocol = str_replace('HTTP/', '', $_SERVER['SERVER_PROTOCOL'] ?? '1.1');
+        $cookies = $_COOKIE ?? [];
+        $queryParams = $_GET ?? [];
+        $uploadedFiles = $this->createUploadedFilesFromGlobals();
+        $parsedBody = $this->getParsedBody($method, $headers, $body);
 
         return new ServerRequest(
-            method: $method,
-            uri: $uri,
-            headers: $headers,
-            body: $body,
-            protocolVersion: $protocolVersion,
-            serverParams: $serverParams,
-            cookieParams: $cookieParams,
-            queryParams: $queryParams,
-            uploadedFiles: $uploadedFiles,
-            parsedBody: $parsedBody,
+            $method,
+            $uri,
+            $headers,
+            $body,
+            $protocol,
+            $_SERVER,
+            $cookies,
+            $queryParams,
+            $parsedBody,
+            $uploadedFiles,
         );
     }
 
-    /**
-     * Parses the body based on Content-Type.
-     *
-     * @param array<string, string|string[]> $headers
-     * @param StreamInterface $body
-     * @param array<string, mixed> $postData
-     * @return mixed
-     */
-    private function parseBody(array $headers, StreamInterface $body, array $postData): mixed
+    private function createUriFromGlobals(): UriInterface
     {
-        $contentType = $headers['content-type'][0] ?? '';
-
-        if (str_contains($contentType, 'application/json')) {
-            $bodyContents = $body->getContents();
-            $parsed = json_decode($bodyContents, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                return $parsed;
-            }
-            return null; // Invalid JSON
+        $scheme = 'http';
+        if (isset($_SERVER['HTTPS']) && ('on' === $_SERVER['HTTPS'] || 1 === (int) $_SERVER['HTTPS'])) {
+            $scheme = 'https';
         }
 
-        if (
-            str_contains($contentType, 'application/x-www-form-urlencoded')
-            || str_contains($contentType, 'multipart/form-data')
-        ) {
-            return $postData;
+        $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+
+        // Remove port from host if present
+        if (1 === preg_match('/^(.+):(\d+)$/', $host, $matches)) {
+            $host = $matches[1];
+            $port = (int) $matches[2];
+        } else {
+            $port = (int) ($_SERVER['SERVER_PORT'] ?? ('http' === $scheme ? 80 : 443));
+        }
+
+        $path = $_SERVER['REQUEST_URI'] ?? '/';
+        // Remove query string from path
+        $path = explode('?', $path, 2)[0];
+
+        $query = $_SERVER['QUERY_STRING'] ?? '';
+        $fragment = ''; // Cannot be determined from server-side
+
+        $user = $_SERVER['PHP_AUTH_USER'] ?? null;
+        $pass = $_SERVER['PHP_AUTH_PW'] ?? null;
+        $userInfo = '';
+        if (null !== $user) {
+            $userInfo = $user . (null !== $pass ? ':' . $pass : '');
+        }
+
+        // Reconstruct URI from parts to let the Uri object handle normalization
+        $uriString = $scheme . '://';
+        if ('' !== $userInfo) {
+            $uriString .= $userInfo . '@';
+        }
+        $uriString .= $host;
+        // Only add port if it's non-standard
+        if (!('http' === $scheme && 80 === $port || 'https' === $scheme && 443 === $port)) {
+            $uriString .= ':' . $port;
+        }
+        $uriString .= $path;
+        if ('' !== $query) {
+            $uriString .= '?' . $query;
+        }
+
+        return new Uri($uriString);
+    }
+
+    private function getHeadersFromGlobals(): array
+    {
+        $headers = [];
+        foreach ($_SERVER as $name => $value) {
+            if (str_starts_with($name, 'HTTP_')) {
+                $headerName = str_replace('_', '-', strtolower(substr($name, 5)));
+                $headers[$headerName] = $value;
+            } elseif (in_array($name, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
+                $headerName = str_replace('_', '-', strtolower($name));
+                $headers[$headerName] = $value;
+            }
+        }
+
+        // Handle Authorization header (often stripped)
+        if (!isset($headers['authorization'])) {
+            if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+                $headers['authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+            } elseif (isset($_SERVER['PHP_AUTH_USER'])) {
+                $basicAuth = base64_encode($_SERVER['PHP_AUTH_USER'] . ':' . ($_SERVER['PHP_AUTH_PW'] ?? ''));
+                $headers['authorization'] = 'Basic ' . $basicAuth;
+            } elseif (isset($_SERVER['PHP_AUTH_DIGEST'])) {
+                $headers['authorization'] = $_SERVER['PHP_AUTH_DIGEST'];
+            }
+        }
+
+        return $headers;
+    }
+
+    private function getParsedBody(string $method, array $headers, Stream $body)
+    {
+        if ('POST' !== $method) {
+            return null;
+        }
+
+        $contentType = $headers['content-type'] ?? '';
+        $parts = explode(';', $contentType);
+        $mime = trim(strtolower($parts[0]));
+
+        if ('application/x-www-form-urlencoded' === $mime) {
+            return $_POST ?? null;
+        }
+
+        if ('multipart/form-data' === $mime) {
+            // Per PSR-7, $_POST data is returned here. $_FILES are separate.
+            return $_POST ?? null;
+        }
+
+        if ('application/json' === $mime) {
+            try {
+                $bodyContents = $body->getContents();
+                if ($bodyContents === '') {
+                    return null;
+                }
+                return json_decode($bodyContents, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\Exception $e) {
+                return null; // Failed to parse JSON
+            }
         }
 
         return null;
     }
 
     /**
-     * Normalizes server params into a PSR-7 header array.
-     *
-     * @param array<string, mixed> $server
-     * @return array<string, string[]>
+     * @return array
+     * @throws InvalidArgumentException
      */
-    private function normalizeHeaders(array $server): array
+    private function createUploadedFilesFromGlobals(): array
     {
-        $headers = [];
-        foreach ($server as $key => $value) {
-            if (!is_string($value)) {
-                continue;
-            }
-
-            if (str_starts_with($key, 'HTTP_')) {
-                // 'HTTP_CONTENT_TYPE' -> 'content-type'
-                $name = str_replace('_', '-', strtolower(substr($key, 5)));
-                $headers[$name] = explode(',', $value);
-            } elseif (in_array(strtolower($key), ['content_type', 'content_length', 'content_md5'], true)) {
-                // Special cases that don't start with HTTP_
-                $name = str_replace('_', '-', strtolower($key));
-                $headers[$name] = explode(',', $value);
-            }
+        if (empty($_FILES)) {
+            return [];
         }
-        return $headers;
+        return $this->normalizeFiles($_FILES);
     }
 
     /**
-     * Normalizes the chaotic $_FILES array into a PSR-7 UploadedFileInterface tree.
-     *
-     * @param array<string, mixed> $files
-     * @return array<string, UploadedFileInterface|array>
+     * @param array $files
+     * @return array
+     * @throws InvalidArgumentException
      */
-    private function normalizeUploadedFiles(array $files): array
+    private function normalizeFiles(array $files): array
     {
         $normalized = [];
         foreach ($files as $key => $value) {
             if ($value instanceof UploadedFileInterface) {
                 $normalized[$key] = $value;
             } elseif (is_array($value) && isset($value['tmp_name'])) {
-                // Check if it's a single file or array of files
-                if (is_array($value['tmp_name'])) {
-                    $normalized[$key] = $this->normalizeNestedFiles($value);
-                } else {
-                    $normalized[$key] = new UploadedFile(
-                        $value['tmp_name'],
-                        (int) ($value['size'] ?? 0),
-                        (int) ($value['error'] ?? UPLOAD_ERR_OK),
-                        $value['name'] ?? null,
-                        $value['type'] ?? null,
-                    );
-                }
+                $normalized[$key] = $this->createUploadedFileFromSpec($value);
+            } elseif (is_array($value)) {
+                $normalized[$key] = $this->normalizeFiles($value);
+            } else {
+                throw new InvalidArgumentException('Invalid value in $_FILES array.');
             }
         }
         return $normalized;
     }
 
     /**
-     * Helper for normalizeUploadedFiles to handle nested arrays.
+     * Create UploadedFile instances from a normalized $_FILES spec.
      *
-     * @param array<string, mixed> $filesData
-     * @return array<int|string, UploadedFileInterface>
+     * @param array $spec
+     * @return UploadedFileInterface|UploadedFileInterface[]
      */
-    private function normalizeNestedFiles(array $filesData): array
+    private function createUploadedFileFromSpec(array $spec): UploadedFileInterface|array
+    {
+        if (is_array($spec['tmp_name'])) {
+            return $this->normalizeNestedFileSpec($spec);
+        }
+
+        return new UploadedFile(
+            $spec['tmp_name'],
+            (int) ($spec['size'] ?? 0),
+            (int) ($spec['error'] ?? UPLOAD_ERR_OK),
+            $spec['name'] ?? null,
+            $spec['type'] ?? null,
+        );
+    }
+
+    /**
+     * @param array $files
+     * @return array
+     */
+    private function normalizeNestedFileSpec(array $files): array
     {
         $normalized = [];
-        $keys = array_keys($filesData['tmp_name']);
-
-        foreach ($keys as $key) {
-            $normalized[$key] = new UploadedFile(
-                $filesData['tmp_name'][$key],
-                (int) ($filesData['size'][$key] ?? 0),
-                (int) ($filesData['error'][$key] ?? UPLOAD_ERR_OK),
-                $filesData['name'][$key] ?? null,
-                $filesData['type'][$key] ?? null,
-            );
+        foreach (array_keys($files['tmp_name']) as $key) {
+            $spec = [
+                'tmp_name' => $files['tmp_name'][$key],
+                'size' => $files['size'][$key] ?? 0,
+                'error' => $files['error'][$key] ?? UPLOAD_ERR_OK,
+                'name' => $files['name'][$key] ?? null,
+                'type' => $files['type'][$key] ?? null,
+            ];
+            $normalized[$key] = $this->createUploadedFileFromSpec($spec);
         }
-
         return $normalized;
-    }
-
-    /**
-     * Creates a UriInterface from server globals.
-     *
-     * @param array<string, mixed> $server
-     */
-    private function createUriFromGlobals(array $server): UriInterface
-    {
-        $scheme = isset($server['HTTPS']) && $server['HTTPS'] !== 'off' ? 'https' : 'http';
-        $host = $server['HTTP_HOST'] ?? $server['SERVER_NAME'] ?? 'localhost';
-        $port = isset($server['SERVER_PORT']) ? (int) $server['SERVER_PORT'] : null;
-        $path = $server['REQUEST_URI'] ?? '/';
-        $query = $server['QUERY_STRING'] ?? '';
-        $fragment = ''; // Fragment is not available in server globals
-
-        // Remove query string from path
-        if (str_contains($path, '?')) {
-            $path = explode('?', $path, 2)[0];
-        }
-
-        // Build authority part (host + port)
-        if ($port !== null) {
-            if ($scheme === 'http' && $port !== 80 || $scheme === 'https' && $port !== 443) {
-                $host .= ':' . $port;
-            }
-        }
-
-        return new Uri($scheme, $host, $port, $path, $query, $fragment);
     }
 }

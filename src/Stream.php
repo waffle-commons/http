@@ -4,35 +4,64 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http;
 
+use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
-/**
- * PSR-7 StreamInterface implementation.
- *
- * This class is a wrapper around a PHP stream resource.
- *
- * @see https://www.php-fig.org/psr/psr-7/#34-psrhttpmessagestreaminterface
- */
 class Stream implements StreamInterface
 {
-    /** @var resource|null */
+    /**
+     * @var resource|null A resource handle.
+     */
     private $resource;
 
     /**
-     * @param resource $resource
+     * @var array|null Known stream metadata.
      */
-    public function __construct($resource)
+    private null|array $meta = null;
+
+    /**
+     * Detached resource metadata cache.
+     *
+     * @var array|null
+     */
+    private null|array $detachedMeta = null;
+
+    private const READABLE_MODES = '/r|a\+|ab\+|w\+|wb\+|x\+|xb\+|c\+|cb\+/';
+    private const WRITABLE_MODES = '/a|w|r\+|rb\+|rw|x|c/';
+
+    /**
+     * @param resource|string $stream Stream resource or file path.
+     * @param string $mode Mode with which to open stream
+     * @throws InvalidArgumentException if $stream is not a resource or string.
+     * @throws RuntimeException if $stream is a string and cannot be opened.
+     */
+    public function __construct($stream, string $mode = 'r')
     {
-        if (!is_resource($resource) || get_resource_type($resource) !== 'stream') {
-            throw new \InvalidArgumentException('Invalid stream resource provided.');
+        if (is_string($stream)) {
+            $resource = @fopen($stream, $mode);
+            if (false === $resource) {
+                throw new RuntimeException('Failed to open stream: ' . $stream);
+            }
+            $this->resource = $resource;
+        } elseif (is_resource($stream)) {
+            $this->resource = $stream;
+        } else {
+            throw new InvalidArgumentException('Invalid stream resource provided; must be a string or resource.');
         }
-        $this->resource = $resource;
     }
 
-    #[\Override]
+    public function __destruct()
+    {
+        $this->close();
+    }
+
     public function __toString(): string
     {
+        if (!$this->isReadable()) {
+            return '';
+        }
+
         try {
             $this->rewind();
             return $this->getContents();
@@ -41,131 +70,172 @@ class Stream implements StreamInterface
         }
     }
 
-    #[\Override]
     public function close(): void
     {
-        if ($this->resource) {
-            fclose($this->resource);
-            $this->detach();
+        if (null === $this->resource) {
+            return;
+        }
+
+        $resource = $this->detach();
+        if (is_resource($resource)) {
+            fclose($resource);
         }
     }
 
-    #[\Override]
     public function detach()
     {
-        if (!$this->resource) {
+        if (null === $this->resource) {
             return null;
         }
+
         $resource = $this->resource;
         $this->resource = null;
+
+        if (null === $this->detachedMeta) {
+            $this->detachedMeta = $this->meta;
+        }
+        $this->meta = null;
+
         return $resource;
     }
 
-    #[\Override]
     public function getSize(): null|int
     {
-        if (!$this->resource) {
-            return null;
+        if (null === $this->resource) {
+            return $this->detachedMeta['unread_bytes'] ?? null;
         }
+
+        // Clear stat cache
+        clearstatcache(true, $this->getMetadata('uri'));
+
         $stats = fstat($this->resource);
         return $stats['size'] ?? null;
     }
 
-    #[\Override]
     public function tell(): int
     {
-        if (!$this->resource || ($pos = ftell($this->resource)) === false) {
-            throw new RuntimeException('Could not determine stream position.');
+        if (null === $this->resource) {
+            throw new RuntimeException('Stream is detached.');
         }
-        return $pos;
+
+        $result = ftell($this->resource);
+
+        if (false === $result) {
+            throw new RuntimeException('Unable to retrieve stream position.');
+        }
+
+        return $result;
     }
 
-    #[\Override]
     public function eof(): bool
     {
-        return !$this->resource || feof($this->resource);
+        return $this->resource ? feof($this->resource) : true;
     }
 
-    #[\Override]
     public function isSeekable(): bool
     {
-        return $this->resource && $this->getMetadata('seekable');
+        return $this->resource ? $this->getMetadata('seekable') ?? false : false;
     }
 
-    #[\Override]
     public function seek(int $offset, int $whence = SEEK_SET): void
     {
-        if (!$this->isSeekable() || fseek($this->resource, $offset, $whence) === -1) {
-            throw new RuntimeException('Could not seek in stream.');
+        if (!$this->isSeekable()) {
+            throw new RuntimeException('Stream is not seekable.');
+        }
+
+        if (0 !== fseek($this->resource, $offset, $whence)) {
+            throw new RuntimeException('Unable to seek to stream position '
+            . $offset
+            . ' with whence '
+            . var_export($whence, true));
         }
     }
 
-    #[\Override]
     public function rewind(): void
     {
         $this->seek(0);
     }
 
-    #[\Override]
     public function isWritable(): bool
     {
-        return $this->resource && $this->isModeWritable($this->getMetadata('mode'));
+        if (null === $this->resource) {
+            return false;
+        }
+        $mode = $this->getMetadata('mode') ?? '';
+        return (bool) preg_match(self::WRITABLE_MODES, $mode);
     }
 
-    private function isModeWritable(string $mode): bool
-    {
-        return (
-            str_contains($mode, 'w')
-            || str_contains($mode, 'a')
-            || str_contains($mode, 'x')
-            || str_contains($mode, 'c')
-            || str_contains($mode, '+')
-        );
-    }
-
-    #[\Override]
     public function write(string $string): int
     {
-        if (!$this->isWritable() || ($bytes = fwrite($this->resource, $string)) === false) {
-            throw new RuntimeException('Could not write to stream.');
+        if (!$this->isWritable()) {
+            throw new RuntimeException('Stream is not writable.');
         }
-        return $bytes;
+
+        $result = fwrite($this->resource, $string);
+
+        if (false === $result) {
+            throw new RuntimeException('Unable to write to stream.');
+        }
+
+        // Invalidate metadata cache
+        $this->meta = null;
+
+        return $result;
     }
 
-    #[\Override]
     public function isReadable(): bool
     {
-        return (
-            $this->resource
-            && (str_contains($this->getMetadata('mode'), 'r') || str_contains($this->getMetadata('mode'), '+'))
-        );
+        if (null === $this->resource) {
+            return false;
+        }
+        $mode = $this->getMetadata('mode') ?? '';
+        return (bool) preg_match(self::READABLE_MODES, $mode);
     }
 
-    #[\Override]
     public function read(int $length): string
     {
-        if (!$this->isReadable() || ($data = fread($this->resource, $length)) === false) {
-            throw new RuntimeException('Could not read from stream.');
+        if (!$this->isReadable()) {
+            throw new RuntimeException('Stream is not readable.');
         }
-        return $data;
+
+        $result = fread($this->resource, $length);
+
+        if (false === $result) {
+            throw new RuntimeException('Unable to read from stream.');
+        }
+
+        return $result;
     }
 
-    #[\Override]
     public function getContents(): string
     {
-        if (!$this->isReadable() || ($contents = stream_get_contents($this->resource)) === false) {
-            throw new RuntimeException('Could not get stream contents.');
+        if (!$this->isReadable()) {
+            throw new RuntimeException('Stream is not readable.');
         }
-        return $contents;
+
+        $result = stream_get_contents($this->resource);
+
+        if (false === $result) {
+            throw new RuntimeException('Unable to read stream contents.');
+        }
+
+        return $result;
     }
 
-    #[\Override]
     public function getMetadata(null|string $key = null)
     {
-        if (!$this->resource) {
-            return $key ? null : [];
+        if (null === $this->resource) {
+            return $this->detachedMeta[$key] ?? null;
         }
-        $meta = stream_get_meta_data($this->resource);
-        return $key === null ? $meta : $meta[$key] ?? null;
+
+        if (null === $this->meta) {
+            $this->meta = stream_get_meta_data($this->resource);
+        }
+
+        if (null === $key) {
+            return $this->meta;
+        }
+
+        return $this->meta[$key] ?? null;
     }
 }

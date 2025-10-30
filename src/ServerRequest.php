@@ -4,251 +4,80 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http;
 
-use InvalidArgumentException;
-use Psr\Http\Message\MessageInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use InvalidArgumentException;
+use Waffle\Commons\Http\Abstract\AbstractMessage;
 
-/**
- * PSR-7 ServerRequestInterface implementation.
- *
- * This class represents a server-side HTTP request.
- * It is "immutable", meaning any change (via "with..." methods)
- * results in a new object (a clone) with the modified data.
- */
-class ServerRequest implements ServerRequestInterface
+class ServerRequest extends AbstractMessage implements ServerRequestInterface
 {
-    /**
-     * @var array<string, string[]> Stores headers with their original case.
-     */
-    private array $headers = [];
+    private array $attributes = [];
+    private array $cookieParams = [];
+    private ?array $parsedBody = null;
+    private array $queryParams = [];
+    private array $serverParams = [];
+    private array $uploadedFiles = [];
+    private ?string $requestTarget = null;
+    private string $method;
+    private UriInterface $uri;
 
-    /**
-     * @var array<string, string> Map of normalized (lowercase) header names to their original case.
-     */
-    private array $normalizedHeaders = [];
-
-    /**
-     * @param string $method HTTP method (GET, POST, etc.)
-     * @param UriInterface $uri The request URI object.
-     * @param array<string, string|string[]> $headers Request headers.
-     * @param StreamInterface $body Request body.
-     * @param string $protocolVersion Protocol version (e.g., "1.1").
-     * @param array<string, mixed> $serverParams Data from $_SERVER.
-     * @param array<string, mixed> $cookieParams Data from $_COOKIE.
-     * @param array<string, mixed> $queryParams Data from $_GET.
-     * @param array<mixed> $uploadedFiles Data from $_FILES (UploadedFileInterface objects).
-     * @param mixed $parsedBody Data from $_POST or decoded JSON.
-     * @param array<string, mixed> $attributes Derived attributes (e.g., route parameters).
-     */
     public function __construct(
-        private string $method,
-        private UriInterface $uri,
-        array $headers,
-        private StreamInterface $body,
-        private string $protocolVersion = '1.1',
-        private array $serverParams = [],
-        private array $cookieParams = [],
-        private array $queryParams = [],
-        private array $uploadedFiles = [],
-        private mixed $parsedBody = null,
-        private array $attributes = [],
-        private null|string $requestTarget = null,
+        string $method,
+        UriInterface $uri,
+        array $headers = [],
+        $body = null,
+        string $version = '1.1',
+        array $serverParams = [],
+        array $cookieParams = [],
+        array $queryParams = [],
+        $parsedBody = null,
+        array $uploadedFiles = []
     ) {
-        $this->processHeaders($headers);
+        $this->method = $method;
+        $this->uri = $uri;
+        $this->headers = $this->normalizeHeaders($headers);
+        $this->body = $this->createStreamBody($body);
+        $this->protocolVersion = $version;
+        $this->serverParams = $serverParams;
+        $this->cookieParams = $cookieParams;
+        $this->queryParams = $queryParams;
+        $this->parsedBody = $parsedBody;
+        $this->uploadedFiles = $uploadedFiles;
     }
 
     /**
-     * Private method to normalize and store headers.
-     * @param array<string, string|string[]> $headers
+     * @param $body
+     * @return StreamInterface
      */
-    private function processHeaders(array $headers): void
+    private function createStreamBody($body): StreamInterface
     {
-        $this->headers = [];
-        $this->normalizedHeaders = [];
-        foreach ($headers as $name => $values) {
-            $this->validateHeaderName($name);
-            $values = $this->normalizeHeaderValues($values);
-            $normalized = strtolower($name);
-
-            // Store the original case for mapping
-            $this->normalizedHeaders[$normalized] = $name;
-            // Store values under the original case name
-            $this->headers[$name] = $values;
+        if ($body instanceof StreamInterface) {
+            return $body;
         }
-    }
 
-    /**
-     * Validates a header name.
-     */
-    private function validateHeaderName(mixed $name): void
-    {
-        if (!is_string($name) || !preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $name)) {
-            throw new InvalidArgumentException(sprintf(
-                'Invalid header name: "%s"',
-                is_string($name) ? $name : gettype($name),
-            ));
-        }
-    }
-
-    /**
-     * Ensures header values are an array of strings.
-     * @param mixed $values
-     * @return string[]
-     */
-    private function normalizeHeaderValues(mixed $values): array
-    {
-        $values = is_array($values) ? $values : [$values];
-        foreach ($values as $value) {
-            if (
-                !is_string($value) && !is_numeric($value)
-                || preg_match("#(?:(?:(?<!\r)\n)|(?:\r(?!\n))|(?:\r\n(?![ \t])))#", (string) $value)
-            ) {
-                throw new InvalidArgumentException('Invalid header value.');
+        if (is_string($body) || null === $body) {
+            $resource = fopen('php://temp', 'r+');
+            if (false === $resource) {
+                throw new \RuntimeException('Failed to open php://temp stream.');
             }
-        }
-        return array_map('strval', $values);
-    }
-
-    /**
-     * Creates a clone. Helper method for immutability.
-     */
-    private function cloneWith(): static
-    {
-        return clone $this;
-    }
-
-    // --- MessageInterface Implementation ---
-
-    #[\Override]
-    public function getProtocolVersion(): string
-    {
-        return $this->protocolVersion;
-    }
-
-    #[\Override]
-    public function withProtocolVersion(string $version): MessageInterface
-    {
-        $new = $this->cloneWith();
-        $new->protocolVersion = $version;
-        return $new;
-    }
-
-    #[\Override]
-    public function getHeaders(): array
-    {
-        return $this->headers;
-    }
-
-    #[\Override]
-    public function hasHeader(string $name): bool
-    {
-        return isset($this->normalizedHeaders[strtolower($name)]);
-    }
-
-    #[\Override]
-    public function getHeader(string $name): array
-    {
-        $normalized = strtolower($name);
-        if (!isset($this->normalizedHeaders[$normalized])) {
-            return [];
+            if (is_string($body) && '' !== $body) {
+                fwrite($resource, $body);
+                fseek($resource, 0);
+            }
+            return new Stream($resource);
         }
 
-        $originalName = $this->normalizedHeaders[$normalized];
-        return $this->headers[$originalName];
-    }
-
-    #[\Override]
-    public function getHeaderLine(string $name): string
-    {
-        return implode(', ', $this->getHeader($name));
-    }
-
-    #[\Override]
-    public function withHeader(string $name, $value): MessageInterface
-    {
-        $this->validateHeaderName($name);
-        $value = $this->normalizeHeaderValues($value);
-        $normalized = strtolower($name);
-
-        $new = $this->cloneWith();
-
-        // Remove old case-insensitive mapping if it exists
-        if (isset($new->normalizedHeaders[$normalized])) {
-            unset($new->headers[$new->normalizedHeaders[$normalized]]);
+        if (is_resource($body)) {
+            return new Stream($body);
         }
 
-        // Add the new mapping
-        $new->headers[$name] = $value;
-        $new->normalizedHeaders[$normalized] = $name;
-
-        return $new;
+        throw new InvalidArgumentException('Invalid body type; must be string, resource, null, or StreamInterface.');
     }
 
-    #[\Override]
-    public function withAddedHeader(string $name, $value): MessageInterface
-    {
-        $this->validateHeaderName($name);
-        $value = $this->normalizeHeaderValues($value);
-        $normalized = strtolower($name);
-
-        // If the header does not exist, this is like withHeader
-        if (!isset($this->normalizedHeaders[$normalized])) {
-            $new = $this->cloneWith();
-            $new->headers[$name] = $value;
-            $new->normalizedHeaders[$normalized] = $name;
-            return $new;
-        }
-
-        // If the header exists, merge the values
-        $new = $this->cloneWith();
-        $originalName = $this->normalizedHeaders[$normalized];
-        $new->headers[$originalName] = array_merge($this->headers[$originalName], $value);
-
-        return $new;
-    }
-
-    #[\Override]
-    public function withoutHeader(string $name): MessageInterface
-    {
-        $normalized = strtolower($name);
-
-        if (!isset($this->normalizedHeaders[$normalized])) {
-            // Nothing to do, return the current instance (immutability)
-            return $this;
-        }
-
-        $new = $this->cloneWith();
-        $originalName = $this->normalizedHeaders[$normalized];
-
-        unset($new->headers[$originalName]);
-        unset($new->normalizedHeaders[$normalized]);
-
-        return $new;
-    }
-
-    #[\Override]
-    public function getBody(): StreamInterface
-    {
-        return $this->body;
-    }
-
-    #[\Override]
-    public function withBody(StreamInterface $body): MessageInterface
-    {
-        $new = $this->cloneWith();
-        $new->body = $body;
-        return $new;
-    }
-
-    // --- RequestInterface Implementation ---
-
-    #[\Override]
     public function getRequestTarget(): string
     {
-        if ($this->requestTarget !== null) {
+        if (null !== $this->requestTarget) {
             return $this->requestTarget;
         }
 
@@ -263,163 +92,136 @@ class ServerRequest implements ServerRequestInterface
         return $target;
     }
 
-    #[\Override]
-    public function withRequestTarget(string $requestTarget): RequestInterface
+    public function withRequestTarget(string $requestTarget): ServerRequestInterface
     {
-        if (preg_match('#\s#', $requestTarget)) {
-            throw new InvalidArgumentException('Request target cannot contain spaces.');
+        if (preg_match('/\s/', $requestTarget)) {
+            throw new InvalidArgumentException('Invalid request target provided; must not contain whitespace.');
         }
-
-        $new = $this->cloneWith();
+        $new = clone $this;
         $new->requestTarget = $requestTarget;
         return $new;
     }
 
-    #[\Override]
     public function getMethod(): string
     {
         return $this->method;
     }
 
-    #[\Override]
-    public function withMethod(string $method): RequestInterface
+    public function withMethod(string $method): ServerRequestInterface
     {
-        if (!preg_match('/^[!#$%&\'*+.^_`|~0-9a-zA-Z-]+$/', $method)) {
-            throw new InvalidArgumentException(sprintf('Invalid HTTP method: "%s"', $method));
+        if ($method === $this->method) {
+            return clone $this;
         }
-
-        $new = $this->cloneWith();
+        $new = clone $this;
         $new->method = $method;
         return $new;
     }
 
-    #[\Override]
     public function getUri(): UriInterface
     {
         return $this->uri;
     }
 
-    #[\Override]
-    public function withUri(UriInterface $uri, bool $preserveHost = false): RequestInterface
+    public function withUri(UriInterface $uri, bool $preserveHost = false): ServerRequestInterface
     {
-        $new = $this->cloneWith();
+        $new = clone $this;
         $new->uri = $uri;
 
         if ($preserveHost && $this->hasHeader('Host')) {
-            // Host is preserved, nothing more to do.
+            // Host header is preserved
             return $new;
         }
 
-        // The host must be updated from the new URI.
+        // Update Host header from new URI
         $host = $uri->getHost();
         if ($host !== '') {
-            if (($port = $uri->getPort()) !== null) {
+            $port = $uri->getPort();
+            if (null !== $port) {
                 $host .= ':' . $port;
             }
-            // Use withHeader to correctly update normalized headers
+            // Use withHeader to maintain case-insensitivity logic
             return $new->withHeader('Host', $host);
         }
 
-        // If the new URI has no host, do not update the Host header.
         return $new;
     }
 
-    // --- ServerRequestInterface Implementation ---
-
-    #[\Override]
     public function getServerParams(): array
     {
         return $this->serverParams;
     }
 
-    #[\Override]
     public function getCookieParams(): array
     {
         return $this->cookieParams;
     }
 
-    #[\Override]
     public function withCookieParams(array $cookies): ServerRequestInterface
     {
-        $new = $this->cloneWith();
+        $new = clone $this;
         $new->cookieParams = $cookies;
         return $new;
     }
 
-    #[\Override]
     public function getQueryParams(): array
     {
         return $this->queryParams;
     }
 
-    #[\Override]
     public function withQueryParams(array $query): ServerRequestInterface
     {
-        $new = $this->cloneWith();
+        $new = clone $this;
         $new->queryParams = $query;
         return $new;
     }
 
-    #[\Override]
     public function getUploadedFiles(): array
     {
         return $this->uploadedFiles;
     }
 
-    #[\Override]
     public function withUploadedFiles(array $uploadedFiles): ServerRequestInterface
     {
-        // A real implementation would validate that $uploadedFiles is a tree
-        // of UploadedFileInterface objects.
-        $new = $this->cloneWith();
+        $new = clone $this;
         $new->uploadedFiles = $uploadedFiles;
         return $new;
     }
 
-    #[\Override]
     public function getParsedBody()
     {
         return $this->parsedBody;
     }
 
-    #[\Override]
     public function withParsedBody($data): ServerRequestInterface
     {
-        // A real implementation would validate the type of $data
-        // (null, object, or array).
-        $new = $this->cloneWith();
+        $new = clone $this;
         $new->parsedBody = $data;
         return $new;
     }
 
-    #[\Override]
     public function getAttributes(): array
     {
         return $this->attributes;
     }
 
-    #[\Override]
     public function getAttribute(string $name, $default = null)
     {
         return $this->attributes[$name] ?? $default;
     }
 
-    #[\Override]
     public function withAttribute(string $name, $value): ServerRequestInterface
     {
-        $new = $this->cloneWith();
+        $new = clone $this;
         $new->attributes[$name] = $value;
         return $new;
     }
 
-    #[\Override]
     public function withoutAttribute(string $name): ServerRequestInterface
     {
-        if (!isset($this->attributes[$name])) {
-            return $this;
+        if (!array_key_exists($name, $this->attributes)) {
+            return clone $this;
         }
-
-        $new = $this->cloneWith();
+        $new = clone $this;
         unset($new->attributes[$name]);
         return $new;
     }

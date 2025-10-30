@@ -5,39 +5,21 @@ declare(strict_types=1);
 namespace Waffle\Commons\Http;
 
 use InvalidArgumentException;
-use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException;
+use Waffle\Commons\Http\Abstract\AbstractMessage;
 
-/**
- * A concrete implementation of PSR-7 ResponseInterface.
- *
- * This class represents an outgoing HTTP response.
- * It follows immutability principles; all `with...` methods
- * return a new instance.
- */
-class Response implements ResponseInterface
+class Response extends AbstractMessage implements ResponseInterface
 {
-    /** @var array<string, string[]> Map of normalized header names to original names and values */
-    private array $headers = [];
+    private int $statusCode = 200;
+    private string $reasonPhrase = 'OK';
 
-    /** @var array<string, string> Map of lower-case header names to original names */
-    private array $headerNames = [];
-
-    private string $protocolVersion;
-    private StreamInterface $body;
-    private int $statusCode;
-    private string $reasonPhrase;
-
-    /**
-     * A map of standard HTTP status codes to their reason phrases.
-     *
-     * @var array<int, string>
-     */
     private const REASON_PHRASES = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
+        103 => 'Early Hints',
         200 => 'OK',
         201 => 'Created',
         202 => 'Accepted',
@@ -46,6 +28,8 @@ class Response implements ResponseInterface
         205 => 'Reset Content',
         206 => 'Partial Content',
         207 => 'Multi-Status',
+        208 => 'Already Reported',
+        226 => 'IM Used',
         300 => 'Multiple Choices',
         301 => 'Moved Permanently',
         302 => 'Found',
@@ -72,14 +56,17 @@ class Response implements ResponseInterface
         415 => 'Unsupported Media Type',
         416 => 'Range Not Satisfiable',
         417 => 'Expectation Failed',
+        418 => 'I\'m a teapot',
         421 => 'Misdirected Request',
         422 => 'Unprocessable Entity',
         423 => 'Locked',
         424 => 'Failed Dependency',
+        425 => 'Too Early',
         426 => 'Upgrade Required',
         428 => 'Precondition Required',
         429 => 'Too Many Requests',
         431 => 'Request Header Fields Too Large',
+        451 => 'Unavailable For Legal Reasons',
         500 => 'Internal Server Error',
         501 => 'Not Implemented',
         502 => 'Bad Gateway',
@@ -95,232 +82,82 @@ class Response implements ResponseInterface
 
     /**
      * @param int $statusCode
-     * @param array<string, string|string[]> $headers
+     * @param array $headers
      * @param StreamInterface|resource|string|null $body
-     * @param string $protocolVersion
+     * @param string $version
      * @param string|null $reasonPhrase
      */
     public function __construct(
         int $statusCode = 200,
         array $headers = [],
         $body = null,
-        string $protocolVersion = '1.1',
+        string $version = '1.1',
         null|string $reasonPhrase = null,
     ) {
+        $this->validateStatusCode($statusCode);
         $this->statusCode = $statusCode;
-        $this->protocolVersion = $protocolVersion;
-        $this->setHeaders($headers);
-        $this->reasonPhrase = $reasonPhrase ?? self::REASON_PHRASES[$this->statusCode] ?? '';
-
-        if ($body instanceof StreamInterface) {
-            $this->body = $body;
-        } elseif ($body === null) {
-            $this->body = new Stream('php://temp', 'wb+');
-        } else {
-            // String or resource
-            $this->body = new Stream('php://temp', 'wb+');
-            $this->body->write((string) $body);
-            $this->body->rewind();
-        }
+        $this->protocolVersion = $version;
+        $this->headers = $this->normalizeHeaders($headers);
+        $this->body = $this->createStreamBody($body);
+        $this->reasonPhrase = $reasonPhrase ?? self::REASON_PHRASES[$statusCode] ?? 'Unknown';
     }
 
-    // --- ResponseInterface Methods ---
+    /**
+     * @param $body
+     * @return StreamInterface
+     */
+    private function createStreamBody($body): StreamInterface
+    {
+        if ($body instanceof StreamInterface) {
+            return $body;
+        }
 
-    #[\Override]
+        if (is_string($body) || null === $body) {
+            $resource = fopen('php://temp', 'r+');
+            if (false === $resource) {
+                throw new RuntimeException('Failed to open php://temp stream.');
+            }
+            if (is_string($body) && '' !== $body) {
+                fwrite($resource, $body);
+                fseek($resource, 0);
+            }
+            return new Stream($resource);
+        }
+
+        if (is_resource($body)) {
+            return new Stream($body);
+        }
+
+        throw new InvalidArgumentException('Invalid body type; must be string, resource, null, or StreamInterface.');
+    }
+
     public function getStatusCode(): int
     {
         return $this->statusCode;
     }
 
-    #[\Override]
     public function withStatus(int $code, string $reasonPhrase = ''): ResponseInterface
     {
-        if ($this->statusCode === $code && ($reasonPhrase === '' || $this->reasonPhrase === $reasonPhrase)) {
-            return $this;
-        }
+        $this->validateStatusCode($code);
 
-        $clone = clone $this;
-        $clone->statusCode = $code;
-        $clone->reasonPhrase = $reasonPhrase ?: self::REASON_PHRASES[$code] ?? '';
-        return $clone;
+        $new = clone $this;
+        $new->statusCode = $code;
+        $new->reasonPhrase = $reasonPhrase === '' ? self::REASON_PHRASES[$code] ?? 'Unknown' : $reasonPhrase;
+        return $new;
     }
 
-    #[\Override]
     public function getReasonPhrase(): string
     {
         return $this->reasonPhrase;
     }
 
-    // --- MessageInterface Methods ---
-
-    #[\Override]
-    public function getProtocolVersion(): string
+    private function validateStatusCode(int $code): void
     {
-        return $this->protocolVersion;
-    }
-
-    #[\Override]
-    public function withProtocolVersion(string $version): MessageInterface
-    {
-        if ($this->protocolVersion === $version) {
-            return $this;
+        if ($code < 100 || $code > 599) {
+            throw new InvalidArgumentException(sprintf(
+                'Invalid status code "%d"; must be an integer between 100 and 599.',
+                $code,
+            ));
         }
-
-        $clone = clone $this;
-        $clone->protocolVersion = $version;
-        return $clone;
-    }
-
-    #[\Override]
-    public function getHeaders(): array
-    {
-        return $this->headers;
-    }
-
-    #[\Override]
-    public function hasHeader(string $name): bool
-    {
-        return isset($this->headerNames[strtolower($name)]);
-    }
-
-    #[\Override]
-    public function getHeader(string $name): array
-    {
-        $normalizedName = strtolower($name);
-        if (!isset($this->headerNames[$normalizedName])) {
-            return [];
-        }
-
-        $originalName = $this->headerNames[$normalizedName];
-        return $this->headers[$originalName];
-    }
-
-    #[\Override]
-    public function getHeaderLine(string $name): string
-    {
-        return implode(', ', $this->getHeader($name));
-    }
-
-    #[\Override]
-    public function withHeader(string $name, $value): MessageInterface
-    {
-        $normalizedName = strtolower($name);
-        $clone = clone $this;
-
-        // Remove existing header (case-insensitive)
-        if (isset($clone->headerNames[$normalizedName])) {
-            $originalName = $clone->headerNames[$normalizedName];
-            unset($clone->headers[$originalName]);
-        }
-
-        $value = $this->normalizeHeaderValue($value);
-
-        // Set new header
-        $clone->headerNames[$normalizedName] = $name;
-        $clone->headers[$name] = $value;
-
-        return $clone;
-    }
-
-    #[\Override]
-    public function withAddedHeader(string $name, $value): MessageInterface
-    {
-        $normalizedName = strtolower($name);
-        $clone = clone $this;
-
-        $value = $this->normalizeHeaderValue($value);
-
-        if (isset($clone->headerNames[$normalizedName])) {
-            // Header exists, append
-            $originalName = $clone->headerNames[$normalizedName];
-            $clone->headers[$originalName] = array_merge($clone->headers[$originalName], $value);
-        } else {
-            // New header
-            $clone->headerNames[$normalizedName] = $name;
-            $clone->headers[$name] = $value;
-        }
-
-        return $clone;
-    }
-
-    #[\Override]
-    public function withoutHeader(string $name): MessageInterface
-    {
-        $normalizedName = strtolower($name);
-        if (!isset($this->headerNames[$normalizedName])) {
-            return $this; // No change
-        }
-
-        $clone = clone $this;
-        $originalName = $clone->headerNames[$normalizedName];
-
-        unset($clone->headers[$originalName]);
-        unset($clone->headerNames[$normalizedName]);
-
-        return $clone;
-    }
-
-    #[\Override]
-    public function getBody(): StreamInterface
-    {
-        return $this->body;
-    }
-
-    #[\Override]
-    public function withBody(StreamInterface $body): MessageInterface
-    {
-        if ($this->body === $body) {
-            return $this;
-        }
-
-        $clone = clone $this;
-        $clone->body = $body;
-        return $clone;
-    }
-
-    // --- Private Helper Methods ---
-
-    /**
-     * Populates the internal header properties from an array.
-     *
-     * @param array<string, string|string[]> $headers
-     */
-    private function setHeaders(array $headers): void
-    {
-        $this->headers = [];
-        $this->headerNames = [];
-        foreach ($headers as $name => $value) {
-            $value = $this->normalizeHeaderValue($value);
-            $normalizedName = strtolower($name);
-
-            $this->headerNames[$normalizedName] = $name;
-            $this->headers[$name] = $value;
-        }
-    }
-
-    /**
-     * Ensures the header value is an array of strings.
-     *
-     * @param string|string[] $value
-     * @return string[]
-     * @throws InvalidArgumentException
-     */
-    private function normalizeHeaderValue($value): array
-    {
-        if (is_string($value)) {
-            $value = [$value];
-        }
-
-        if (!is_array($value)) {
-            throw new InvalidArgumentException('Header value must be a string or an array of strings.');
-        }
-
-        foreach ($value as $item) {
-            if (!is_string($item)) {
-                throw new InvalidArgumentException('Header value must be a string or an array of strings.');
-            }
-        }
-
-        return $value;
     }
 }
