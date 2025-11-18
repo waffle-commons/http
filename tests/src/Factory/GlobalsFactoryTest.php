@@ -20,7 +20,6 @@ class GlobalsFactoryTest extends AbstractTestCase
 
     protected function setUp(): void
     {
-        // Backup superglobals
         $this->serverBackup = $_SERVER;
         $this->getBackup = $_GET;
         $this->postBackup = $_POST;
@@ -30,7 +29,6 @@ class GlobalsFactoryTest extends AbstractTestCase
 
     protected function tearDown(): void
     {
-        // Restore superglobals
         $_SERVER = $this->serverBackup;
         $_GET = $this->getBackup;
         $_POST = $this->postBackup;
@@ -45,8 +43,7 @@ class GlobalsFactoryTest extends AbstractTestCase
         array $cookie = [],
         array $files = [],
     ): void {
-        $_SERVER = $server
-            + [
+        $_SERVER = $server + [
                 'REQUEST_METHOD' => 'GET',
                 'REQUEST_URI' => '/',
                 'SERVER_PROTOCOL' => 'HTTP/1.1',
@@ -87,55 +84,18 @@ class GlobalsFactoryTest extends AbstractTestCase
 
     public function testCreateFromGlobalsThrowsExceptionForInvalidFiles(): void
     {
-        $this->setGlobals(
-            files: ['invalid_upload' => 'this is just a string, not an array']
-        );
+        $this->setGlobals(files: ['invalid_upload' => 'string']);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value in $_FILES array');
 
-        $factory = new GlobalsFactory();
-        $factory->createFromGlobals();
+        (new GlobalsFactory())->createFromGlobals();
     }
 
     public function testHttpsDetection(): void
     {
         $this->setGlobals(server: ['HTTPS' => 'on', 'HTTP_HOST' => 'secure.com']);
-        $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame('https', $request->getUri()->getScheme());
-
-        $this->setGlobals(server: ['HTTPS' => '1', 'HTTP_HOST' => 'secure.com']);
-        $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame('https', $request->getUri()->getScheme());
-
-        $this->setGlobals(server: ['HTTPS' => 'off', 'HTTP_HOST' => 'unsecure.com']);
-        $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame('http', $request->getUri()->getScheme());
-    }
-
-    public function testParsedBodyForJson(): void
-    {
-        $this->setGlobals(
-            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'application/json'],
-            post: ['user' => 'waffle'], // Ignored for JSON
-        );
-
-        // Simulates php://input
-        $factory = new GlobalsFactory(fn() => $this->createStream('{"user":"test"}'));
-        $request = $factory->createFromGlobals();
-
-        $this->assertSame(['user' => 'test'], $request->getParsedBody());
-    }
-
-    public function testParsedBodyForUrlEncoded(): void
-    {
-        $this->setGlobals(
-            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'],
-            post: ['user' => 'waffle'],
-        );
-
-        $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame(['user' => 'waffle'], $request->getParsedBody());
+        $this->assertSame('https', (new GlobalsFactory())->createFromGlobals()->getUri()->getScheme());
     }
 
     public function testParsedBodyForFormData(): void

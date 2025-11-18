@@ -17,6 +17,8 @@ use Waffle\Commons\Http\Uri;
 
 /**
  * Creates a ServerRequestInterface (PSR-7) instance from PHP superglobals.
+ *
+ * This factory is specific to the Waffle framework's bootstrap process.
  */
 class GlobalsFactory
 {
@@ -26,7 +28,7 @@ class GlobalsFactory
     private $bodyStreamFactory;
 
     /**
-     * @param callable|null $bodyStreamFactory
+     * @param callable|null $bodyStreamFactory Factory to create a Stream for php://input.
      */
     public function __construct(null|callable $bodyStreamFactory = null)
     {
@@ -103,9 +105,8 @@ class GlobalsFactory
         $path = explode('?', $path, 2)[0];
 
         $query = $_SERVER['QUERY_STRING'] ?? '';
-        $fragment = ''; // Fragment is never sent to server
 
-        // Handles Basic/Digest authentication
+        // Basic/Digest authentication handling
         $user = $_SERVER['PHP_AUTH_USER'] ?? null;
         $pass = $_SERVER['PHP_AUTH_PW'] ?? null;
         $userInfo = '';
@@ -113,14 +114,12 @@ class GlobalsFactory
             $userInfo = $user . (null !== $pass ? ':' . $pass : '');
         }
 
-        // Reconstructs a full URI string to pass to the Uri constructor,
-        // which will handle final normalization (e.g., standard port).
+        // Reconstructs a full URI string
         $uriString = $scheme . '://';
         if ('' !== $userInfo) {
             $uriString .= $userInfo . '@';
         }
         $uriString .= $host;
-        // Only adds port if it's non-standard
         if (!('http' === $scheme && 80 === $port || 'https' === $scheme && 443 === $port)) {
             $uriString .= ':' . $port;
         }
@@ -142,17 +141,14 @@ class GlobalsFactory
         $headers = [];
         foreach ($_SERVER as $name => $value) {
             if (str_starts_with($name, 'HTTP_')) {
-                // Converts HTTP_CONTENT_TYPE to content-type
                 $headerName = str_replace('_', '-', strtolower(substr($name, 5)));
                 $headers[$headerName] = $value;
             } elseif (in_array($name, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
-                // Handles headers without HTTP_ prefix
                 $headerName = str_replace('_', '-', strtolower($name));
                 $headers[$headerName] = $value;
             }
         }
 
-        // Handles Authorization header (often handled differently by SAPIs)
         if (!isset($headers['authorization'])) {
             if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
                 $headers['authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
@@ -170,14 +166,10 @@ class GlobalsFactory
     /**
      * Retrieves the parsed body (e.g., $_POST or decoded JSON).
      *
-     * @param string $method
-     * @param array $headers
-     * @param StreamInterface $body
      * @return array|object|null
      */
     private function getParsedBody(string $method, array $headers, StreamInterface $body)
     {
-        // No parsed body for GET/HEAD/etc. requests
         if ('POST' !== $method) {
             return null;
         }
@@ -191,8 +183,6 @@ class GlobalsFactory
         }
 
         if ('multipart/form-data' === $mime) {
-            // Per PSR-7, $_POST data is returned here.
-            // $_FILES is handled separately by getUploadedFiles().
             return $_POST ?? null;
         }
 
@@ -200,16 +190,14 @@ class GlobalsFactory
             try {
                 $bodyContents = $body->getContents();
                 if ($bodyContents === '') {
-                    return null; // Empty JSON body
+                    return null;
                 }
-                // Attempts to decode JSON
                 return json_decode($bodyContents, true, 512, JSON_THROW_ON_ERROR);
             } catch (\Exception $e) {
-                return null; // JSON parsing failed
+                return null;
             }
         }
 
-        // Unknown or unparsable content type
         return null;
     }
 
@@ -217,7 +205,6 @@ class GlobalsFactory
      * Creates and normalizes the uploaded files structure from $_FILES.
      *
      * @return array<string, UploadedFileInterface>
-     * @throws InvalidArgumentException
      */
     private function createUploadedFilesFromGlobals(): array
     {
@@ -228,11 +215,7 @@ class GlobalsFactory
     }
 
     /**
-     * Normalizes the $_FILES structure (which can be complex).
-     *
-     * @param array $files The $_FILES array.
-     * @return array<string, UploadedFileInterface|array>
-     * @throws InvalidArgumentException
+     * Normalizes the $_FILES structure.
      */
     private function normalizeFiles(array $files): array
     {
@@ -241,10 +224,8 @@ class GlobalsFactory
             if ($value instanceof UploadedFileInterface) {
                 $normalized[$key] = $value;
             } elseif (is_array($value) && isset($value['tmp_name'])) {
-                // This is a "leaf" (actual file) or an array of "leafs"
                 $normalized[$key] = $this->createUploadedFileFromSpec($value);
             } elseif (is_array($value)) {
-                // This is a nested sub-array (e.g., <input name="details[avatar]">)
                 $normalized[$key] = $this->normalizeFiles($value);
             } else {
                 throw new InvalidArgumentException('Invalid value in $_FILES array.');
@@ -255,18 +236,13 @@ class GlobalsFactory
 
     /**
      * Creates UploadedFile instances from a normalized $_FILES spec.
-     *
-     * @param array $spec
-     * @return UploadedFileInterface|UploadedFileInterface[]
      */
     private function createUploadedFileFromSpec(array $spec): UploadedFileInterface|array
     {
         if (is_array($spec['tmp_name'])) {
-            // Handles the <input name="files[]"> case
             return $this->normalizeNestedFileSpec($spec);
         }
 
-        // Single file case
         return new UploadedFile(
             $spec['tmp_name'],
             (int) ($spec['size'] ?? 0),
@@ -278,14 +254,10 @@ class GlobalsFactory
 
     /**
      * Handles the nested structure of <input name="files[]">.
-     *
-     * @param array $files
-     * @return array<int, UploadedFileInterface>
      */
     private function normalizeNestedFileSpec(array $files): array
     {
         $normalized = [];
-        // Iterates over 'tmp_name' keys (0, 1, 2...)
         foreach (array_keys($files['tmp_name']) as $key) {
             $spec = [
                 'tmp_name' => $files['tmp_name'][$key],
@@ -294,7 +266,6 @@ class GlobalsFactory
                 'name' => $files['name'][$key] ?? null,
                 'type' => $files['type'][$key] ?? null,
             ];
-            // Creates the UploadedFile instance for this index
             $normalized[$key] = $this->createUploadedFileFromSpec($spec);
         }
         return $normalized;
