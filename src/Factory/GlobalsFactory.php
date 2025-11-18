@@ -18,7 +18,7 @@ use Waffle\Commons\Http\Uri;
 /**
  * Creates a ServerRequestInterface (PSR-7) instance from PHP superglobals.
  */
-class RequestFactory
+class GlobalsFactory
 {
     /**
      * @var callable Factory to create a Stream for php://input.

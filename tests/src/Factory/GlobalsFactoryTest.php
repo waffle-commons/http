@@ -6,11 +6,11 @@ namespace WaffleTests\Commons\Http\Factory;
 
 use InvalidArgumentException;
 use Psr\Http\Message\UploadedFileInterface;
-use Waffle\Commons\Http\Factory\RequestFactory;
+use Waffle\Commons\Http\Factory\GlobalsFactory;
 use Waffle\Commons\Http\UploadedFile;
 use WaffleTests\Commons\Http\AbstractTestCase;
 
-class RequestFactoryTest extends AbstractTestCase
+class GlobalsFactoryTest extends AbstractTestCase
 {
     private array $serverBackup;
     private array $getBackup;
@@ -73,7 +73,7 @@ class RequestFactoryTest extends AbstractTestCase
             cookie: ['user' => 'test'],
         );
 
-        $factory = new RequestFactory();
+        $factory = new GlobalsFactory();
         $request = $factory->createFromGlobals();
 
         $this->assertSame('POST', $request->getMethod());
@@ -94,22 +94,22 @@ class RequestFactoryTest extends AbstractTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value in $_FILES array');
 
-        $factory = new RequestFactory();
+        $factory = new GlobalsFactory();
         $factory->createFromGlobals();
     }
 
     public function testHttpsDetection(): void
     {
         $this->setGlobals(server: ['HTTPS' => 'on', 'HTTP_HOST' => 'secure.com']);
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame('https', $request->getUri()->getScheme());
 
         $this->setGlobals(server: ['HTTPS' => '1', 'HTTP_HOST' => 'secure.com']);
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame('https', $request->getUri()->getScheme());
 
         $this->setGlobals(server: ['HTTPS' => 'off', 'HTTP_HOST' => 'unsecure.com']);
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame('http', $request->getUri()->getScheme());
     }
 
@@ -121,7 +121,7 @@ class RequestFactoryTest extends AbstractTestCase
         );
 
         // Simulates php://input
-        $factory = new RequestFactory(fn() => $this->createStream('{"user":"test"}'));
+        $factory = new GlobalsFactory(fn() => $this->createStream('{"user":"test"}'));
         $request = $factory->createFromGlobals();
 
         $this->assertSame(['user' => 'test'], $request->getParsedBody());
@@ -134,7 +134,7 @@ class RequestFactoryTest extends AbstractTestCase
             post: ['user' => 'waffle'],
         );
 
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame(['user' => 'waffle'], $request->getParsedBody());
     }
 
@@ -145,7 +145,7 @@ class RequestFactoryTest extends AbstractTestCase
             post: ['user' => 'waffle'],
         );
 
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame(['user' => 'waffle'], $request->getParsedBody());
     }
 
@@ -169,7 +169,7 @@ class RequestFactoryTest extends AbstractTestCase
         ];
         $this->setGlobals(files: $files);
 
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $uploadedFiles = $request->getUploadedFiles();
 
         $this->assertCount(1, $uploadedFiles);
@@ -199,7 +199,7 @@ class RequestFactoryTest extends AbstractTestCase
         ];
         $this->setGlobals(files: $files);
 
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $uploadedFiles = $request->getUploadedFiles();
 
         $this->assertCount(1, $uploadedFiles);
@@ -217,7 +217,7 @@ class RequestFactoryTest extends AbstractTestCase
     public function testAuthorizationHeader(): void
     {
         $this->setGlobals(server: ['HTTP_AUTHORIZATION' => 'Bearer 12345']);
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame('Bearer 12345', $request->getHeaderLine('Authorization'));
     }
 
@@ -225,7 +225,7 @@ class RequestFactoryTest extends AbstractTestCase
     {
         // Tests REDIRECT_HTTP_AUTHORIZATION (used by Apache + mod_rewrite)
         $this->setGlobals(server: ['REDIRECT_HTTP_AUTHORIZATION' => 'Bearer 67890']);
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame('Bearer 67890', $request->getHeaderLine('Authorization'));
     }
 
@@ -235,7 +235,7 @@ class RequestFactoryTest extends AbstractTestCase
             'PHP_AUTH_USER' => 'waffle',
             'PHP_AUTH_PW' => 'secret',
         ]);
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame('waffle:secret', $request->getUri()->getUserInfo());
         $this->assertSame('Basic ' . base64_encode('waffle:secret'), $request->getHeaderLine('Authorization'));
     }
@@ -246,7 +246,7 @@ class RequestFactoryTest extends AbstractTestCase
             'HTTP_HOST' => 'example.com:8080',
             'SERVER_PORT' => 8080,
         ]);
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame('http://example.com:8080/', (string) $request->getUri());
         $this->assertSame(8080, $request->getUri()->getPort());
     }
@@ -257,7 +257,7 @@ class RequestFactoryTest extends AbstractTestCase
             'REQUEST_URI' => '/path?foo=bar&baz=qux',
             'QUERY_STRING' => 'foo=bar&baz=qux',
         ]);
-        $request = new RequestFactory()->createFromGlobals();
+        $request = new GlobalsFactory()->createFromGlobals();
         $this->assertSame('/path', $request->getUri()->getPath());
         $this->assertSame('foo=bar&baz=qux', $request->getUri()->getQuery());
     }
