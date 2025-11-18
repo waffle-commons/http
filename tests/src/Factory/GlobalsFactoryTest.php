@@ -18,6 +18,7 @@ class GlobalsFactoryTest extends AbstractTestCase
     private array $cookieBackup;
     private array $filesBackup;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->serverBackup = $_SERVER;
@@ -27,6 +28,7 @@ class GlobalsFactoryTest extends AbstractTestCase
         $this->filesBackup = $_FILES;
     }
 
+    #[\Override]
     protected function tearDown(): void
     {
         $_SERVER = $this->serverBackup;
@@ -74,13 +76,13 @@ class GlobalsFactoryTest extends AbstractTestCase
         $factory = new GlobalsFactory();
         $request = $factory->createFromGlobals();
 
-        $this->assertSame('POST', $request->getMethod());
-        $this->assertSame('http://example.com/test?foo=bar', (string) $request->getUri());
-        $this->assertSame(['foo' => 'bar'], $request->getQueryParams());
-        $this->assertSame(['user' => 'test'], $request->getCookieParams());
-        $this->assertSame('application/json', $request->getHeaderLine('Content-Type'));
-        $this->assertSame('Waffle', $request->getHeaderLine('X-Test'));
-        $this->assertSame('example.com', $request->getHeaderLine('Host'));
+        static::assertSame('POST', $request->getMethod());
+        static::assertSame('http://example.com/test?foo=bar', (string) $request->getUri());
+        static::assertSame(['foo' => 'bar'], $request->getQueryParams());
+        static::assertSame(['user' => 'test'], $request->getCookieParams());
+        static::assertSame('application/json', $request->getHeaderLine('Content-Type'));
+        static::assertSame('Waffle', $request->getHeaderLine('X-Test'));
+        static::assertSame('example.com', $request->getHeaderLine('Host'));
     }
 
     public function testCreateFromGlobalsThrowsExceptionForInvalidFiles(): void
@@ -96,7 +98,7 @@ class GlobalsFactoryTest extends AbstractTestCase
     public function testHttpsDetection(): void
     {
         $this->setGlobals(server: ['HTTPS' => 'on', 'HTTP_HOST' => 'secure.com']);
-        $this->assertSame('https', new GlobalsFactory()->createFromGlobals()->getUri()->getScheme());
+        static::assertSame('https', new GlobalsFactory()->createFromGlobals()->getUri()->getScheme());
     }
 
     public function testParsedBodyForFormData(): void
@@ -107,7 +109,7 @@ class GlobalsFactoryTest extends AbstractTestCase
         );
 
         $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame(['user' => 'waffle'], $request->getParsedBody());
+        static::assertSame(['user' => 'waffle'], $request->getParsedBody());
     }
 
     public function testUploadedFiles(): void
@@ -115,7 +117,7 @@ class GlobalsFactoryTest extends AbstractTestCase
         // Simulates file upload
         $tempFile = tempnam(sys_get_temp_dir(), 'wfl_test_upload');
         if ($tempFile === false) {
-            $this->fail('Unable to create temporary file');
+            static::fail('Unable to create temporary file');
         }
         file_put_contents($tempFile, 'test');
 
@@ -133,10 +135,10 @@ class GlobalsFactoryTest extends AbstractTestCase
         $request = new GlobalsFactory()->createFromGlobals();
         $uploadedFiles = $request->getUploadedFiles();
 
-        $this->assertCount(1, $uploadedFiles);
-        $this->assertInstanceOf(UploadedFile::class, $uploadedFiles['avatar']);
-        $this->assertSame('test.txt', $uploadedFiles['avatar']->getClientFilename());
-        $this->assertSame(4, $uploadedFiles['avatar']->getSize());
+        static::assertCount(1, $uploadedFiles);
+        static::assertInstanceOf(UploadedFile::class, $uploadedFiles['avatar']);
+        static::assertSame('test.txt', $uploadedFiles['avatar']->getClientFilename());
+        static::assertSame(4, $uploadedFiles['avatar']->getSize());
 
         unlink($tempFile);
     }
@@ -163,13 +165,13 @@ class GlobalsFactoryTest extends AbstractTestCase
         $request = new GlobalsFactory()->createFromGlobals();
         $uploadedFiles = $request->getUploadedFiles();
 
-        $this->assertCount(1, $uploadedFiles);
-        $this->assertIsArray($uploadedFiles['docs']);
-        $this->assertCount(2, $uploadedFiles['docs']);
-        $this->assertInstanceOf(UploadedFileInterface::class, $uploadedFiles['docs'][0]);
-        $this->assertInstanceOf(UploadedFileInterface::class, $uploadedFiles['docs'][1]);
-        $this->assertSame('doc1.txt', $uploadedFiles['docs'][0]->getClientFilename());
-        $this->assertSame('doc2.txt', $uploadedFiles['docs'][1]->getClientFilename());
+        static::assertCount(1, $uploadedFiles);
+        static::assertIsArray($uploadedFiles['docs']);
+        static::assertCount(2, $uploadedFiles['docs']);
+        static::assertInstanceOf(UploadedFileInterface::class, $uploadedFiles['docs'][0]);
+        static::assertInstanceOf(UploadedFileInterface::class, $uploadedFiles['docs'][1]);
+        static::assertSame('doc1.txt', $uploadedFiles['docs'][0]->getClientFilename());
+        static::assertSame('doc2.txt', $uploadedFiles['docs'][1]->getClientFilename());
 
         unlink($tempFile1);
         unlink($tempFile2);
@@ -179,7 +181,7 @@ class GlobalsFactoryTest extends AbstractTestCase
     {
         $this->setGlobals(server: ['HTTP_AUTHORIZATION' => 'Bearer 12345']);
         $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame('Bearer 12345', $request->getHeaderLine('Authorization'));
+        static::assertSame('Bearer 12345', $request->getHeaderLine('Authorization'));
     }
 
     public function testRedirectAuthorizationHeader(): void
@@ -187,7 +189,7 @@ class GlobalsFactoryTest extends AbstractTestCase
         // Tests REDIRECT_HTTP_AUTHORIZATION (used by Apache + mod_rewrite)
         $this->setGlobals(server: ['REDIRECT_HTTP_AUTHORIZATION' => 'Bearer 67890']);
         $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame('Bearer 67890', $request->getHeaderLine('Authorization'));
+        static::assertSame('Bearer 67890', $request->getHeaderLine('Authorization'));
     }
 
     public function testBasicAuthCredentials(): void
@@ -197,8 +199,8 @@ class GlobalsFactoryTest extends AbstractTestCase
             'PHP_AUTH_PW' => 'secret',
         ]);
         $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame('waffle:secret', $request->getUri()->getUserInfo());
-        $this->assertSame('Basic ' . base64_encode('waffle:secret'), $request->getHeaderLine('Authorization'));
+        static::assertSame('waffle:secret', $request->getUri()->getUserInfo());
+        static::assertSame('Basic ' . base64_encode('waffle:secret'), $request->getHeaderLine('Authorization'));
     }
 
     public function testUriWithPort(): void
@@ -208,8 +210,8 @@ class GlobalsFactoryTest extends AbstractTestCase
             'SERVER_PORT' => 8080,
         ]);
         $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame('http://example.com:8080/', (string) $request->getUri());
-        $this->assertSame(8080, $request->getUri()->getPort());
+        static::assertSame('http://example.com:8080/', (string) $request->getUri());
+        static::assertSame(8080, $request->getUri()->getPort());
     }
 
     public function testUriWithQueryStringInRequestUri(): void
@@ -219,7 +221,7 @@ class GlobalsFactoryTest extends AbstractTestCase
             'QUERY_STRING' => 'foo=bar&baz=qux',
         ]);
         $request = new GlobalsFactory()->createFromGlobals();
-        $this->assertSame('/path', $request->getUri()->getPath());
-        $this->assertSame('foo=bar&baz=qux', $request->getUri()->getQuery());
+        static::assertSame('/path', $request->getUri()->getPath());
+        static::assertSame('foo=bar&baz=qux', $request->getUri()->getQuery());
     }
 }

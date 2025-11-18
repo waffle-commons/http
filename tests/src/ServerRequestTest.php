@@ -20,7 +20,18 @@ class ServerRequestTest extends AbstractTestCase
         $parsedBody = null,
         array $uploadedFiles = [],
     ): ServerRequest {
-        return new ServerRequest($method, new Uri($uri), [], $this->createStream(), '1.1', $serverParams, $cookieParams, $queryParams, $parsedBody, $uploadedFiles); // Headers // Body
+        return new ServerRequest(
+            $method,
+            new Uri($uri),
+            [],
+            $this->createStream(),
+            '1.1',
+            $serverParams,
+            $cookieParams,
+            $queryParams,
+            $parsedBody,
+            $uploadedFiles,
+        ); // Headers // Body
     }
 
     public function testConstructorAcceptsResourceBody(): void
@@ -31,8 +42,8 @@ class ServerRequestTest extends AbstractTestCase
 
         $request = new ServerRequest('POST', new Uri('/'), [], $resource);
 
-        $this->assertInstanceOf(Stream::class, $request->getBody());
-        $this->assertSame('Resource Body', (string) $request->getBody());
+        static::assertInstanceOf(Stream::class, $request->getBody());
+        static::assertSame('Resource Body', (string) $request->getBody());
     }
 
     public function testConstructorThrowsExceptionForInvalidBodyType(): void
@@ -46,13 +57,13 @@ class ServerRequestTest extends AbstractTestCase
     public function testRequestTargetDefaultsToSlash(): void
     {
         $request = $this->createTestRequest('GET', '');
-        $this->assertSame('/', $request->getRequestTarget());
+        static::assertSame('/', $request->getRequestTarget());
     }
 
     public function testRequestTargetIncludesQuery(): void
     {
         $request = new ServerRequest('GET', new Uri('/path?foo=bar'));
-        $this->assertSame('/path?foo=bar', $request->getRequestTarget());
+        static::assertSame('/path?foo=bar', $request->getRequestTarget());
     }
 
     public function testWithRequestTarget(): void
@@ -60,8 +71,8 @@ class ServerRequestTest extends AbstractTestCase
         $r1 = $this->createTestRequest();
         $r2 = $r1->withRequestTarget('*');
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame('*', $r2->getRequestTarget());
+        static::assertNotSame($r1, $r2);
+        static::assertSame('*', $r2->getRequestTarget());
     }
 
     public function testWithRequestTargetThrowsExceptionForWhitespace(): void
@@ -78,9 +89,9 @@ class ServerRequestTest extends AbstractTestCase
         $r2 = $r1->withMethod('POST');
         $r3 = $r1->withMethod('GET'); // Same method
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame('POST', $r2->getMethod());
-        $this->assertNotSame($r1, $r3); // Clones even if same
+        static::assertNotSame($r1, $r2);
+        static::assertSame('POST', $r2->getMethod());
+        static::assertNotSame($r1, $r3); // Clones even if same
     }
 
     public function testWithUriPreservesHostHeaderIfPresent(): void
@@ -91,8 +102,8 @@ class ServerRequestTest extends AbstractTestCase
         $uri2 = new Uri('http://other.com');
         $newRequest = $request->withUri($uri2, true); // preserveHost = true
 
-        $this->assertSame('example.com', $newRequest->getHeaderLine('Host'));
-        $this->assertSame($uri2, $newRequest->getUri());
+        static::assertSame('example.com', $newRequest->getHeaderLine('Host'));
+        static::assertSame($uri2, $newRequest->getUri());
     }
 
     public function testWithUriUpdatesHostHeaderIfNotPreserved(): void
@@ -102,7 +113,7 @@ class ServerRequestTest extends AbstractTestCase
 
         $newRequest = $request->withUri($uri); // preserveHost = false (default)
 
-        $this->assertSame('example.com', $newRequest->getHeaderLine('Host'));
+        static::assertSame('example.com', $newRequest->getHeaderLine('Host'));
     }
 
     public function testWithUriAddsPortToHostHeader(): void
@@ -112,21 +123,21 @@ class ServerRequestTest extends AbstractTestCase
 
         $newRequest = $request->withUri($uri);
 
-        $this->assertSame('example.com:8080', $newRequest->getHeaderLine('Host'));
+        static::assertSame('example.com:8080', $newRequest->getHeaderLine('Host'));
     }
 
     public function testGetServerParams(): void
     {
         $params = ['REQUEST_TIME' => 123456];
         $request = $this->createTestRequest('GET', '/', $params);
-        $this->assertSame($params, $request->getServerParams());
+        static::assertSame($params, $request->getServerParams());
     }
 
     public function testGetCookieParams(): void
     {
         $cookies = ['user' => 'waffle'];
         $request = $this->createTestRequest('GET', '/', [], $cookies);
-        $this->assertSame($cookies, $request->getCookieParams());
+        static::assertSame($cookies, $request->getCookieParams());
     }
 
     public function testWithCookieParams(): void
@@ -136,16 +147,16 @@ class ServerRequestTest extends AbstractTestCase
         $r1 = $this->createTestRequest('GET', '/', [], $cookies1);
         $r2 = $r1->withCookieParams($cookies2);
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame($cookies1, $r1->getCookieParams());
-        $this->assertSame($cookies2, $r2->getCookieParams());
+        static::assertNotSame($r1, $r2);
+        static::assertSame($cookies1, $r1->getCookieParams());
+        static::assertSame($cookies2, $r2->getCookieParams());
     }
 
     public function testGetQueryParams(): void
     {
         $query = ['page' => '1'];
         $request = $this->createTestRequest('GET', '/', [], [], $query);
-        $this->assertSame($query, $request->getQueryParams());
+        static::assertSame($query, $request->getQueryParams());
     }
 
     public function testWithQueryParams(): void
@@ -155,16 +166,16 @@ class ServerRequestTest extends AbstractTestCase
         $r1 = $this->createTestRequest('GET', '/', [], [], $query1);
         $r2 = $r1->withQueryParams($query2);
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame($query1, $r1->getQueryParams());
-        $this->assertSame($query2, $r2->getQueryParams());
+        static::assertNotSame($r1, $r2);
+        static::assertSame($query1, $r1->getQueryParams());
+        static::assertSame($query2, $r2->getQueryParams());
     }
 
     public function testGetUploadedFiles(): void
     {
         $files = ['avatar' => new \stdClass()]; // Simulates UploadedFileInterface
         $request = $this->createTestRequest('POST', '/', [], [], [], null, $files);
-        $this->assertSame($files, $request->getUploadedFiles());
+        static::assertSame($files, $request->getUploadedFiles());
     }
 
     public function testWithUploadedFiles(): void
@@ -174,16 +185,16 @@ class ServerRequestTest extends AbstractTestCase
         $r1 = $this->createTestRequest('POST', '/', [], [], [], null, $files1);
         $r2 = $r1->withUploadedFiles($files2);
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame($files1, $r1->getUploadedFiles());
-        $this->assertSame($files2, $r2->getUploadedFiles());
+        static::assertNotSame($r1, $r2);
+        static::assertSame($files1, $r1->getUploadedFiles());
+        static::assertSame($files2, $r2->getUploadedFiles());
     }
 
     public function testGetParsedBody(): void
     {
         $body = ['username' => 'waffle'];
         $request = $this->createTestRequest('POST', '/', [], [], [], $body);
-        $this->assertSame($body, $request->getParsedBody());
+        static::assertSame($body, $request->getParsedBody());
     }
 
     public function testWithParsedBody(): void
@@ -193,9 +204,9 @@ class ServerRequestTest extends AbstractTestCase
         $r1 = $this->createTestRequest('POST', '/', [], [], [], $body1);
         $r2 = $r1->withParsedBody($body2);
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame($body1, $r1->getParsedBody());
-        $this->assertSame($body2, $r2->getParsedBody());
+        static::assertNotSame($r1, $r2);
+        static::assertSame($body1, $r1->getParsedBody());
+        static::assertSame($body2, $r2->getParsedBody());
     }
 
     public function testWithParsedBodyThrowsExceptionForInvalidType(): void
@@ -210,18 +221,18 @@ class ServerRequestTest extends AbstractTestCase
         $r2 = $r1->withAttribute('user', 123);
         $r3 = $r2->withAttribute('role', 'admin');
 
-        $this->assertSame([], $r1->getAttributes());
-        $this->assertSame(['user' => 123], $r2->getAttributes());
-        $this->assertSame(['user' => 123, 'role' => 'admin'], $r3->getAttributes());
+        static::assertSame([], $r1->getAttributes());
+        static::assertSame(['user' => 123], $r2->getAttributes());
+        static::assertSame(['user' => 123, 'role' => 'admin'], $r3->getAttributes());
     }
 
     public function testGetAttribute(): void
     {
         $r1 = $this->createTestRequest()->withAttribute('user', 123);
 
-        $this->assertSame(123, $r1->getAttribute('user'));
-        $this->assertNull($r1->getAttribute('non_existent'));
-        $this->assertSame('default', $r1->getAttribute('non_existent', 'default'));
+        static::assertSame(123, $r1->getAttribute('user'));
+        static::assertNull($r1->getAttribute('non_existent'));
+        static::assertSame('default', $r1->getAttribute('non_existent', 'default'));
     }
 
     public function testWithAttribute(): void
@@ -229,9 +240,9 @@ class ServerRequestTest extends AbstractTestCase
         $r1 = $this->createTestRequest();
         $r2 = $r1->withAttribute('user', 123);
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertNull($r1->getAttribute('user'));
-        $this->assertSame(123, $r2->getAttribute('user'));
+        static::assertNotSame($r1, $r2);
+        static::assertNull($r1->getAttribute('user'));
+        static::assertSame(123, $r2->getAttribute('user'));
     }
 
     public function testWithoutAttribute(): void
@@ -240,9 +251,9 @@ class ServerRequestTest extends AbstractTestCase
 
         $r2 = $r1->withoutAttribute('user');
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame(['user' => 123, 'role' => 'admin'], $r1->getAttributes());
-        $this->assertSame(['role' => 'admin'], $r2->getAttributes());
-        $this->assertNull($r2->getAttribute('user'));
+        static::assertNotSame($r1, $r2);
+        static::assertSame(['user' => 123, 'role' => 'admin'], $r1->getAttributes());
+        static::assertSame(['role' => 'admin'], $r2->getAttributes());
+        static::assertNull($r2->getAttribute('user'));
     }
 }

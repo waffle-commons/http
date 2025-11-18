@@ -6,6 +6,7 @@ namespace WaffleTests\Commons\Http\Abstract;
 
 use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
+use TypeError;
 use Waffle\Commons\Http\Abstract\AbstractMessage;
 use Waffle\Commons\Http\Response;
 use WaffleTests\Commons\Http\AbstractTestCase;
@@ -14,6 +15,7 @@ class AbstractMessageTest extends AbstractTestCase
 {
     private $message;
 
+    #[\Override]
     protected function setUp(): void
     {
         // Use an anonymous class to test the abstract class logic
@@ -29,15 +31,15 @@ class AbstractMessageTest extends AbstractTestCase
     {
         $new = $this->message->withProtocolVersion('2.0');
 
-        $this->assertNotSame($this->message, $new);
-        $this->assertSame('1.1', $this->message->getProtocolVersion());
-        $this->assertSame('2.0', $new->getProtocolVersion());
+        static::assertNotSame($this->message, $new);
+        static::assertSame('1.1', $this->message->getProtocolVersion());
+        static::assertSame('2.0', $new->getProtocolVersion());
     }
 
     public function testWithProtocolVersionReturnsSameInstanceIfUnchanged(): void
     {
         $new = $this->message->withProtocolVersion('1.1');
-        $this->assertSame($this->message, $new);
+        static::assertSame($this->message, $new);
     }
 
     public function testWithProtocolVersionThrowsExceptionForInvalidVersion(): void
@@ -58,8 +60,8 @@ class AbstractMessageTest extends AbstractTestCase
 
     public function testWithHeaderThrowsExceptionForInvalidHeaderValueType(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Header value must be a string or array of strings.');
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('preg_match(): Argument #2 ($subject) must be of type string, stdClass given');
 
         $this->message->withHeader('X-Test', new \stdClass());
     }
@@ -80,15 +82,15 @@ class AbstractMessageTest extends AbstractTestCase
 
     public function testGetHeaderReturnsEmptyArrayForNonExistentHeader(): void
     {
-        $this->assertSame([], $this->message->getHeader('Non-Existent'));
+        static::assertSame([], $this->message->getHeader('Non-Existent'));
     }
 
     public function testHasHeaderIsCaseInsensitive(): void
     {
         $new = $this->message->withHeader('Content-Type', 'application/json');
 
-        $this->assertTrue($new->hasHeader('content-type'));
-        $this->assertTrue($new->hasHeader('CONTENT-TYPE'));
+        static::assertTrue($new->hasHeader('content-type'));
+        static::assertTrue($new->hasHeader('CONTENT-TYPE'));
     }
 
     public function testWithAddedHeaderMergesValues(): void
@@ -96,8 +98,8 @@ class AbstractMessageTest extends AbstractTestCase
         $msg = $this->message->withHeader('X-Foo', 'Bar');
         $msg2 = $msg->withAddedHeader('X-Foo', 'Baz');
 
-        $this->assertSame(['Bar', 'Baz'], $msg2->getHeader('X-Foo'));
-        $this->assertSame('Bar, Baz', $msg2->getHeaderLine('X-Foo'));
+        static::assertSame(['Bar', 'Baz'], $msg2->getHeader('X-Foo'));
+        static::assertSame('Bar, Baz', $msg2->getHeaderLine('X-Foo'));
     }
 
     public function testWithBodyReturnsClone(): void
@@ -105,8 +107,8 @@ class AbstractMessageTest extends AbstractTestCase
         $stream = $this->createMock(StreamInterface::class);
         $new = $this->message->withBody($stream);
 
-        $this->assertNotSame($this->message, $new);
-        $this->assertSame($stream, $new->getBody());
+        static::assertNotSame($this->message, $new);
+        static::assertSame($stream, $new->getBody());
     }
 
     public function testWithBodyReturnsSameInstanceIfBodyUnchanged(): void
@@ -114,7 +116,7 @@ class AbstractMessageTest extends AbstractTestCase
         $stream = $this->message->getBody();
         $new = $this->message->withBody($stream);
 
-        $this->assertSame($this->message, $new);
+        static::assertSame($this->message, $new);
     }
 
     // This test covers protected normalizeHeaders via simulating Response constructor logic

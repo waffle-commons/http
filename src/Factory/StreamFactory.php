@@ -11,6 +11,7 @@ use Waffle\Commons\Http\Stream;
 
 class StreamFactory implements StreamFactoryInterface
 {
+    #[\Override]
     public function createStream(string $content = ''): StreamInterface
     {
         $resource = fopen('php://temp', 'r+');
@@ -23,11 +24,13 @@ class StreamFactory implements StreamFactoryInterface
         return new Stream($resource);
     }
 
+    #[\Override]
     public function createStreamFromFile(string $filename, string $mode = 'r'): StreamInterface
     {
         return new Stream($filename, $mode);
     }
 
+    #[\Override]
     public function createStreamFromResource($resource): StreamInterface
     {
         return new Stream($resource);

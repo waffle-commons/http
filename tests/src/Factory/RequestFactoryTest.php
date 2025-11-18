@@ -15,7 +15,7 @@ class RequestFactoryTest extends AbstractTestCase
     public function testImplementsPsrInterface(): void
     {
         $factory = new RequestFactory();
-        $this->assertInstanceOf(RequestFactoryInterface::class, $factory);
+        static::assertInstanceOf(RequestFactoryInterface::class, $factory);
     }
 
     public function testCreateRequestWithStringUri(): void
@@ -23,11 +23,11 @@ class RequestFactoryTest extends AbstractTestCase
         $factory = new RequestFactory();
         $request = $factory->createRequest('GET', 'https://example.com/api');
 
-        $this->assertInstanceOf(RequestInterface::class, $request);
-        $this->assertSame('GET', $request->getMethod());
-        $this->assertSame('https', $request->getUri()->getScheme());
-        $this->assertSame('example.com', $request->getUri()->getHost());
-        $this->assertSame('/api', $request->getUri()->getPath());
+        static::assertInstanceOf(RequestInterface::class, $request);
+        static::assertSame('GET', $request->getMethod());
+        static::assertSame('https', $request->getUri()->getScheme());
+        static::assertSame('example.com', $request->getUri()->getHost());
+        static::assertSame('/api', $request->getUri()->getPath());
     }
 
     public function testCreateRequestWithUriObject(): void
@@ -36,8 +36,8 @@ class RequestFactoryTest extends AbstractTestCase
         $uri = new Uri('https://example.org/test');
         $request = $factory->createRequest('POST', $uri);
 
-        $this->assertInstanceOf(RequestInterface::class, $request);
-        $this->assertSame('POST', $request->getMethod());
-        $this->assertSame($uri, $request->getUri());
+        static::assertInstanceOf(RequestInterface::class, $request);
+        static::assertSame('POST', $request->getMethod());
+        static::assertSame($uri, $request->getUri());
     }
 }

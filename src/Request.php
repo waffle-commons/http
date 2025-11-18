@@ -37,6 +37,7 @@ class Request extends AbstractMessage implements RequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getRequestTarget(): string
     {
         if ($this->requestTarget !== null) {
@@ -57,6 +58,7 @@ class Request extends AbstractMessage implements RequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withRequestTarget(string $requestTarget): RequestInterface
     {
         // PSR-7 3.2.1: Request target must not contain whitespace
@@ -72,6 +74,7 @@ class Request extends AbstractMessage implements RequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getMethod(): string
     {
         return $this->method;
@@ -80,6 +83,7 @@ class Request extends AbstractMessage implements RequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withMethod(string $method): RequestInterface
     {
         $new = clone $this;
@@ -90,6 +94,7 @@ class Request extends AbstractMessage implements RequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getUri(): UriInterface
     {
         return $this->uri;
@@ -98,6 +103,7 @@ class Request extends AbstractMessage implements RequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withUri(UriInterface $uri, bool $preserveHost = false): RequestInterface
     {
         $new = clone $this;

@@ -10,6 +10,7 @@ use Waffle\Commons\Http\Response;
 
 class ResponseFactory implements ResponseFactoryInterface
 {
+    #[\Override]
     public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface
     {
         return new Response($code, [], null, '1.1', $reasonPhrase !== '' ? $reasonPhrase : null);

@@ -14,12 +14,12 @@ class ResponseTest extends AbstractTestCase
     {
         $response = new Response();
 
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('OK', $response->getReasonPhrase());
-        $this->assertSame('1.1', $response->getProtocolVersion());
-        $this->assertSame([], $response->getHeaders());
-        $this->assertInstanceOf(Stream::class, $response->getBody());
-        $this->assertSame('', (string) $response->getBody());
+        static::assertSame(200, $response->getStatusCode());
+        static::assertSame('OK', $response->getReasonPhrase());
+        static::assertSame('1.1', $response->getProtocolVersion());
+        static::assertSame([], $response->getHeaders());
+        static::assertInstanceOf(Stream::class, $response->getBody());
+        static::assertSame('', (string) $response->getBody());
     }
 
     public function testConstructorWithParameters(): void
@@ -28,18 +28,18 @@ class ResponseTest extends AbstractTestCase
         $headers = ['X-Test' => 'Waffle'];
         $response = new Response(404, $headers, $stream, '2.0', 'Not Found Custom');
 
-        $this->assertSame(404, $response->getStatusCode());
-        $this->assertSame('Not Found Custom', $response->getReasonPhrase());
-        $this->assertSame('2.0', $response->getProtocolVersion());
-        $this->assertSame(['X-Test' => ['Waffle']], $response->getHeaders());
-        $this->assertSame($stream, $response->getBody());
+        static::assertSame(404, $response->getStatusCode());
+        static::assertSame('Not Found Custom', $response->getReasonPhrase());
+        static::assertSame('2.0', $response->getProtocolVersion());
+        static::assertSame(['X-Test' => ['Waffle']], $response->getHeaders());
+        static::assertSame($stream, $response->getBody());
     }
 
     public function testConstructorCreatesStreamForStringBody(): void
     {
         $response = new Response(200, [], 'Hello World');
-        $this->assertInstanceOf(Stream::class, $response->getBody());
-        $this->assertSame('Hello World', (string) $response->getBody());
+        static::assertInstanceOf(Stream::class, $response->getBody());
+        static::assertSame('Hello World', (string) $response->getBody());
     }
 
     public function testConstructorAcceptsResourceBody(): void
@@ -49,8 +49,8 @@ class ResponseTest extends AbstractTestCase
 
         $response = new Response(200, [], $resource);
 
-        $this->assertInstanceOf(Stream::class, $response->getBody());
-        $this->assertSame('Resource Content', (string) $response->getBody());
+        static::assertInstanceOf(Stream::class, $response->getBody());
+        static::assertSame('Resource Content', (string) $response->getBody());
     }
 
     public function testConstructorAcceptsStreamInterfaceBody(): void
@@ -59,7 +59,7 @@ class ResponseTest extends AbstractTestCase
         $response = new Response(200, [], $stream);
 
         // Should use the exact same instance
-        $this->assertSame($stream, $response->getBody());
+        static::assertSame($stream, $response->getBody());
     }
 
     public function testConstructorThrowsExceptionForInvalidBodyType(): void
@@ -88,15 +88,15 @@ class ResponseTest extends AbstractTestCase
         $r2 = $r1->withStatus(404);
         $r3 = $r2->withStatus(500, 'Server Error');
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame(200, $r1->getStatusCode());
-        $this->assertSame('OK', $r1->getReasonPhrase());
+        static::assertNotSame($r1, $r2);
+        static::assertSame(200, $r1->getStatusCode());
+        static::assertSame('OK', $r1->getReasonPhrase());
 
-        $this->assertSame(404, $r2->getStatusCode());
-        $this->assertSame('Not Found', $r2->getReasonPhrase());
+        static::assertSame(404, $r2->getStatusCode());
+        static::assertSame('Not Found', $r2->getReasonPhrase());
 
-        $this->assertSame(500, $r3->getStatusCode());
-        $this->assertSame('Server Error', $r3->getReasonPhrase());
+        static::assertSame(500, $r3->getStatusCode());
+        static::assertSame('Server Error', $r3->getReasonPhrase());
     }
 
     public function testWithStatusThrowsExceptionForInvalidCode(): void
@@ -110,9 +110,9 @@ class ResponseTest extends AbstractTestCase
     {
         $response = new Response(200, ['Content-Type' => 'application/json']);
 
-        $this->assertTrue($response->hasHeader('content-type'));
-        $this->assertSame(['application/json'], $response->getHeader('content-type'));
-        $this->assertSame('application/json', $response->getHeaderLine('content-type'));
+        static::assertTrue($response->hasHeader('content-type'));
+        static::assertSame(['application/json'], $response->getHeader('content-type'));
+        static::assertSame('application/json', $response->getHeaderLine('content-type'));
     }
 
     public function testImmutabilityWithHeader(): void
@@ -120,10 +120,10 @@ class ResponseTest extends AbstractTestCase
         $r1 = new Response();
         $r2 = $r1->withHeader('X-Test', 'Value1');
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertFalse($r1->hasHeader('X-Test'));
-        $this->assertTrue($r2->hasHeader('X-Test'));
-        $this->assertSame('Value1', $r2->getHeaderLine('X-Test'));
+        static::assertNotSame($r1, $r2);
+        static::assertFalse($r1->hasHeader('X-Test'));
+        static::assertTrue($r2->hasHeader('X-Test'));
+        static::assertSame('Value1', $r2->getHeaderLine('X-Test'));
     }
 
     public function testWithAddedHeader(): void
@@ -131,9 +131,9 @@ class ResponseTest extends AbstractTestCase
         $r1 = new Response(200, ['X-Foo' => 'Bar']);
         $r2 = $r1->withAddedHeader('X-Foo', 'Baz');
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame(['Bar'], $r1->getHeader('X-Foo'));
-        $this->assertSame(['Bar', 'Baz'], $r2->getHeader('X-Foo'));
+        static::assertNotSame($r1, $r2);
+        static::assertSame(['Bar'], $r1->getHeader('X-Foo'));
+        static::assertSame(['Bar', 'Baz'], $r2->getHeader('X-Foo'));
     }
 
     public function testWithoutHeader(): void
@@ -141,10 +141,10 @@ class ResponseTest extends AbstractTestCase
         $r1 = new Response(200, ['X-Foo' => 'Bar', 'X-Test' => 'Value']);
         $r2 = $r1->withoutHeader('x-foo'); // case-insensitive
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertTrue($r1->hasHeader('X-Foo'));
-        $this->assertFalse($r2->hasHeader('X-Foo'));
-        $this->assertTrue($r2->hasHeader('X-Test')); // Other header remains
+        static::assertNotSame($r1, $r2);
+        static::assertTrue($r1->hasHeader('X-Foo'));
+        static::assertFalse($r2->hasHeader('X-Foo'));
+        static::assertTrue($r2->hasHeader('X-Test')); // Other header remains
     }
 
     public function testWithBody(): void
@@ -154,8 +154,8 @@ class ResponseTest extends AbstractTestCase
         $r1 = new Response(200, [], $s1);
         $r2 = $r1->withBody($s2);
 
-        $this->assertNotSame($r1, $r2);
-        $this->assertSame($s1, $r1->getBody());
-        $this->assertSame($s2, $r2->getBody());
+        static::assertNotSame($r1, $r2);
+        static::assertSame($s1, $r1->getBody());
+        static::assertSame($s2, $r2->getBody());
     }
 }

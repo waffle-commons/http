@@ -33,7 +33,7 @@ class GlobalsFactory
     public function __construct(null|callable $bodyStreamFactory = null)
     {
         // Provides a default factory if none is given
-        $this->bodyStreamFactory = $bodyStreamFactory ?? function (): Stream {
+        $this->bodyStreamFactory = $bodyStreamFactory ?? static function (): Stream {
             $resource = fopen('php://input', 'r');
             if (false === $resource) {
                 throw new RuntimeException('Failed to open php://input stream.');
@@ -58,12 +58,23 @@ class GlobalsFactory
 
         // ServerRequest-specific parameters
         $cookies = $_COOKIE ?? [];
-        $queryParams = $_GET ?? [];
+        $queryParams = $_GET;
         $uploadedFiles = $this->createUploadedFilesFromGlobals();
         // Parsed body (depends on method and Content-Type)
         $parsedBody = $this->getParsedBody($method, $headers, $body);
 
-        return new ServerRequest($method, $uri, $headers, $body, $protocol, $_SERVER, $cookies, $queryParams, $parsedBody, $uploadedFiles); // serverParams
+        return new ServerRequest(
+            $method,
+            $uri,
+            $headers,
+            $body,
+            $protocol,
+            $_SERVER,
+            $cookies,
+            $queryParams,
+            $parsedBody,
+            $uploadedFiles,
+        ); // serverParams
     }
 
     /**
@@ -168,11 +179,11 @@ class GlobalsFactory
         $mime = trim(strtolower($parts[0]));
 
         if ('application/x-www-form-urlencoded' === $mime) {
-            return $_POST ?? null;
+            return $_POST;
         }
 
         if ('multipart/form-data' === $mime) {
-            return $_POST ?? null;
+            return $_POST;
         }
 
         if ('application/json' === $mime) {

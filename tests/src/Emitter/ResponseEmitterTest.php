@@ -17,7 +17,7 @@ namespace Waffle\Commons\Http\Emitter {
      * Mock for header().
      * Prevents actual output and PHPUnit errors about headers being sent.
      */
-    function header(string $header, bool $replace = true, int $http_response_code = 0): void
+    function header(string $_header, bool $_replace = true, int $_http_response_code = 0): void
     {
         // no-op for tests
     }
@@ -38,6 +38,7 @@ namespace WaffleTests\Commons\Http\Emitter {
      */
     class ResponseEmitterTest extends AbstractTestCase
     {
+        #[\Override]
         protected function tearDown(): void
         {
             // Reset global mock state
@@ -61,7 +62,7 @@ namespace WaffleTests\Commons\Http\Emitter {
             $output = ob_get_clean();
 
             // We verify the response body
-            $this->assertSame('Hello World', $output);
+            static::assertSame('Hello World', $output);
         }
 
         public function testThrowsExceptionIfHeadersSent(): void
@@ -88,7 +89,7 @@ namespace WaffleTests\Commons\Http\Emitter {
             ob_get_clean();
 
             // Assertion: Just ensuring no crash occurs during header emission logic
-            $this->assertTrue(true);
+            static::assertTrue(true);
         }
     }
 }

@@ -62,6 +62,7 @@ namespace WaffleTests\Commons\Http {
         public static bool $mockFreadFail = false;
         public static bool $mockStreamGetContentsFail = false;
 
+        #[\Override]
         protected function setUp(): void
         {
             parent::setUp();
@@ -76,7 +77,7 @@ namespace WaffleTests\Commons\Http {
         public function testConstructorInitializesStreamWithResource(): void
         {
             $stream = $this->createStream('Hello');
-            $this->assertSame('Hello', (string) $stream);
+            static::assertSame('Hello', (string) $stream);
             $stream->close();
         }
 
@@ -86,7 +87,7 @@ namespace WaffleTests\Commons\Http {
             file_put_contents($tempFile, 'File Content');
 
             $stream = new Stream($tempFile);
-            $this->assertSame('File Content', (string) $stream);
+            static::assertSame('File Content', (string) $stream);
 
             $stream->close();
             unlink($tempFile);
@@ -111,7 +112,7 @@ namespace WaffleTests\Commons\Http {
         public function testToStringReadsContent(): void
         {
             $stream = $this->createStream('Waffle');
-            $this->assertSame('Waffle', (string) $stream);
+            static::assertSame('Waffle', (string) $stream);
         }
 
         public function testToStringReturnsEmptyStringOnException(): void
@@ -119,7 +120,7 @@ namespace WaffleTests\Commons\Http {
             $stream = $this->createStream('Content');
             $stream->close(); // Force exception by closing resource
 
-            $this->assertSame('', (string) $stream);
+            static::assertSame('', (string) $stream);
         }
 
         public function testToStringReturnsEmptyStringOnRewindFailure(): void
@@ -129,14 +130,14 @@ namespace WaffleTests\Commons\Http {
             self::$mockFseekFail = true;
 
             // __toString catches RuntimeException thrown by rewind/seek
-            $this->assertSame('', (string) $stream);
+            static::assertSame('', (string) $stream);
         }
 
         public function testToStringRewindsStream(): void
         {
             $stream = $this->createStream('Hello');
             $stream->read(5);
-            $this->assertSame('Hello', (string) $stream);
+            static::assertSame('Hello', (string) $stream);
         }
 
         public function testToStringReturnsEmptyStringIfNotReadable(): void
@@ -144,7 +145,7 @@ namespace WaffleTests\Commons\Http {
             $file = tempnam(sys_get_temp_dir(), 'write_only');
             $stream = new Stream($file, 'w');
 
-            $this->assertSame('', (string) $stream);
+            static::assertSame('', (string) $stream);
 
             $stream->close();
             unlink($file);
@@ -154,8 +155,8 @@ namespace WaffleTests\Commons\Http {
         {
             $resource = fopen('php://temp', 'r+');
             $stream = new Stream($resource);
-            $this->assertSame($resource, $stream->detach());
-            $this->assertNull($stream->detach());
+            static::assertSame($resource, $stream->detach());
+            static::assertNull($stream->detach());
         }
 
         public function testCloseRemovesResource(): void
@@ -163,15 +164,15 @@ namespace WaffleTests\Commons\Http {
             $stream = $this->createStream('test');
             $stream->close();
 
-            $this->assertFalse($stream->isReadable());
-            $this->assertFalse($stream->isWritable());
-            $this->assertFalse($stream->isSeekable());
+            static::assertFalse($stream->isReadable());
+            static::assertFalse($stream->isWritable());
+            static::assertFalse($stream->isSeekable());
         }
 
         public function testGetSize(): void
         {
             $stream = $this->createStream('Hello World');
-            $this->assertSame(11, $stream->getSize());
+            static::assertSame(11, $stream->getSize());
         }
 
         public function testGetSizeReturnsNullIfDetached(): void
@@ -179,14 +180,14 @@ namespace WaffleTests\Commons\Http {
             $resource = fopen('php://temp', 'r+');
             $stream = new Stream($resource);
             $stream->detach();
-            $this->assertNull($stream->getSize());
+            static::assertNull($stream->getSize());
         }
 
         public function testTell(): void
         {
             $stream = $this->createStream('Hello World');
             $stream->read(5);
-            $this->assertSame(5, $stream->tell());
+            static::assertSame(5, $stream->tell());
         }
 
         public function testTellThrowsExceptionIfDetached(): void
@@ -211,19 +212,19 @@ namespace WaffleTests\Commons\Http {
         public function testEof(): void
         {
             $stream = $this->createStream('Hi');
-            $this->assertFalse($stream->eof());
+            static::assertFalse($stream->eof());
             $stream->read(2);
-            $this->assertFalse($stream->eof());
+            static::assertFalse($stream->eof());
             $stream->read(1);
-            $this->assertTrue($stream->eof());
+            static::assertTrue($stream->eof());
         }
 
         public function testSeek(): void
         {
             $stream = $this->createStream('Hello World');
             $stream->seek(6);
-            $this->assertSame(6, $stream->tell());
-            $this->assertSame('World', $stream->getContents());
+            static::assertSame(6, $stream->tell());
+            static::assertSame('World', $stream->getContents());
         }
 
         public function testSeekThrowsExceptionIfDetached(): void
@@ -260,16 +261,16 @@ namespace WaffleTests\Commons\Http {
             $stream = $this->createStream('Hello');
             $stream->seek(5);
             $stream->rewind();
-            $this->assertSame(0, $stream->tell());
-            $this->assertSame('Hello', (string) $stream);
+            static::assertSame(0, $stream->tell());
+            static::assertSame('Hello', (string) $stream);
         }
 
         public function testWrite(): void
         {
             $stream = $this->createStream();
             $bytesWritten = $stream->write('Hello');
-            $this->assertSame(5, $bytesWritten);
-            $this->assertSame('Hello', (string) $stream);
+            static::assertSame(5, $bytesWritten);
+            static::assertSame('Hello', (string) $stream);
         }
 
         public function testWriteThrowsExceptionIfNotWritable(): void
@@ -302,8 +303,8 @@ namespace WaffleTests\Commons\Http {
         {
             $stream = $this->createStream('Hello World');
             $content = $stream->read(5);
-            $this->assertSame('Hello', $content);
-            $this->assertSame(5, $stream->tell());
+            static::assertSame('Hello', $content);
+            static::assertSame(5, $stream->tell());
         }
 
         public function testReadThrowsExceptionIfDetached(): void
@@ -344,8 +345,8 @@ namespace WaffleTests\Commons\Http {
         public function testGetContents(): void
         {
             $stream = $this->createStream('Waffle Framework');
-            $this->assertSame('Waffle Framework', $stream->getContents());
-            $this->assertSame('', $stream->getContents());
+            static::assertSame('Waffle Framework', $stream->getContents());
+            static::assertSame('', $stream->getContents());
         }
 
         public function testGetContentsThrowsExceptionIfNotReadable(): void
@@ -377,13 +378,13 @@ namespace WaffleTests\Commons\Http {
         public function testGetMetadata(): void
         {
             $stream = $this->createStream();
-            $this->assertIsArray($stream->getMetadata());
-            $this->assertSame('php://temp', $stream->getMetadata('uri'));
-            $this->assertNull($stream->getMetadata('non_existent_key'));
+            static::assertIsArray($stream->getMetadata());
+            static::assertSame('php://temp', $stream->getMetadata('uri'));
+            static::assertNull($stream->getMetadata('non_existent_key'));
 
             // Test detached metadata retrieval
             $stream->detach();
-            $this->assertSame('php://temp', $stream->getMetadata('uri'));
+            static::assertSame('php://temp', $stream->getMetadata('uri'));
         }
 
         public function testThrowsExceptionOnDetachedStream(): void

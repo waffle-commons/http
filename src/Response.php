@@ -148,6 +148,7 @@ class Response extends AbstractMessage implements ResponseInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getStatusCode(): int
     {
         return $this->statusCode;
@@ -156,6 +157,7 @@ class Response extends AbstractMessage implements ResponseInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withStatus(int $code, string $reasonPhrase = ''): ResponseInterface
     {
         $this->validateStatusCode($code);
@@ -169,6 +171,7 @@ class Response extends AbstractMessage implements ResponseInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getReasonPhrase(): string
     {
         return $this->reasonPhrase;

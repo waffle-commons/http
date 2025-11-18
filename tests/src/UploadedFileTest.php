@@ -25,6 +25,7 @@ namespace WaffleTests\Commons\Http {
 
         private string $tempFile;
 
+        #[\Override]
         protected function setUp(): void
         {
             // Réinitialise le mock avant chaque test
@@ -37,6 +38,7 @@ namespace WaffleTests\Commons\Http {
             file_put_contents($this->tempFile, 'Test content');
         }
 
+        #[\Override]
         protected function tearDown(): void
         {
             // Nettoyage du flag
@@ -51,10 +53,10 @@ namespace WaffleTests\Commons\Http {
         {
             $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_OK, 'test.txt', 'text/plain');
 
-            $this->assertSame(12, $file->getSize());
-            $this->assertSame(UPLOAD_ERR_OK, $file->getError());
-            $this->assertSame('test.txt', $file->getClientFilename());
-            $this->assertSame('text/plain', $file->getClientMediaType());
+            static::assertSame(12, $file->getSize());
+            static::assertSame(UPLOAD_ERR_OK, $file->getError());
+            static::assertSame('test.txt', $file->getClientFilename());
+            static::assertSame('text/plain', $file->getClientMediaType());
         }
 
         public function testConstructorIgnoresStreamIfError(): void
@@ -70,8 +72,8 @@ namespace WaffleTests\Commons\Http {
             $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_OK);
             $stream = $file->getStream();
 
-            $this->assertInstanceOf(Stream::class, $stream);
-            $this->assertSame('Test content', $stream->getContents());
+            static::assertInstanceOf(Stream::class, $stream);
+            static::assertSame('Test content', $stream->getContents());
             $stream->close();
         }
 
@@ -99,9 +101,9 @@ namespace WaffleTests\Commons\Http {
 
             $file->moveTo($destination);
 
-            $this->assertFileExists($destination);
-            $this->assertSame('Test content', file_get_contents($destination));
-            $this->assertFileDoesNotExist($this->tempFile);
+            static::assertFileExists($destination);
+            static::assertSame('Test content', file_get_contents($destination));
+            static::assertFileDoesNotExist($this->tempFile);
 
             unlink($destination);
         }

@@ -11,6 +11,7 @@ use Waffle\Commons\Http\UploadedFile;
 
 class UploadedFileFactory implements UploadedFileFactoryInterface
 {
+    #[\Override]
     public function createUploadedFile(
         StreamInterface $stream,
         null|int $size = null,

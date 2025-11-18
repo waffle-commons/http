@@ -6,12 +6,12 @@ namespace Waffle\Commons\Http\Factory;
 
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 use Waffle\Commons\Http\ServerRequest;
 use Waffle\Commons\Http\Uri;
 
 class ServerRequestFactory implements ServerRequestFactoryInterface
 {
+    #[\Override]
     public function createServerRequest(string $method, $uri, array $serverParams = []): ServerRequestInterface
     {
         if (is_string($uri)) {

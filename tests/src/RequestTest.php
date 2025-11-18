@@ -15,11 +15,11 @@ class RequestTest extends AbstractTestCase
         $uri = new Uri('https://example.com/');
         $request = new Request('GET', $uri);
 
-        $this->assertSame('GET', $request->getMethod());
-        $this->assertSame($uri, $request->getUri());
-        $this->assertSame('/', $request->getRequestTarget());
+        static::assertSame('GET', $request->getMethod());
+        static::assertSame($uri, $request->getUri());
+        static::assertSame('/', $request->getRequestTarget());
         // Host header should be set automatically from URI
-        $this->assertSame('example.com', $request->getHeaderLine('Host'));
+        static::assertSame('example.com', $request->getHeaderLine('Host'));
     }
 
     public function testConstructorWithStringUri(): void
@@ -28,17 +28,17 @@ class RequestTest extends AbstractTestCase
         $uri = new Uri('https://example.com/');
         $request = new Request('GET', $uri);
 
-        $this->assertSame($uri, $request->getUri());
+        static::assertSame($uri, $request->getUri());
     }
 
     public function testGetRequestTarget(): void
     {
         $request = new Request('GET', new Uri('/'));
-        $this->assertSame('/', $request->getRequestTarget());
+        static::assertSame('/', $request->getRequestTarget());
 
         // Test with query string
         $request = new Request('GET', new Uri('/path?query=1'));
-        $this->assertSame('/path?query=1', $request->getRequestTarget());
+        static::assertSame('/path?query=1', $request->getRequestTarget());
     }
 
     public function testGetRequestTargetReturnsStoredTarget(): void
@@ -46,9 +46,9 @@ class RequestTest extends AbstractTestCase
         $request = new Request('GET', new Uri('/'));
         $newRequest = $request->withRequestTarget('*');
 
-        $this->assertSame('*', $newRequest->getRequestTarget());
+        static::assertSame('*', $newRequest->getRequestTarget());
         // Original should stay same
-        $this->assertSame('/', $request->getRequestTarget());
+        static::assertSame('/', $request->getRequestTarget());
     }
 
     public function testWithRequestTarget(): void
@@ -56,8 +56,8 @@ class RequestTest extends AbstractTestCase
         $request = new Request('GET', new Uri('/'));
         $newRequest = $request->withRequestTarget('/new-target');
 
-        $this->assertNotSame($request, $newRequest);
-        $this->assertSame('/new-target', $newRequest->getRequestTarget());
+        static::assertNotSame($request, $newRequest);
+        static::assertSame('/new-target', $newRequest->getRequestTarget());
     }
 
     public function testWithRequestTargetThrowsExceptionForWhitespace(): void
@@ -74,9 +74,9 @@ class RequestTest extends AbstractTestCase
         $request = new Request('GET', new Uri('/'));
         $newRequest = $request->withMethod('POST');
 
-        $this->assertNotSame($request, $newRequest);
-        $this->assertSame('GET', $request->getMethod());
-        $this->assertSame('POST', $newRequest->getMethod());
+        static::assertNotSame($request, $newRequest);
+        static::assertSame('GET', $request->getMethod());
+        static::assertSame('POST', $newRequest->getMethod());
     }
 
     public function testWithUri(): void
@@ -87,9 +87,9 @@ class RequestTest extends AbstractTestCase
         $request = new Request('GET', $uri1);
         $newRequest = $request->withUri($uri2);
 
-        $this->assertNotSame($request, $newRequest);
-        $this->assertSame($uri2, $newRequest->getUri());
-        $this->assertSame('example.org', $newRequest->getHeaderLine('Host'));
+        static::assertNotSame($request, $newRequest);
+        static::assertSame($uri2, $newRequest->getUri());
+        static::assertSame('example.org', $newRequest->getHeaderLine('Host'));
     }
 
     public function testWithUriPreservesHost(): void
@@ -104,8 +104,8 @@ class RequestTest extends AbstractTestCase
         // We update URI but ask to preserve host
         $newRequest = $request->withUri($uri2, true);
 
-        $this->assertSame('custom.com', $newRequest->getHeaderLine('Host'));
-        $this->assertSame($uri2, $newRequest->getUri());
+        static::assertSame('custom.com', $newRequest->getHeaderLine('Host'));
+        static::assertSame($uri2, $newRequest->getUri());
     }
 
     public function testWithUriUpdatesHostIfPreserveHostIsFalse(): void
@@ -118,7 +118,7 @@ class RequestTest extends AbstractTestCase
 
         $newRequest = $request->withUri($uri2, false); // Default behavior
 
-        $this->assertSame('example.org', $newRequest->getHeaderLine('Host'));
+        static::assertSame('example.org', $newRequest->getHeaderLine('Host'));
     }
 
     public function testWithUriDoesNotUpdateHostIfNoHostInUri(): void
@@ -129,6 +129,6 @@ class RequestTest extends AbstractTestCase
         $newRequest = $request->withUri($noHostUri);
 
         // Host header should remain from the original request (example.com)
-        $this->assertSame('example.com', $newRequest->getHeaderLine('Host'));
+        static::assertSame('example.com', $newRequest->getHeaderLine('Host'));
     }
 }

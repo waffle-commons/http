@@ -85,7 +85,7 @@ class Uri implements UriInterface
     /**
      * Filters and assembles user info.
      */
-    private function filterUserInfo(string $user, null|string $password = null): string
+    private function filterUserInfo(string $user, #[\SensitiveParameter] null|string $password = null): string
     {
         $userInfo = $user;
         if (null !== $password && '' !== $password) {
@@ -127,7 +127,7 @@ class Uri implements UriInterface
         // Encodes unauthorized characters in a path, except '/'
         $path = preg_replace_callback(
             '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/%]+|%(?![A-Fa-f0-9]{2}))/',
-            fn(array $matches): string => rawurlencode($matches[0]),
+            static fn(array $matches): string => rawurlencode($matches[0]),
             $path,
         );
         // Ensures a non-empty path starts with a '/'
@@ -142,7 +142,7 @@ class Uri implements UriInterface
         // Encodes unauthorized characters, except '/' and '?'
         $query = preg_replace_callback(
             '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/\?%]+|%(?![A-Fa-f0-9]{2}))/',
-            fn(array $matches): string => rawurlencode($matches[0]),
+            static fn(array $matches): string => rawurlencode($matches[0]),
             $query,
         );
         // Removes leading '?' if present
@@ -157,7 +157,7 @@ class Uri implements UriInterface
         // Encodes unauthorized characters, except '/', '?' and '#'
         $fragment = preg_replace_callback(
             '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/\?%]+|%(?![A-Fa-f0-9]{2}))/',
-            fn(array $matches): string => rawurlencode($matches[0]),
+            static fn(array $matches): string => rawurlencode($matches[0]),
             $fragment,
         );
         // Removes leading '#' if present
@@ -169,6 +169,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function __toString(): string
     {
         $uri = '';
@@ -217,6 +218,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getScheme(): string
     {
         return $this->scheme;
@@ -225,6 +227,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getAuthority(): string
     {
         $authority = $this->host;
@@ -249,6 +252,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getUserInfo(): string
     {
         return $this->userInfo;
@@ -257,6 +261,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getHost(): string
     {
         return $this->host;
@@ -265,6 +270,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getPort(): null|int
     {
         if (null === $this->port) {
@@ -283,6 +289,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getPath(): string
     {
         return $this->path;
@@ -291,6 +298,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getQuery(): string
     {
         return $this->query;
@@ -299,6 +307,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getFragment(): string
     {
         return $this->fragment;
@@ -307,6 +316,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withScheme(string $scheme): UriInterface
     {
         $new = clone $this;
@@ -319,7 +329,8 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
-    public function withUserInfo(string $user, null|string $password = null): UriInterface
+    #[\Override]
+    public function withUserInfo(string $user, #[\SensitiveParameter] null|string $password = null): UriInterface
     {
         $new = clone $this;
         $new->userInfo = $this->filterUserInfo($user, $password);
@@ -329,6 +340,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withHost(string $host): UriInterface
     {
         if ($host === $this->host) {
@@ -342,6 +354,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withPort(null|int $port): UriInterface
     {
         $new = clone $this;
@@ -352,6 +365,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withPath(string $path): UriInterface
     {
         if ($path === $this->path) {
@@ -365,6 +379,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withQuery(string $query): UriInterface
     {
         if ($query === $this->query) {
@@ -378,6 +393,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withFragment(string $fragment): UriInterface
     {
         if ($fragment === $this->fragment) {

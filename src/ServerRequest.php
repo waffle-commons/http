@@ -98,6 +98,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getRequestTarget(): string
     {
         if (null !== $this->requestTarget) {
@@ -119,6 +120,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withRequestTarget(string $requestTarget): ServerRequestInterface
     {
         // Validates that there is no whitespace (PSR-7 section 3.2.1)
@@ -133,6 +135,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getMethod(): string
     {
         return $this->method;
@@ -141,6 +144,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withMethod(string $method): ServerRequestInterface
     {
         if ($method === $this->method) {
@@ -155,6 +159,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getUri(): UriInterface
     {
         return $this->uri;
@@ -163,6 +168,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withUri(UriInterface $uri, bool $preserveHost = false): ServerRequestInterface
     {
         $new = clone $this;
@@ -192,6 +198,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getServerParams(): array
     {
         return $this->serverParams;
@@ -200,6 +207,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getCookieParams(): array
     {
         return $this->cookieParams;
@@ -208,6 +216,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withCookieParams(array $cookies): ServerRequestInterface
     {
         $new = clone $this;
@@ -218,6 +227,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getQueryParams(): array
     {
         return $this->queryParams;
@@ -226,6 +236,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withQueryParams(array $query): ServerRequestInterface
     {
         $new = clone $this;
@@ -236,6 +247,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getUploadedFiles(): array
     {
         return $this->uploadedFiles;
@@ -244,6 +256,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withUploadedFiles(array $uploadedFiles): ServerRequestInterface
     {
         // NOTE: Deep validation to ensure array only contains
@@ -256,6 +269,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getParsedBody()
     {
         return $this->parsedBody;
@@ -264,6 +278,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withParsedBody($data): ServerRequestInterface
     {
         // Validates $data type according to PSR-7
@@ -278,6 +293,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getAttributes(): array
     {
         return $this->attributes;
@@ -286,6 +302,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getAttribute(string $name, $default = null)
     {
         return $this->attributes[$name] ?? $default;
@@ -294,6 +311,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withAttribute(string $name, $value): ServerRequestInterface
     {
         $new = clone $this;
@@ -304,6 +322,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withoutAttribute(string $name): ServerRequestInterface
     {
         if (!array_key_exists($name, $this->attributes)) {

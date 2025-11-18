@@ -75,6 +75,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function __toString(): string
     {
         if (!$this->isReadable()) {
@@ -93,6 +94,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function close(): void
     {
         if (null === $this->resource) {
@@ -108,6 +110,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function detach()
     {
         if (null === $this->resource) {
@@ -129,6 +132,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getSize(): null|int
     {
         if (null === $this->resource) {
@@ -140,12 +144,13 @@ class Stream implements StreamInterface
         clearstatcache(true, $this->getMetadata('uri'));
 
         $stats = fstat($this->resource);
-        return $stats['size'] ?? null;
+        return $stats['size'];
     }
 
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function tell(): int
     {
         if (null === $this->resource) {
@@ -164,6 +169,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function eof(): bool
     {
         return $this->resource ? feof($this->resource) : true;
@@ -172,6 +178,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function isSeekable(): bool
     {
         return $this->resource ? $this->getMetadata('seekable') ?? false : false;
@@ -180,6 +187,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function seek(int $offset, int $whence = SEEK_SET): void
     {
         if (!$this->isSeekable()) {
@@ -197,6 +205,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function rewind(): void
     {
         $this->seek(0);
@@ -205,6 +214,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function isWritable(): bool
     {
         if (null === $this->resource) {
@@ -217,6 +227,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function write(string $string): int
     {
         if (!$this->isWritable()) {
@@ -238,6 +249,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function isReadable(): bool
     {
         if (null === $this->resource) {
@@ -250,6 +262,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function read(int $length): string
     {
         if (!$this->isReadable()) {
@@ -268,6 +281,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getContents(): string
     {
         if (!$this->isReadable()) {
@@ -286,6 +300,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getMetadata(null|string $key = null)
     {
         if (null === $this->resource) {

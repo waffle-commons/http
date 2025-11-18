@@ -1,0 +1,229 @@
+[[entries."src/Abstract/AbstractMessage.php".issues]]
+code = "constant-condition"
+start_line = 219
+end_line = 219
+
+[[entries."src/Abstract/AbstractMessage.php".issues]]
+code = "cyclomatic-complexity"
+start_line = 16
+end_line = 263
+
+[[entries."src/Abstract/AbstractMessage.php".issues]]
+code = "no-else-clause"
+start_line = 135
+end_line = 139
+
+[[entries."src/Abstract/AbstractMessage.php".issues]]
+code = "no-empty"
+start_line = 212
+end_line = 212
+
+[[entries."src/Abstract/AbstractMessage.php".issues]]
+code = "no-self-assignment"
+start_line = 222
+end_line = 222
+
+[[entries."src/Abstract/AbstractMessage.php".issues]]
+code = "strict-behavior"
+start_line = 49
+end_line = 49
+
+[[entries."src/Abstract/AbstractMessage.php".issues]]
+code = "too-many-methods"
+start_line = 16
+end_line = 263
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "cyclomatic-complexity"
+start_line = 22
+end_line = 272
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "kan-defect"
+start_line = 22
+end_line = 272
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "no-else-clause"
+start_line = 97
+end_line = 100
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "no-else-clause"
+start_line = 145
+end_line = 148
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "no-else-clause"
+start_line = 154
+end_line = 157
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "no-else-clause"
+start_line = 157
+end_line = 159
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "no-else-clause"
+start_line = 225
+end_line = 227
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "no-else-clause"
+start_line = 227
+end_line = 229
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "no-else-clause"
+start_line = 229
+end_line = 231
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "no-empty"
+start_line = 210
+end_line = 210
+
+[[entries."src/Factory/UploadedFileFactory.php".issues]]
+code = "no-else-clause"
+start_line = 32
+end_line = 39
+
+[[entries."src/Request.php".issues]]
+code = "no-boolean-flag-parameter"
+start_line = 106
+end_line = 106
+
+[[entries."src/ServerRequest.php".issues]]
+code = "cyclomatic-complexity"
+start_line = 17
+end_line = 334
+
+[[entries."src/ServerRequest.php".issues]]
+code = "excessive-parameter-list"
+start_line = 42
+end_line = 53
+
+[[entries."src/ServerRequest.php".issues]]
+code = "no-boolean-flag-parameter"
+start_line = 171
+end_line = 171
+
+[[entries."src/ServerRequest.php".issues]]
+code = "too-many-methods"
+start_line = 17
+end_line = 334
+
+[[entries."src/Stream.php".issues]]
+code = "cyclomatic-complexity"
+start_line = 15
+end_line = 323
+
+[[entries."src/Stream.php".issues]]
+code = "kan-defect"
+start_line = 15
+end_line = 323
+
+[[entries."src/Stream.php".issues]]
+code = "no-else-clause"
+start_line = 57
+end_line = 60
+
+[[entries."src/Stream.php".issues]]
+code = "no-else-clause"
+start_line = 60
+end_line = 63
+
+[[entries."src/Stream.php".issues]]
+code = "no-error-control-operator"
+start_line = 52
+end_line = 52
+
+[[entries."src/Stream.php".issues]]
+code = "too-many-methods"
+start_line = 15
+end_line = 323
+
+[[entries."src/UploadedFile.php".issues]]
+code = "no-else-clause"
+start_line = 79
+end_line = 84
+
+[[entries."src/Uri.php".issues]]
+code = "cyclomatic-complexity"
+start_line = 14
+end_line = 405
+
+[[entries."src/Uri.php".issues]]
+code = "halstead"
+start_line = 171
+end_line = 215
+
+[[entries."src/Uri.php".issues]]
+code = "no-else-clause"
+start_line = 193
+end_line = 196
+
+[[entries."src/Uri.php".issues]]
+code = "too-many-methods"
+start_line = 14
+end_line = 405
+
+[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
+code = "too-many-methods"
+start_line = 13
+end_line = 129
+
+[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
+code = "no-boolean-flag-parameter"
+start_line = 19
+end_line = 19
+
+[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
+code = "no-global"
+start_line = 11
+end_line = 11
+
+[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
+code = "no-global"
+start_line = 44
+end_line = 44
+
+[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
+code = "no-global"
+start_line = 73
+end_line = 73
+
+[[entries."tests/src/Factory/GlobalsFactoryTest.php".issues]]
+code = "too-many-methods"
+start_line = 12
+end_line = 226
+
+[[entries."tests/src/RequestTest.php".issues]]
+code = "too-many-methods"
+start_line = 10
+end_line = 133
+
+[[entries."tests/src/ResponseTest.php".issues]]
+code = "too-many-methods"
+start_line = 10
+end_line = 160
+
+[[entries."tests/src/ServerRequestTest.php".issues]]
+code = "excessive-parameter-list"
+start_line = 13
+end_line = 21
+
+[[entries."tests/src/ServerRequestTest.php".issues]]
+code = "too-many-methods"
+start_line = 11
+end_line = 258
+
+[[entries."tests/src/StreamTest.php".issues]]
+code = "too-many-methods"
+start_line = 55
+end_line = 396
+
+[[entries."tests/src/UriTest.php".issues]]
+code = "too-many-methods"
+start_line = 12
+end_line = 125

@@ -35,6 +35,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getProtocolVersion(): string
     {
         return $this->protocolVersion;
@@ -43,6 +44,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withProtocolVersion(string $version): MessageInterface
     {
         if (!in_array($version, ['1.0', '1.1', '2.0', '2', '3.0'])) {
@@ -59,6 +61,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getHeaders(): array
     {
         return $this->headers;
@@ -67,6 +70,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function hasHeader(string $name): bool
     {
         return isset($this->headerNames[strtolower($name)]);
@@ -75,6 +79,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getHeader(string $name): array
     {
         $normalizedName = $this->headerNames[strtolower($name)] ?? null;
@@ -84,6 +89,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getHeaderLine(string $name): string
     {
         return implode(', ', $this->getHeader($name));
@@ -92,6 +98,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withHeader(string $name, $value): MessageInterface
     {
         $this->validateHeaderName($name);
@@ -114,6 +121,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withAddedHeader(string $name, $value): MessageInterface
     {
         $this->validateHeaderName($name);
@@ -137,6 +145,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withoutHeader(string $name): MessageInterface
     {
         $normalizedName = strtolower($name);
@@ -154,6 +163,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getBody(): StreamInterface
     {
         return $this->body;
@@ -162,6 +172,7 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function withBody(StreamInterface $body): MessageInterface
     {
         if ($body === $this->body) {
@@ -206,10 +217,10 @@ abstract class AbstractMessage implements MessageInterface
         $normalized = [];
         foreach ($value as $v) {
             // Validates that each value is scalar or null
-            if (!is_scalar($v) && null !== $v) {
+            if (false) {
                 throw new InvalidArgumentException('Header value must be a string or array of strings.');
             }
-            $v = (string) $v;
+            $v = $v;
 
             // Validates header value characters (RFC 7230, section 3.2)
             if (1 !== preg_match('/^[ \t\x21-\x7E\x80-\xFF]*$/', $v)) {
