@@ -17,21 +17,10 @@ class ServerRequestTest extends AbstractTestCase
         array $serverParams = [],
         array $cookieParams = [],
         array $queryParams = [],
-               $parsedBody = null,
+        $parsedBody = null,
         array $uploadedFiles = [],
     ): ServerRequest {
-        return new ServerRequest(
-            $method,
-            new Uri($uri),
-            [], // Headers
-            $this->createStream(), // Body
-            '1.1',
-            $serverParams,
-            $cookieParams,
-            $queryParams,
-            $parsedBody,
-            $uploadedFiles,
-        );
+        return new ServerRequest($method, new Uri($uri), [], $this->createStream(), '1.1', $serverParams, $cookieParams, $queryParams, $parsedBody, $uploadedFiles); // Headers // Body
     }
 
     public function testConstructorAcceptsResourceBody(): void

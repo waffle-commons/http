@@ -24,7 +24,6 @@ namespace Waffle\Commons\Http\Emitter {
 }
 
 namespace WaffleTests\Commons\Http\Emitter {
-
     use RuntimeException;
     use Waffle\Commons\Http\Emitter\ResponseEmitter;
     use Waffle\Commons\Http\Response;
@@ -75,7 +74,7 @@ namespace WaffleTests\Commons\Http\Emitter {
             $mockHeadersSent = true;
 
             $response = new Response(200, [], $this->createStream('test'));
-            (new ResponseEmitter())->emit($response);
+            new ResponseEmitter()->emit($response);
         }
 
         public function testEmitsHeadersWithMultipleValues(): void

@@ -63,18 +63,7 @@ class GlobalsFactory
         // Parsed body (depends on method and Content-Type)
         $parsedBody = $this->getParsedBody($method, $headers, $body);
 
-        return new ServerRequest(
-            $method,
-            $uri,
-            $headers,
-            $body,
-            $protocol,
-            $_SERVER, // serverParams
-            $cookies,
-            $queryParams,
-            $parsedBody,
-            $uploadedFiles,
-        );
+        return new ServerRequest($method, $uri, $headers, $body, $protocol, $_SERVER, $cookies, $queryParams, $parsedBody, $uploadedFiles); // serverParams
     }
 
     /**

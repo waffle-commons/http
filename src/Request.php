@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http;
 
+use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\UriInterface;
 use Waffle\Commons\Http\Abstract\AbstractMessage;
-use InvalidArgumentException;
 
 /**
  * PSR-7 Request implementation (Client-side).

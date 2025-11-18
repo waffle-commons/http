@@ -69,10 +69,7 @@ class ResponseEmitter
 
             // Combine other headers
             foreach ($values as $value) {
-                header(
-                    sprintf('%s: %s', $name, $value),
-                    $first // Replaces header on first value, adds for subsequent ones
-                );
+                header(sprintf('%s: %s', $name, $value), $first); // Replaces header on first value, adds for subsequent ones
                 $first = false;
             }
         }

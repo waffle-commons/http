@@ -7,7 +7,8 @@ namespace WaffleTests\Commons\Http\Abstract;
 use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
 use Waffle\Commons\Http\Abstract\AbstractMessage;
-use Waffle\Commons\Http\Response;use WaffleTests\Commons\Http\AbstractTestCase;
+use Waffle\Commons\Http\Response;
+use WaffleTests\Commons\Http\AbstractTestCase;
 
 class AbstractMessageTest extends AbstractTestCase
 {
@@ -17,7 +18,8 @@ class AbstractMessageTest extends AbstractTestCase
     {
         // Use an anonymous class to test the abstract class logic
         $this->message = new class extends AbstractMessage {
-            public function __construct() {
+            public function __construct()
+            {
                 $this->body = new \Waffle\Commons\Http\Stream(fopen('php://temp', 'r+'));
             }
         };

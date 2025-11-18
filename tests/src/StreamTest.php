@@ -22,7 +22,7 @@ namespace Waffle\Commons\Http {
         return \ftell($stream);
     }
 
-    function fwrite($stream, string $data, ?int $length = null): int|false
+    function fwrite($stream, string $data, null|int $length = null): int|false
     {
         if (StreamTest::$mockFwriteFail) {
             return false; // Simulate failure
@@ -38,7 +38,7 @@ namespace Waffle\Commons\Http {
         return \fread($stream, $length);
     }
 
-    function stream_get_contents($stream, ?int $length = null, int $offset = -1): string|false
+    function stream_get_contents($stream, null|int $length = null, int $offset = -1): string|false
     {
         if (StreamTest::$mockStreamGetContentsFail) {
             return false; // Simulate failure
@@ -49,7 +49,6 @@ namespace Waffle\Commons\Http {
 
 // 2. Define the test class
 namespace WaffleTests\Commons\Http {
-
     use InvalidArgumentException;
     use RuntimeException;
     use Waffle\Commons\Http\Stream;

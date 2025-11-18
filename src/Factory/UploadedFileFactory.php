@@ -13,10 +13,10 @@ class UploadedFileFactory implements UploadedFileFactoryInterface
 {
     public function createUploadedFile(
         StreamInterface $stream,
-        ?int $size = null,
+        null|int $size = null,
         int $error = UPLOAD_ERR_OK,
-        ?string $clientFilename = null,
-        ?string $clientMediaType = null
+        null|string $clientFilename = null,
+        null|string $clientMediaType = null,
     ): UploadedFileInterface {
         if ($size === null) {
             $size = $stream->getSize();
@@ -35,15 +35,9 @@ class UploadedFileFactory implements UploadedFileFactoryInterface
             if ($path === false) {
                 throw new \RuntimeException('Unable to create temporary file for UploadedFile.');
             }
-            file_put_contents($path, (string)$stream);
+            file_put_contents($path, (string) $stream);
         }
 
-        return new UploadedFile(
-            $path,
-            (int) $size,
-            $error,
-            $clientFilename,
-            $clientMediaType
-        );
+        return new UploadedFile($path, (int) $size, $error, $clientFilename, $clientMediaType);
     }
 }

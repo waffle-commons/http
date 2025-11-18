@@ -43,12 +43,13 @@ class GlobalsFactoryTest extends AbstractTestCase
         array $cookie = [],
         array $files = [],
     ): void {
-        $_SERVER = $server + [
-                'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/',
-                'SERVER_PROTOCOL' => 'HTTP/1.1',
-                'HTTP_HOST' => 'localhost',
-            ];
+        $_SERVER = $server
+        + [
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/',
+            'SERVER_PROTOCOL' => 'HTTP/1.1',
+            'HTTP_HOST' => 'localhost',
+        ];
         $_GET = $get;
         $_POST = $post;
         $_COOKIE = $cookie;
@@ -89,13 +90,13 @@ class GlobalsFactoryTest extends AbstractTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value in $_FILES array');
 
-        (new GlobalsFactory())->createFromGlobals();
+        new GlobalsFactory()->createFromGlobals();
     }
 
     public function testHttpsDetection(): void
     {
         $this->setGlobals(server: ['HTTPS' => 'on', 'HTTP_HOST' => 'secure.com']);
-        $this->assertSame('https', (new GlobalsFactory())->createFromGlobals()->getUri()->getScheme());
+        $this->assertSame('https', new GlobalsFactory()->createFromGlobals()->getUri()->getScheme());
     }
 
     public function testParsedBodyForFormData(): void

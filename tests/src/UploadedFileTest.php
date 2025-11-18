@@ -15,7 +15,6 @@ namespace Waffle\Commons\Http {
 }
 
 namespace WaffleTests\Commons\Http {
-
     use RuntimeException;
     use Waffle\Commons\Http\Stream;
     use Waffle\Commons\Http\UploadedFile;
