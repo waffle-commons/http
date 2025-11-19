@@ -1,3 +1,11 @@
+[![PHP Version Require](http://poser.pugx.org/waffle-commons/http/require/php)](https://packagist.org/packages/waffle-commons/http)
+[![PHP CI](https://github.com/waffle-commons/http/actions/workflows/main.yml/badge.svg)](https://github.com/waffle-commons/http/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/waffle-commons/http/graph/badge.svg?token=d74ac62a-7872-4035-8b8b-bcc3af1991e0)](https://codecov.io/gh/waffle-commons/http)
+[![Latest Stable Version](http://poser.pugx.org/waffle-commons/http/v)](https://packagist.org/packages/waffle-commons/http)
+[![Latest Unstable Version](http://poser.pugx.org/waffle-commons/http/v/unstable)](https://packagist.org/packages/waffle-commons/http)
+[![Total Downloads](https://img.shields.io/packagist/dt/waffle-commons/http.svg)](https://packagist.org/packages/waffle-commons/http)
+[![Packagist License](https://img.shields.io/packagist/l/waffle-commons/http)](https://github.com/waffle-commons/http/blob/main/LICENSE.md)
+
 Waffle Commons - HTTP Component
 ===============================
 
