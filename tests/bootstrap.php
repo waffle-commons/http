@@ -2,11 +2,18 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// This is the bootstrap file for PHPUnit.
 
-define('APP_ROOT', realpath(path: dirname(path: __DIR__)));
-const APP_CONFIG = 'temp_config';
+// Set error reporting to the highest level
+error_reporting(E_ALL);
 
-require_once __DIR__ . '/src/AbstractTestCase.php';
+// Set default timezone (optional, but good practice for consistency)
+date_default_timezone_set('UTC');
 
-// required test helpers, so we include them manually.
+// Include the Composer autoloader
+$autoloader = require dirname(__DIR__) . '/vendor/autoload.php';
+
+if (!$autoloader) {
+    echo "Composer autoloader not found. Please run 'composer install'." . PHP_EOL;
+    exit(1);
+}

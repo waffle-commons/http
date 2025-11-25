@@ -1,6 +1,6 @@
 {
     "name": "waffle-commons/http",
-    "version": "0.1.0-alpha1.0",
+    "version": "0.1.0-alpha1",
     "description": "Http component for Waffle framework.",
     "type": "library",
     "license": "MIT",
@@ -17,12 +17,14 @@
     "authors": [
         {
             "name": "Leslie Petrimaux",
-            "email": "leslie@eightyfour.ovh"
+            "email": "contact@waffle-commons.cloud"
         }
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "^8.4"
+        "php": "^8.4",
+        "psr/http-message": "^2.0",
+        "psr/http-factory": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^12.0",
