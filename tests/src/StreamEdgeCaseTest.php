@@ -6,8 +6,8 @@ namespace WaffleTests\Commons\Http;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Waffle\Commons\Http\Stream;
 use RuntimeException;
+use Waffle\Commons\Http\Stream;
 
 /**
  * Targets specific edge cases in Stream implementation:

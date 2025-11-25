@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace WaffleTests\Commons\Http;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use TypeError;
 use Waffle\Commons\Http\Stream;
 use Waffle\Commons\Http\UploadedFile;
-use RuntimeException;
-use InvalidArgumentException;
-use TypeError;
 
 /**
  * Targets edge cases for UploadedFile, specifically focusing on
@@ -38,13 +38,7 @@ class UploadedFileEdgeCaseTest extends TestCase
     public function testMoveToThrowsExceptionOnWriteFailure(): void
     {
         // Pass the file path string, not a Stream object
-        $uploadedFile = new UploadedFile(
-            $this->tempFile,
-            1024,
-            UPLOAD_ERR_OK,
-            'test.txt',
-            'text/plain'
-        );
+        $uploadedFile = new UploadedFile($this->tempFile, 1024, UPLOAD_ERR_OK, 'test.txt', 'text/plain');
 
         // We try to move the file to a directory that definitely does not exist
         // and implies a permission error or "directory not found" error.
@@ -59,11 +53,7 @@ class UploadedFileEdgeCaseTest extends TestCase
 
     public function testMoveToThrowsExceptionIfStreamIsMoved(): void
     {
-        $uploadedFile = new UploadedFile(
-            $this->tempFile,
-            1024,
-            UPLOAD_ERR_OK
-        );
+        $uploadedFile = new UploadedFile($this->tempFile, 1024, UPLOAD_ERR_OK);
 
         // First move (simulated success to a valid temp location)
         $target = $this->tempFile . '_moved';
@@ -84,20 +74,12 @@ class UploadedFileEdgeCaseTest extends TestCase
         // Expect TypeError because constructor enforces string type hint
         $this->expectException(TypeError::class);
 
-        new UploadedFile(
-            ['not a string'], // Invalid type
-            0,
-            UPLOAD_ERR_OK
-        );
+        new UploadedFile(['not a string'], 0, UPLOAD_ERR_OK); // Invalid type
     }
 
     public function testGetStreamThrowsExceptionIfMoved(): void
     {
-        $uploadedFile = new UploadedFile(
-            $this->tempFile,
-            1024,
-            UPLOAD_ERR_OK
-        );
+        $uploadedFile = new UploadedFile($this->tempFile, 1024, UPLOAD_ERR_OK);
 
         $target = $this->tempFile . '_moved_stream';
         $uploadedFile->moveTo($target);

@@ -553,6 +553,26 @@ code = "possibly-false-argument"
 start_line = 363
 end_line = 363
 
+[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+code = "invalid-argument"
+start_line = 76
+end_line = 76
+
+[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+code = "invalid-property-assignment-value"
+start_line = 26
+end_line = 26
+
+[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+code = "missing-override-attribute"
+start_line = 23
+end_line = 23
+
+[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+code = "missing-override-attribute"
+start_line = 29
+end_line = 29
+
 [[entries."tests/src/UploadedFileTest.php".issues]]
 code = "impossible-condition"
 start_line = 34
