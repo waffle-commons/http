@@ -344,7 +344,7 @@ class Uri implements UriInterface
     public function withHost(string $host): UriInterface
     {
         if ($host === $this->host) {
-            return clone $this;
+            return $this;
         }
         $new = clone $this;
         $new->host = $this->filterHost($host);
@@ -369,7 +369,7 @@ class Uri implements UriInterface
     public function withPath(string $path): UriInterface
     {
         if ($path === $this->path) {
-            return clone $this;
+            return $this;
         }
         $new = clone $this;
         $new->path = $this->filterPath($path);
@@ -383,7 +383,7 @@ class Uri implements UriInterface
     public function withQuery(string $query): UriInterface
     {
         if ($query === $this->query) {
-            return clone $this;
+            return $this;
         }
         $new = clone $this;
         $new->query = $this->filterQuery($query);
@@ -397,7 +397,7 @@ class Uri implements UriInterface
     public function withFragment(string $fragment): UriInterface
     {
         if ($fragment === $this->fragment) {
-            return clone $this;
+            return $this;
         }
         $new = clone $this;
         $new->fragment = $this->filterFragment($fragment);
