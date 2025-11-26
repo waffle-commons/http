@@ -15,8 +15,13 @@ end_line = 245
 
 [[entries."src/Emitter/ResponseEmitter.php".issues]]
 code = "less-specific-argument"
-start_line = 43
-end_line = 43
+start_line = 44
+end_line = 44
+
+[[entries."src/Emitter/ResponseEmitter.php".issues]]
+code = "missing-override-attribute"
+start_line = 23
+end_line = 23
 
 [[entries."src/Factory/GlobalsFactory.php".issues]]
 code = "invalid-return-statement"

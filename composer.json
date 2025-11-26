@@ -20,11 +20,13 @@
             "email": "contact@waffle-commons.cloud"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^8.4",
         "psr/http-message": "^2.0",
-        "psr/http-factory": "^1.1"
+        "psr/http-factory": "^1.1",
+        "waffle-commons/contracts": "^0.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^12.0",

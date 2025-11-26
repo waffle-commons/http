@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http\Factory;
 
-use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Waffle\Commons\Contracts\Http\ServerRequestFactoryInterface;
 use Waffle\Commons\Http\ServerRequest;
 use Waffle\Commons\Http\Uri;
 
