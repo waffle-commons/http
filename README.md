@@ -6,10 +6,50 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/waffle-commons/http.svg)](https://packagist.org/packages/waffle-commons/http)
 [![Packagist License](https://img.shields.io/packagist/l/waffle-commons/http)](https://github.com/waffle-commons/http/blob/main/LICENSE.md)
 
-Waffle Commons - HTTP Component
+Waffle HTTP Component
 ===============================
 
-A lightweight, strict, and fully tested PSR-7 and PSR-17 implementation for the Waffle Framework ecosystem. This component provides the fundamental HTTP message objects (Request, Response, Stream, URI, UploadedFile) required for modern PHP applications.
+A strict, lightweight, and high-performance implementation of PSR-7 (HTTP Message) and PSR-17 (HTTP Factories).
+
+## 📦 Installation
+
+```bash
+composer require waffle-commons/http
+```
+
+## 🚀 Usage
+
+### Creating a Request (PSR-7)
+
+```php
+use Waffle\Commons\Http\Factory\ServerRequestFactory;
+
+$factory = new ServerRequestFactory();
+
+// Create a request from global superglobals ($_SERVER, $_GET, etc.)
+$request = $factory->createServerRequestFromGlobals();
+
+$method = $request->getMethod();
+$uri = $request->getUri();
+```
+
+### Creating a Response (PSR-7)
+
+```php
+use Waffle\Commons\Http\Response;
+
+$response = new Response(200, ['Content-Type' => 'application/json']);
+$response->getBody()->write(json_encode(['status' => 'ok']));
+```
+
+### Emitting a Response
+
+```php
+use Waffle\Commons\Http\Emitter\ResponseEmitter;
+
+$emitter = new ResponseEmitter();
+$emitter->emit($response);
+```
 
 Features
 --------
