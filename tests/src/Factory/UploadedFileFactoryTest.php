@@ -26,20 +26,20 @@ class UploadedFileFactoryTest extends TestCase
     public function testCreateUploadedFileUsesStreamPathIfRealFile(): void
     {
         $factory = new UploadedFileFactory();
-        
+
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_upload');
         file_put_contents($tmpFile, 'test content');
-        
+
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('getSize')->willReturn(12);
         $stream->method('getMetadata')->with('uri')->willReturn($tmpFile);
 
         $file = $factory->createUploadedFile($stream);
-        
+
         // We can't easily check the path as it's private in UploadedFile
         // But we can verify no exception is thrown and it works.
         $this->assertSame(12, $file->getSize());
-        
+
         unlink($tmpFile);
     }
 }

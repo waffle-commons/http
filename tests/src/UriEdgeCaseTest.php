@@ -14,8 +14,8 @@ class UriEdgeCaseTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unable to parse URI');
-        
-        // A URI that parse_url fails on. 
+
+        // A URI that parse_url fails on.
         // 'http://:80' is valid.
         // 'http:///example.com' is valid.
         // '://' is valid (scheme empty, path //).
@@ -27,7 +27,7 @@ class UriEdgeCaseTest extends TestCase
         // So we can't easily mock it without defining it in Waffle\Commons\Http namespace.
         // Let's try a known failing string: "http:///example.com:1000000" -> valid parse, invalid port check later.
         // "http://user@" -> valid.
-        
+
         // If we can't trigger it easily, we might skip this one or use namespace mocking trick again.
         // Let's rely on the fact that we can't easily trigger it for now and focus on others.
         // Or try:
@@ -41,12 +41,12 @@ class UriEdgeCaseTest extends TestCase
         // We need to construct it such that path is 'foo' but authority is present.
         // Constructor uses parse_url which usually handles this.
         // But we can use withPath().
-        
+
         $uri = new Uri('http://example.com');
         $new = $uri->withPath('foo'); // Should become /foo
-        
+
         $this->assertSame('/foo', $new->getPath());
-        $this->assertSame('http://example.com/foo', (string)$new);
+        $this->assertSame('http://example.com/foo', (string) $new);
     }
 
     public function testPathNormalizationWithoutAuthority(): void
@@ -54,10 +54,10 @@ class UriEdgeCaseTest extends TestCase
         // No authority, path starts with //
         $uri = new Uri('foo'); // path 'foo'
         $new = $uri->withPath('//bar'); // Should become /bar
-        
+
         $this->assertSame('//bar', $new->getPath());
         // string representation: path
-        $this->assertSame('/bar', (string)$new);
+        $this->assertSame('/bar', (string) $new);
     }
 
     public function testPathNormalizationEmptyPathWithAuthority(): void
@@ -66,29 +66,29 @@ class UriEdgeCaseTest extends TestCase
         $uri = new Uri('http://example.com');
         // path is empty by default? parse_url returns null or empty?
         // If empty, __toString adds /?
-        
+
         $this->assertSame('', $uri->getPath()); // Wait, standard says empty path is allowed?
         // PSR-7: "If the path is empty, and the URI contains an authority component, the path component MUST be empty."
         // BUT RFC 3986 says if authority is present, path must be empty or start with /.
         // Waffle implementation:
         // if ($path === '' && '' !== $authority) { $path = '/'; }
         // So it forces /.
-        
-        $this->assertSame('http://example.com/', (string)$uri);
+
+        $this->assertSame('http://example.com/', (string) $uri);
     }
 
     public function testImmutabilityChecks(): void
     {
         $uri = new Uri('http://example.com/foo?query=1#frag');
-        
+
         // withScheme does not optimize for immutability in current implementation
         // $this->assertSame($uri, $uri->withScheme('http'));
-        
+
         $this->assertSame($uri, $uri->withHost('example.com'));
         $this->assertSame($uri, $uri->withPath('/foo'));
         $this->assertSame($uri, $uri->withQuery('query=1'));
         $this->assertSame($uri, $uri->withFragment('frag'));
-        
+
         $this->assertNotSame($uri, $uri->withScheme('https'));
     }
 

@@ -28,12 +28,12 @@ class StreamFactoryTest extends TestCase
     public function testCreateStreamThrowsExceptionOnFopenFailure(): void
     {
         self::$mockFopenFail = true;
-        
+
         $factory = new StreamFactory();
-        
+
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Unable to open php://temp stream.');
-        
+
         $factory->createStream('content');
     }
 
@@ -41,8 +41,8 @@ class StreamFactoryTest extends TestCase
     {
         $factory = new StreamFactory();
         $stream = $factory->createStream('test');
-        
-        $this->assertSame('test', (string)$stream);
+
+        $this->assertSame('test', (string) $stream);
     }
 
     public function testCreateStreamFromFile(): void
@@ -50,10 +50,10 @@ class StreamFactoryTest extends TestCase
         $factory = new StreamFactory();
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmp, 'file content');
-        
+
         $stream = $factory->createStreamFromFile($tmp);
-        $this->assertSame('file content', (string)$stream);
-        
+        $this->assertSame('file content', (string) $stream);
+
         unlink($tmp);
     }
 
@@ -62,8 +62,8 @@ class StreamFactoryTest extends TestCase
         $factory = new StreamFactory();
         $resource = \fopen('php://memory', 'r+');
         fwrite($resource, 'resource content');
-        
+
         $stream = $factory->createStreamFromResource($resource);
-        $this->assertSame('resource content', (string)$stream);
+        $this->assertSame('resource content', (string) $stream);
     }
 }

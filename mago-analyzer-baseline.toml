@@ -35,6 +35,11 @@ end_line = 213
 
 [[entries."src/Factory/GlobalsFactory.php".issues]]
 code = "mixed-argument"
+start_line = 40
+end_line = 40
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "mixed-argument"
 start_line = 63
 end_line = 63
 
@@ -80,6 +85,11 @@ end_line = 262
 
 [[entries."src/Factory/GlobalsFactory.php".issues]]
 code = "mixed-assignment"
+start_line = 36
+end_line = 36
+
+[[entries."src/Factory/GlobalsFactory.php".issues]]
+code = "mixed-assignment"
 start_line = 55
 end_line = 55
 
@@ -112,6 +122,26 @@ end_line = 210
 code = "reference-to-undefined-variable"
 start_line = 94
 end_line = 94
+
+[[entries."src/Factory/StreamFactory.php".issues]]
+code = "mixed-argument"
+start_line = 20
+end_line = 20
+
+[[entries."src/Factory/StreamFactory.php".issues]]
+code = "mixed-argument"
+start_line = 21
+end_line = 21
+
+[[entries."src/Factory/StreamFactory.php".issues]]
+code = "mixed-argument"
+start_line = 23
+end_line = 23
+
+[[entries."src/Factory/StreamFactory.php".issues]]
+code = "mixed-assignment"
+start_line = 16
+end_line = 16
 
 [[entries."src/Request.php".issues]]
 code = "possibly-null-operand"
@@ -452,6 +482,36 @@ end_line = 51
 code = "possibly-false-argument"
 start_line = 53
 end_line = 53
+
+[[entries."tests/src/Factory/StreamFactoryTest.php".issues]]
+code = "missing-override-attribute"
+start_line = 22
+end_line = 22
+
+[[entries."tests/src/Factory/StreamFactoryTest.php".issues]]
+code = "possibly-false-argument"
+start_line = 51
+end_line = 51
+
+[[entries."tests/src/Factory/StreamFactoryTest.php".issues]]
+code = "possibly-false-argument"
+start_line = 53
+end_line = 53
+
+[[entries."tests/src/Factory/StreamFactoryTest.php".issues]]
+code = "possibly-false-argument"
+start_line = 56
+end_line = 56
+
+[[entries."tests/src/Factory/UploadedFileFactoryTest.php".issues]]
+code = "possibly-false-argument"
+start_line = 30
+end_line = 30
+
+[[entries."tests/src/Factory/UploadedFileFactoryTest.php".issues]]
+code = "possibly-false-argument"
+start_line = 42
+end_line = 42
 
 [[entries."tests/src/ResponseTest.php".issues]]
 code = "invalid-argument"

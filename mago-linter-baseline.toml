@@ -198,6 +198,31 @@ code = "too-many-methods"
 start_line = 12
 end_line = 226
 
+[[entries."tests/src/Factory/StreamFactoryTest.php".issues]]
+code = "assertion-style"
+start_line = 44
+end_line = 44
+
+[[entries."tests/src/Factory/StreamFactoryTest.php".issues]]
+code = "assertion-style"
+start_line = 54
+end_line = 54
+
+[[entries."tests/src/Factory/StreamFactoryTest.php".issues]]
+code = "assertion-style"
+start_line = 66
+end_line = 66
+
+[[entries."tests/src/Factory/UploadedFileFactoryTest.php".issues]]
+code = "assertion-style"
+start_line = 22
+end_line = 22
+
+[[entries."tests/src/Factory/UploadedFileFactoryTest.php".issues]]
+code = "assertion-style"
+start_line = 40
+end_line = 40
+
 [[entries."tests/src/RequestTest.php".issues]]
 code = "too-many-methods"
 start_line = 10
@@ -272,6 +297,71 @@ end_line = 6
 code = "no-redundant-use"
 start_line = 11
 end_line = 11
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 47
+end_line = 47
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 48
+end_line = 48
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 57
+end_line = 57
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 59
+end_line = 59
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 69
+end_line = 69
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 76
+end_line = 76
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 86
+end_line = 86
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 87
+end_line = 87
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 88
+end_line = 88
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 89
+end_line = 89
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 91
+end_line = 91
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 97
+end_line = 97
+
+[[entries."tests/src/UriEdgeCaseTest.php".issues]]
+code = "assertion-style"
+start_line = 98
+end_line = 98
 
 [[entries."tests/src/UriTest.php".issues]]
 code = "too-many-methods"
