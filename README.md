@@ -19,64 +19,6 @@ composer require waffle-commons/http
 
 ## 🚀 Usage
 
-### Creating a Request (PSR-7)
-
-```php
-use Waffle\Commons\Http\Factory\ServerRequestFactory;
-
-$factory = new ServerRequestFactory();
-
-// Create a request from global superglobals ($_SERVER, $_GET, etc.)
-$request = $factory->createServerRequestFromGlobals();
-
-$method = $request->getMethod();
-$uri = $request->getUri();
-```
-
-### Creating a Response (PSR-7)
-
-```php
-use Waffle\Commons\Http\Response;
-
-$response = new Response(200, ['Content-Type' => 'application/json']);
-$response->getBody()->write(json_encode(['status' => 'ok']));
-```
-
-### Emitting a Response
-
-```php
-use Waffle\Commons\Http\Emitter\ResponseEmitter;
-
-$emitter = new ResponseEmitter();
-$emitter->emit($response);
-```
-
-Features
---------
-
-*   **PSR-7 Compliance:** Full implementation of HTTP Message interfaces (Request, Response, ServerRequest, Stream, Uri, UploadedFile).
-
-*   **PSR-17 Factories:** Includes factories for creating all HTTP objects, ensuring interoperability with other libraries.
-
-*   **Strict Typing:** Built with PHP 8.4+ strict types for reliability.
-
-*   **Zero Dependencies:** No external dependencies other than psr/http-message and psr/http-factory.
-
-*   **Secure by Design:** Robust handling of headers, file uploads, and streams.
-
-
-Installation
-------------
-
-You can install the package via Composer:
-
-```shell
-composer require waffle-commons/http
-```
-
-Usage
------
-
 ### 1\. Creating a Request from Globals (Bootstrap)
 
 The GlobalsFactory is designed to capture the current PHP environment (superglobals like `$_SERVER`, `$_POST`, `$_FILES`) and convert it into a PSR-7 ServerRequestInterface. This is typically used at the entry point of your application (index.php).
@@ -158,6 +100,18 @@ $stream = $factory->createStream('Hello World');
 
 echo $stream->getContents(); // "Hello World"
 ```
+
+Features
+--------
+
+*   **PSR-7:** Full implementation of `Request`, `Response`, `ServerRequest`, `Stream`, `Uri`, `UploadedFile`.
+*   **PSR-17:** Full implementation of Factories for all HTTP objects.
+*   **Response Emitter:** A simple emitter to output PSR-7 responses to the browser.
+*   **Lightweight:** Minimal dependencies, focused on performance.
+*   **Strict Typing:** Built with PHP 8.4+ strict types for reliability.
+*   **Zero Dependencies:** No external dependencies other than psr/http-message and psr/http-factory.
+*   **Secure by Design:** Robust handling of headers, file uploads, and streams.
+
 
 Testing
 -------
