@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Waffle\Commons\Http\Emitter;
 
 use Psr\Http\Message\ResponseInterface;
+use Waffle\Commons\Contracts\Http\ResponseEmitterInterface;
 
 /**
  * Emits a PSR-7 Response to the client.
@@ -12,7 +13,7 @@ use Psr\Http\Message\ResponseInterface;
  * This class is responsible for the "dirty" work of sending
  * the status line, headers, and body using native PHP functions.
  */
-class ResponseEmitter
+class ResponseEmitter implements ResponseEmitterInterface
 {
     /**
      * Emits the given PSR-7 response.

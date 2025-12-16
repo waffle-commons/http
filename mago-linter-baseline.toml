@@ -1,279 +1,277 @@
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+variant = "loose"
+
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "constant-condition"
-start_line = 219
-end_line = 219
+message = "Redundant `if` statement."
+count = 1
 
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "cyclomatic-complexity"
-start_line = 16
-end_line = 263
+message = "Class has high complexity."
+count = 1
 
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "no-else-clause"
-start_line = 135
-end_line = 139
+message = "Avoid `else` clauses."
+count = 1
 
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "no-empty"
-start_line = 212
-end_line = 212
+message = "Use of the `empty` construct."
+count = 1
 
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "no-self-assignment"
-start_line = 222
-end_line = 222
+message = "Self-assignment has no effect."
+count = 1
 
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "strict-behavior"
-start_line = 49
-end_line = 49
+message = "Call to `in_array` must enforce strict comparison."
+count = 1
 
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "too-many-methods"
-start_line = 16
-end_line = 263
+message = "Class has too many methods."
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "cyclomatic-complexity"
-start_line = 22
-end_line = 272
+message = "Class has high complexity."
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "kan-defect"
-start_line = 22
-end_line = 272
+message = "Class has a high kan defect score (2.1000000000000005)."
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "no-else-clause"
-start_line = 97
-end_line = 100
+message = "Avoid `else` clauses."
+count = 2
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "no-else-clause"
-start_line = 145
-end_line = 148
+message = "Avoid `elseif` clauses."
+count = 5
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
-code = "no-else-clause"
-start_line = 154
-end_line = 157
-
-[[entries."src/Factory/GlobalsFactory.php".issues]]
-code = "no-else-clause"
-start_line = 157
-end_line = 159
-
-[[entries."src/Factory/GlobalsFactory.php".issues]]
-code = "no-else-clause"
-start_line = 225
-end_line = 227
-
-[[entries."src/Factory/GlobalsFactory.php".issues]]
-code = "no-else-clause"
-start_line = 227
-end_line = 229
-
-[[entries."src/Factory/GlobalsFactory.php".issues]]
-code = "no-else-clause"
-start_line = 229
-end_line = 231
-
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "no-empty"
-start_line = 210
-end_line = 210
+message = "Use of the `empty` construct."
+count = 1
 
-[[entries."src/Factory/UploadedFileFactory.php".issues]]
+[[issues]]
+file = "src/Factory/UploadedFileFactory.php"
 code = "no-else-clause"
-start_line = 32
-end_line = 39
+message = "Avoid `else` clauses."
+count = 1
 
-[[entries."src/Request.php".issues]]
+[[issues]]
+file = "src/Request.php"
 code = "no-boolean-flag-parameter"
-start_line = 106
-end_line = 106
+message = "Avoid boolean flag parameters."
+count = 1
 
-[[entries."src/ServerRequest.php".issues]]
+[[issues]]
+file = "src/ServerRequest.php"
 code = "cyclomatic-complexity"
-start_line = 17
-end_line = 334
+message = "Class has high complexity."
+count = 1
 
-[[entries."src/ServerRequest.php".issues]]
+[[issues]]
+file = "src/ServerRequest.php"
 code = "excessive-parameter-list"
-start_line = 42
-end_line = 53
+message = "Parameter list is too long."
+count = 1
 
-[[entries."src/ServerRequest.php".issues]]
+[[issues]]
+file = "src/ServerRequest.php"
 code = "no-boolean-flag-parameter"
-start_line = 171
-end_line = 171
+message = "Avoid boolean flag parameters."
+count = 1
 
-[[entries."src/ServerRequest.php".issues]]
+[[issues]]
+file = "src/ServerRequest.php"
 code = "too-many-methods"
-start_line = 17
-end_line = 334
+message = "Class has too many methods."
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "cyclomatic-complexity"
-start_line = 15
-end_line = 323
+message = "Class has high complexity."
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "kan-defect"
-start_line = 15
-end_line = 323
+message = "Class has a high kan defect score (1.76)."
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "no-else-clause"
-start_line = 57
-end_line = 60
+message = "Avoid `else` clauses."
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "no-else-clause"
-start_line = 60
-end_line = 63
+message = "Avoid `elseif` clauses."
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "no-error-control-operator"
-start_line = 52
-end_line = 52
+message = "Unsafe use of error control operator `@`."
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "too-many-methods"
-start_line = 15
-end_line = 323
+message = "Class has too many methods."
+count = 1
 
-[[entries."src/UploadedFile.php".issues]]
+[[issues]]
+file = "src/UploadedFile.php"
 code = "no-else-clause"
-start_line = 79
-end_line = 84
+message = "Avoid `else` clauses."
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "cyclomatic-complexity"
-start_line = 14
-end_line = 405
+message = "Class has high complexity."
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "halstead"
-start_line = 171
-end_line = 215
+message = "Method has a high halstead difficulty"
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "no-else-clause"
-start_line = 193
-end_line = 196
+message = "Avoid `elseif` clauses."
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "too-many-methods"
-start_line = 14
-end_line = 405
+message = "Class has too many methods."
+count = 1
 
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
+[[issues]]
+file = "tests/src/Abstract/AbstractMessageTest.php"
 code = "too-many-methods"
-start_line = 13
-end_line = 129
+message = "Class has too many methods."
+count = 1
 
-[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
+[[issues]]
+file = "tests/src/Emitter/ResponseEmitterTest.php"
 code = "no-boolean-flag-parameter"
-start_line = 19
-end_line = 19
+message = "Avoid boolean flag parameters."
+count = 1
 
-[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
+[[issues]]
+file = "tests/src/Emitter/ResponseEmitterTest.php"
 code = "no-global"
-start_line = 11
-end_line = 11
+message = "Unsafe use of `global` keyword."
+count = 3
 
-[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
-code = "no-global"
-start_line = 44
-end_line = 44
-
-[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
-code = "no-global"
-start_line = 73
-end_line = 73
-
-[[entries."tests/src/Factory/GlobalsFactoryTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "too-many-methods"
-start_line = 12
-end_line = 226
+message = "Class has too many methods."
+count = 1
 
-[[entries."tests/src/RequestTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/StreamFactoryTest.php"
+code = "assertion-style"
+message = "Inconsistent assertions style."
+count = 3
+
+[[issues]]
+file = "tests/src/Factory/UploadedFileFactoryTest.php"
+code = "assertion-style"
+message = "Inconsistent assertions style."
+count = 2
+
+[[issues]]
+file = "tests/src/RequestTest.php"
 code = "too-many-methods"
-start_line = 10
-end_line = 133
+message = "Class has too many methods."
+count = 1
 
-[[entries."tests/src/ResponseTest.php".issues]]
+[[issues]]
+file = "tests/src/ResponseTest.php"
 code = "too-many-methods"
-start_line = 10
-end_line = 160
+message = "Class has too many methods."
+count = 1
 
-[[entries."tests/src/ServerRequestTest.php".issues]]
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
 code = "excessive-parameter-list"
-start_line = 13
-end_line = 21
+message = "Parameter list is too long."
+count = 1
 
-[[entries."tests/src/ServerRequestTest.php".issues]]
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
 code = "too-many-methods"
-start_line = 11
-end_line = 258
+message = "Class has too many methods."
+count = 1
 
-[[entries."tests/src/StreamEdgeCaseTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamEdgeCaseTest.php"
 code = "assertion-style"
-start_line = 30
-end_line = 30
+message = "Inconsistent assertions style."
+count = 4
 
-[[entries."tests/src/StreamEdgeCaseTest.php".issues]]
-code = "assertion-style"
-start_line = 39
-end_line = 39
-
-[[entries."tests/src/StreamEdgeCaseTest.php".issues]]
-code = "assertion-style"
-start_line = 42
-end_line = 42
-
-[[entries."tests/src/StreamEdgeCaseTest.php".issues]]
-code = "assertion-style"
-start_line = 91
-end_line = 91
-
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "too-many-methods"
-start_line = 55
-end_line = 396
+message = "Class has too many methods."
+count = 1
 
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "no-error-control-operator"
-start_line = 32
-end_line = 32
+message = "Unsafe use of error control operator `@`."
+count = 4
 
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
-code = "no-error-control-operator"
-start_line = 50
-end_line = 50
-
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
-code = "no-error-control-operator"
-start_line = 62
-end_line = 62
-
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
-code = "no-error-control-operator"
-start_line = 85
-end_line = 85
-
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "no-redundant-use"
-start_line = 6
-end_line = 6
+message = "Unused import: `InvalidArgumentException`."
+count = 1
 
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "no-redundant-use"
-start_line = 11
-end_line = 11
+message = "Unused import: `Stream`."
+count = 1
 
-[[entries."tests/src/UriTest.php".issues]]
+[[issues]]
+file = "tests/src/UriEdgeCaseTest.php"
+code = "assertion-style"
+message = "Inconsistent assertions style."
+count = 13
+
+[[issues]]
+file = "tests/src/UriTest.php"
 code = "too-many-methods"
-start_line = 12
-end_line = 125
+message = "Class has too many methods."
+count = 1

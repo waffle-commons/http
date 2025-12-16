@@ -1,644 +1,547 @@
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+variant = "loose"
+
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "impossible-condition"
-start_line = 219
-end_line = 219
+message = "This condition (type `false`) will always evaluate to false."
+count = 1
 
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "mixed-argument"
-start_line = 253
-end_line = 253
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Abstract\AbstractMessage::normalizeheadervalue`: expected `array<array-key, string>|string`, but found `mixed`.'
+count = 1
 
-[[entries."src/Abstract/AbstractMessage.php".issues]]
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "mixed-assignment"
-start_line = 245
-end_line = 245
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
 
-[[entries."src/Emitter/ResponseEmitter.php".issues]]
+[[issues]]
+file = "src/Emitter/ResponseEmitter.php"
 code = "less-specific-argument"
-start_line = 43
-end_line = 43
+message = 'Argument type mismatch for argument #1 of `Waffle\Commons\Http\Emitter\ResponseEmitter::emitheaders`: expected `array<string, array<array-key, string>>`, but provided type `array<array-key, array<array-key, string>>` is less specific.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Emitter/ResponseEmitter.php"
+code = "missing-override-attribute"
+message = 'Missing `#[Override]` attribute on overriding method `Waffle\Commons\Http\Emitter\ResponseEmitter::emit`.'
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "invalid-return-statement"
-start_line = 162
-end_line = 162
+message = 'Invalid return type for function `waffle\commons\http\factory\globalsfactory::getheadersfromglobals`: expected `array<string, string>`, but found `array<string, bool|float|non-empty-list<string>|positive-int|string>`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "less-specific-return-statement"
-start_line = 213
-end_line = 213
+message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, Psr\Http\Message\UploadedFileInterface>` for function `waffle\commons\http\factory\globalsfactory::createuploadedfilesfromglobals`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-start_line = 63
-end_line = 63
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-start_line = 69
-end_line = 69
+message = 'Invalid argument type for argument #1 of `waffle\commons\http\stream::__construct`: expected `resource|string`, but found `mixed`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-start_line = 72
-end_line = 72
+message = 'Invalid argument type for argument #1 of `waffle\commons\http\uploadedfile::__construct`: expected `string`, but found `mixed`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-start_line = 177
-end_line = 177
+message = "Invalid argument type for argument #2 of `explode`: expected `string`, but found `nonnull`."
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-start_line = 246
-end_line = 246
+message = 'Invalid argument type for argument #3 of `Waffle\Commons\Http\Factory\GlobalsFactory::getparsedbody`: expected `Psr\Http\Message\StreamInterface`, but found `mixed`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-start_line = 249
-end_line = 249
+message = 'Invalid argument type for argument #4 of `waffle\commons\http\serverrequest::__construct`: expected `Psr\Http\Message\StreamInterface|null|resource|string`, but found `mixed`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-start_line = 250
-end_line = 250
+message = 'Invalid argument type for argument #4 of `waffle\commons\http\uploadedfile::__construct`: expected `null|string`, but found `mixed`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-start_line = 260
-end_line = 260
+message = 'Invalid argument type for argument #5 of `waffle\commons\http\uploadedfile::__construct`: expected `null|string`, but found `mixed`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-array-access"
-start_line = 262
-end_line = 262
+message = "Unsafe array access on type `mixed`."
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-assignment"
-start_line = 55
-end_line = 55
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-assignment"
-start_line = 59
-end_line = 59
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
-code = "mixed-assignment"
-start_line = 176
-end_line = 176
-
-[[entries."src/Factory/GlobalsFactory.php".issues]]
-code = "mixed-assignment"
-start_line = 222
-end_line = 222
-
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "mixed-return-statement"
-start_line = 194
-end_line = 194
+message = 'Could not infer a precise return type for function `waffle\commons\http\factory\globalsfactory::getparsedbody`. Saw type `mixed`.'
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "redundant-condition"
-start_line = 210
-end_line = 210
+message = "This condition (type `true`) will always evaluate to true."
+count = 1
 
-[[entries."src/Factory/GlobalsFactory.php".issues]]
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "redundant-null-coalesce"
+message = "Redundant null coalesce: left-hand side can never be `null` or undefined."
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "reference-to-undefined-variable"
-start_line = 94
-end_line = 94
+message = "Reference created from a previously undefined variable `$matches`."
+count = 1
 
-[[entries."src/Request.php".issues]]
+[[issues]]
+file = "src/Factory/StreamFactory.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `fseek`: expected `resource`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "src/Factory/StreamFactory.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `fwrite`: expected `resource`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "src/Factory/StreamFactory.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `waffle\commons\http\stream::__construct`: expected `resource|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Factory/StreamFactory.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Request.php"
 code = "possibly-null-operand"
-start_line = 131
-end_line = 131
+message = "Possibly null right operand used in string concatenation (type `int|null`)."
+count = 1
 
-[[entries."src/ServerRequest.php".issues]]
+[[issues]]
+file = "src/ServerRequest.php"
 code = "impossible-condition"
-start_line = 284
-end_line = 284
+message = "This condition (type `false`) will always evaluate to false."
+count = 1
 
-[[entries."src/ServerRequest.php".issues]]
+[[issues]]
+file = "src/ServerRequest.php"
 code = "redundant-comparison"
-start_line = 284
-end_line = 284
+message = "Redundant `!==` comparison: left-hand side is never identical to (always false for !==) right-hand side."
+count = 1
 
-[[entries."src/ServerRequest.php".issues]]
+[[issues]]
+file = "src/ServerRequest.php"
 code = "redundant-logical-operation"
-start_line = 284
-end_line = 284
+message = "Redundant `&&` operation: left operand is evaluated and right operand is always falsy."
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "less-specific-nested-argument-type"
-start_line = 143
-end_line = 143
+message = "Argument type mismatch for argument #2 of `clearstatcache`: expected `string`, but provided type `array<array-key, mixed>|mixed` is less specific."
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "mixed-argument"
-start_line = 223
-end_line = 223
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `nonnull`."
+count = 2
 
-[[entries."src/Stream.php".issues]]
-code = "mixed-argument"
-start_line = 258
-end_line = 258
-
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "mixed-assignment"
-start_line = 222
-end_line = 222
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 2
 
-[[entries."src/Stream.php".issues]]
-code = "mixed-assignment"
-start_line = 257
-end_line = 257
-
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "mixed-return-statement"
-start_line = 139
-end_line = 139
+message = 'Could not infer a precise return type for function `waffle\commons\http\stream::getmetadata`. Saw type `mixed`.'
+count = 2
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "mixed-return-statement"
-start_line = 183
-end_line = 183
+message = 'Could not infer a precise return type for function `waffle\commons\http\stream::getsize`. Saw type `mixed`.'
+count = 1
 
-[[entries."src/Stream.php".issues]]
+[[issues]]
+file = "src/Stream.php"
 code = "mixed-return-statement"
-start_line = 307
-end_line = 307
+message = 'Could not infer a precise return type for function `waffle\commons\http\stream::isseekable`. Saw type `nonnull`.'
+count = 1
 
-[[entries."src/Stream.php".issues]]
-code = "mixed-return-statement"
-start_line = 321
-end_line = 321
-
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "invalid-return-statement"
-start_line = 133
-end_line = 133
+message = 'Invalid return type for function `waffle\commons\http\uri::filterpath`: expected `string`, but found `null|string`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "mixed-argument"
-start_line = 65
-end_line = 65
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterfragment`: expected `string`, but found `nonnull`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "mixed-argument"
-start_line = 66
-end_line = 66
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterhost`: expected `string`, but found `nonnull`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "mixed-argument"
-start_line = 67
-end_line = 67
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterpath`: expected `string`, but found `nonnull`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "mixed-argument"
-start_line = 68
-end_line = 68
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterport`: expected `int|null`, but found `nonnull`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "mixed-argument"
-start_line = 69
-end_line = 69
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterquery`: expected `string`, but found `nonnull`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "mixed-argument"
-start_line = 70
-end_line = 70
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterscheme`: expected `string`, but found `nonnull`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "mixed-argument"
-start_line = 71
-end_line = 71
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filteruserinfo`: expected `string`, but found `nonnull`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `Waffle\Commons\Http\Uri::filteruserinfo`: expected `null|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Uri.php"
 code = "nullable-return-statement"
-start_line = 133
-end_line = 133
+message = 'Function `waffle\commons\http\uri::filterpath` is declared to return `string` but possibly returns a nullable value (inferred as `null|string`).'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "possibly-invalid-argument"
-start_line = 54
-end_line = 54
+message = 'Possible argument type mismatch for argument #1 of `Waffle\Commons\Http\Uri::applyparts`: expected `array<array-key, mixed>`, but possibly received `array<array-key, mixed>|int|null|string`.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "possibly-null-argument"
-start_line = 54
-end_line = 54
+message = "Argument #1 of function `ltrim` is possibly `null`, but parameter type `string` does not accept it."
+count = 2
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "possibly-null-argument"
-start_line = 133
-end_line = 133
+message = "Argument #1 of function `str_starts_with` is possibly `null`, but parameter type `string` does not accept it."
+count = 1
 
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "possibly-null-argument"
-start_line = 148
-end_line = 148
+message = 'Argument #1 of method `Waffle\Commons\Http\Uri::applyparts` is possibly `null`, but parameter type `array<array-key, mixed>` does not accept it.'
+count = 1
 
-[[entries."src/Uri.php".issues]]
-code = "possibly-null-argument"
-start_line = 163
-end_line = 163
-
-[[entries."src/Uri.php".issues]]
+[[issues]]
+file = "src/Uri.php"
 code = "possibly-null-operand"
-start_line = 133
-end_line = 133
+message = "Possibly null right operand used in string concatenation (type `non-empty-string|null`)."
+count = 1
 
-[[entries."tests/bootstrap.php".issues]]
+[[issues]]
+file = "tests/bootstrap.php"
 code = "mixed-assignment"
-start_line = 13
-end_line = 13
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
 
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
+[[issues]]
+file = "tests/src/Abstract/AbstractMessageTest.php"
 code = "mixed-assignment"
-start_line = 31
-end_line = 31
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 8
 
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-assignment"
-start_line = 40
-end_line = 40
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-assignment"
-start_line = 89
-end_line = 89
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-assignment"
-start_line = 97
-end_line = 97
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-assignment"
-start_line = 98
-end_line = 98
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-assignment"
-start_line = 107
-end_line = 107
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-assignment"
-start_line = 115
-end_line = 115
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-assignment"
-start_line = 116
-end_line = 116
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
+[[issues]]
+file = "tests/src/Abstract/AbstractMessageTest.php"
 code = "mixed-method-access"
-start_line = 31
-end_line = 31
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 21
 
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 34
-end_line = 34
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 35
-end_line = 35
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 40
-end_line = 40
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 49
-end_line = 49
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 57
-end_line = 57
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 65
-end_line = 65
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 71
-end_line = 71
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 79
-end_line = 79
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 84
-end_line = 84
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 89
-end_line = 89
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 91
-end_line = 91
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 92
-end_line = 92
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 97
-end_line = 97
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 98
-end_line = 98
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 100
-end_line = 100
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 101
-end_line = 101
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 107
-end_line = 107
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 110
-end_line = 110
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 115
-end_line = 115
-
-[[entries."tests/src/Abstract/AbstractMessageTest.php".issues]]
-code = "mixed-method-access"
-start_line = 116
-end_line = 116
-
-[[entries."tests/src/Emitter/ResponseEmitterTest.php".issues]]
+[[issues]]
+file = "tests/src/Emitter/ResponseEmitterTest.php"
 code = "mixed-return-statement"
-start_line = 12
-end_line = 12
+message = 'Could not infer a precise return type for function `waffle\commons\http\emitter\headers_sent`. Saw type `nonnull`.'
+count = 1
 
-[[entries."tests/src/Factory/GlobalsFactoryTest.php".issues]]
-code = "mixed-property-type-coercion"
-start_line = 26
-end_line = 26
-
-[[entries."tests/src/Factory/GlobalsFactoryTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "possibly-false-argument"
-start_line = 149
-end_line = 149
+message = "Argument #1 of function `file_put_contents` is possibly `false`, but parameter type `string` does not accept it."
+count = 2
 
-[[entries."tests/src/Factory/GlobalsFactoryTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "possibly-false-argument"
-start_line = 151
-end_line = 151
+message = "Argument #1 of function `unlink` is possibly `false`, but parameter type `string` does not accept it."
+count = 2
 
-[[entries."tests/src/Factory/GlobalsFactoryTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/Psr17FactoryTest.php"
 code = "possibly-false-argument"
-start_line = 175
-end_line = 175
+message = "Argument #1 of function `file_put_contents` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
 
-[[entries."tests/src/Factory/GlobalsFactoryTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/Psr17FactoryTest.php"
 code = "possibly-false-argument"
-start_line = 176
-end_line = 176
+message = "Argument #1 of function `unlink` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
 
-[[entries."tests/src/Factory/GlobalsFactoryTest.php".issues]]
-code = "undefined-variable"
-start_line = 26
-end_line = 26
-
-[[entries."tests/src/Factory/Psr17FactoryTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/Psr17FactoryTest.php"
 code = "possibly-false-argument"
-start_line = 50
-end_line = 50
+message = 'Argument #1 of method `Waffle\Commons\Http\Factory\StreamFactory::createstreamfromfile` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
 
-[[entries."tests/src/Factory/Psr17FactoryTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/StreamFactoryTest.php"
+code = "missing-override-attribute"
+message = 'Missing `#[Override]` attribute on overriding method `Waffle\Commons\Http\Factory\StreamFactoryTest::tearDown`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/StreamFactoryTest.php"
 code = "possibly-false-argument"
-start_line = 51
-end_line = 51
+message = "Argument #1 of function `file_put_contents` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
 
-[[entries."tests/src/Factory/Psr17FactoryTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/StreamFactoryTest.php"
 code = "possibly-false-argument"
-start_line = 53
-end_line = 53
+message = "Argument #1 of function `unlink` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
 
-[[entries."tests/src/ResponseTest.php".issues]]
+[[issues]]
+file = "tests/src/Factory/StreamFactoryTest.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `Waffle\Commons\Http\Factory\StreamFactory::createstreamfromfile` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/UploadedFileFactoryTest.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `file_put_contents` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/UploadedFileFactoryTest.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `unlink` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "tests/src/ResponseTest.php"
 code = "invalid-argument"
-start_line = 69
-end_line = 69
+message = 'Invalid argument type for argument #3 of `waffle\commons\http\response::__construct`: expected `Psr\Http\Message\StreamInterface|null|resource|string`, but found `int(12345)`.'
+count = 1
 
-[[entries."tests/src/ServerRequestTest.php".issues]]
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
 code = "invalid-argument"
-start_line = 53
-end_line = 53
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\ServerRequest::withparsedbody`: expected `array<array-key, mixed>|null|object`, but found `int(123)`.'
+count = 1
 
-[[entries."tests/src/ServerRequestTest.php".issues]]
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
 code = "invalid-argument"
-start_line = 214
-end_line = 214
+message = 'Invalid argument type for argument #4 of `waffle\commons\http\serverrequest::__construct`: expected `Psr\Http\Message\StreamInterface|null|resource|string`, but found `int(12345)`.'
+count = 1
 
-[[entries."tests/src/ServerRequestTest.php".issues]]
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
 code = "mixed-argument"
-start_line = 31
-end_line = 31
+message = 'Invalid argument type for argument #9 of `waffle\commons\http\serverrequest::__construct`: expected `array<array-key, mixed>|null|object`, but found `mixed`.'
+count = 1
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "invalid-argument"
-start_line = 108
-end_line = 108
+message = 'Invalid argument type for argument #1 of `waffle\commons\http\stream::__construct`: expected `resource|string`, but found `int(12345)`.'
+count = 1
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "mixed-argument"
-start_line = 13
-end_line = 13
+message = "Invalid argument type for argument #1 of `fread`: expected `resource`, but found `mixed`."
+count = 1
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "mixed-argument"
-start_line = 21
-end_line = 21
+message = "Invalid argument type for argument #1 of `fseek`: expected `resource`, but found `mixed`."
+count = 1
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "mixed-argument"
-start_line = 29
-end_line = 29
+message = "Invalid argument type for argument #1 of `ftell`: expected `resource`, but found `mixed`."
+count = 1
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "mixed-argument"
-start_line = 37
-end_line = 37
+message = "Invalid argument type for argument #1 of `fwrite`: expected `resource`, but found `mixed`."
+count = 1
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "mixed-argument"
-start_line = 45
-end_line = 45
+message = "Invalid argument type for argument #1 of `stream_get_contents`: expected `resource`, but found `mixed`."
+count = 1
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "possibly-false-argument"
-start_line = 86
-end_line = 86
+message = "Argument #1 of function `file_put_contents` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "possibly-false-argument"
-start_line = 88
-end_line = 88
+message = "Argument #1 of function `unlink` is possibly `false`, but parameter type `string` does not accept it."
+count = 5
 
-[[entries."tests/src/StreamTest.php".issues]]
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "possibly-false-argument"
-start_line = 92
-end_line = 92
+message = 'Argument #1 of method `waffle\commons\http\stream::__construct` is possibly `false`, but parameter type `resource|string` does not accept it.'
+count = 5
 
-[[entries."tests/src/StreamTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 145
-end_line = 145
-
-[[entries."tests/src/StreamTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 150
-end_line = 150
-
-[[entries."tests/src/StreamTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 278
-end_line = 278
-
-[[entries."tests/src/StreamTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 287
-end_line = 287
-
-[[entries."tests/src/StreamTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 321
-end_line = 321
-
-[[entries."tests/src/StreamTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 330
-end_line = 330
-
-[[entries."tests/src/StreamTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 354
-end_line = 354
-
-[[entries."tests/src/StreamTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 363
-end_line = 363
-
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "invalid-argument"
-start_line = 76
-end_line = 76
+message = '''Invalid argument type for argument #1 of `waffle\commons\http\uploadedfile::__construct`: expected `string`, but found `list{string('not a string')}`.'''
+count = 1
 
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "invalid-property-assignment-value"
-start_line = 26
-end_line = 26
+message = "Invalid type for property `$tempFile`: expected `string`, but got `false|string`."
+count = 1
 
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "missing-override-attribute"
-start_line = 23
-end_line = 23
+message = 'Missing `#[Override]` attribute on overriding method `WaffleTests\Commons\Http\UploadedFileEdgeCaseTest::setUp`.'
+count = 1
 
-[[entries."tests/src/UploadedFileEdgeCaseTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "missing-override-attribute"
-start_line = 29
-end_line = 29
+message = 'Missing `#[Override]` attribute on overriding method `WaffleTests\Commons\Http\UploadedFileEdgeCaseTest::tearDown`.'
+count = 1
 
-[[entries."tests/src/UploadedFileTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
 code = "impossible-condition"
-start_line = 34
-end_line = 34
+message = "This condition (type `false`) will always evaluate to false."
+count = 1
 
-[[entries."tests/src/UploadedFileTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
 code = "invalid-property-assignment-value"
-start_line = 33
-end_line = 33
+message = "Invalid type for property `$tempFile`: expected `string`, but got `false|string`."
+count = 1
 
-[[entries."tests/src/UploadedFileTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
 code = "mixed-argument"
-start_line = 12
-end_line = 12
+message = "Invalid argument type for argument #3 of `rename`: expected `null|resource`, but found `mixed`."
+count = 1
 
-[[entries."tests/src/UploadedFileTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
 code = "possibly-false-argument"
-start_line = 84
-end_line = 84
+message = "Argument #1 of function `file_get_contents` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
 
-[[entries."tests/src/UploadedFileTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
 code = "possibly-false-argument"
-start_line = 92
-end_line = 92
+message = "Argument #1 of function `unlink` is possibly `false`, but parameter type `string` does not accept it."
+count = 3
 
-[[entries."tests/src/UploadedFileTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
 code = "possibly-false-argument"
-start_line = 101
-end_line = 101
+message = 'Argument #1 of method `Waffle\Commons\Http\UploadedFile::moveto` is possibly `false`, but parameter type `string` does not accept it.'
+count = 5
 
-[[entries."tests/src/UploadedFileTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
 code = "possibly-false-argument"
-start_line = 103
-end_line = 103
+message = 'Argument #1 of method `phpunit\framework\assert::assertfileexists` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
 
-[[entries."tests/src/UploadedFileTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 104
-end_line = 104
-
-[[entries."tests/src/UploadedFileTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 107
-end_line = 107
-
-[[entries."tests/src/UploadedFileTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 115
-end_line = 115
-
-[[entries."tests/src/UploadedFileTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 122
-end_line = 122
-
-[[entries."tests/src/UploadedFileTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 126
-end_line = 126
-
-[[entries."tests/src/UploadedFileTest.php".issues]]
-code = "possibly-false-argument"
-start_line = 128
-end_line = 128
-
-[[entries."tests/src/UploadedFileTest.php".issues]]
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
 code = "redundant-comparison"
-start_line = 34
-end_line = 34
+message = "Redundant `===` comparison: left-hand side is never identical to right-hand side."
+count = 1

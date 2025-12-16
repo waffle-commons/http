@@ -6,36 +6,18 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/waffle-commons/http.svg)](https://packagist.org/packages/waffle-commons/http)
 [![Packagist License](https://img.shields.io/packagist/l/waffle-commons/http)](https://github.com/waffle-commons/http/blob/main/LICENSE.md)
 
-Waffle Commons - HTTP Component
+Waffle HTTP Component
 ===============================
 
-A lightweight, strict, and fully tested PSR-7 and PSR-17 implementation for the Waffle Framework ecosystem. This component provides the fundamental HTTP message objects (Request, Response, Stream, URI, UploadedFile) required for modern PHP applications.
+A strict, lightweight, and high-performance implementation of PSR-7 (HTTP Message) and PSR-17 (HTTP Factories).
 
-Features
---------
+## 📦 Installation
 
-*   **PSR-7 Compliance:** Full implementation of HTTP Message interfaces (Request, Response, ServerRequest, Stream, Uri, UploadedFile).
-
-*   **PSR-17 Factories:** Includes factories for creating all HTTP objects, ensuring interoperability with other libraries.
-
-*   **Strict Typing:** Built with PHP 8.4+ strict types for reliability.
-
-*   **Zero Dependencies:** No external dependencies other than psr/http-message and psr/http-factory.
-
-*   **Secure by Design:** Robust handling of headers, file uploads, and streams.
-
-
-Installation
-------------
-
-You can install the package via Composer:
-
-```shell
+```bash
 composer require waffle-commons/http
 ```
 
-Usage
------
+## 🚀 Usage
 
 ### 1\. Creating a Request from Globals (Bootstrap)
 
@@ -118,6 +100,18 @@ $stream = $factory->createStream('Hello World');
 
 echo $stream->getContents(); // "Hello World"
 ```
+
+Features
+--------
+
+*   **PSR-7:** Full implementation of `Request`, `Response`, `ServerRequest`, `Stream`, `Uri`, `UploadedFile`.
+*   **PSR-17:** Full implementation of Factories for all HTTP objects.
+*   **Response Emitter:** A simple emitter to output PSR-7 responses to the browser.
+*   **Lightweight:** Minimal dependencies, focused on performance.
+*   **Strict Typing:** Built with PHP 8.4+ strict types for reliability.
+*   **Zero Dependencies:** No external dependencies other than psr/http-message and psr/http-factory.
+*   **Secure by Design:** Robust handling of headers, file uploads, and streams.
+
 
 Testing
 -------
