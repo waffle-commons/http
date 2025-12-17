@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace WaffleTests\Commons\Http;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use TypeError;
-use Waffle\Commons\Http\Stream;
 use Waffle\Commons\Http\UploadedFile;
 
 /**
@@ -21,12 +19,14 @@ class UploadedFileEdgeCaseTest extends TestCase
 {
     private string $tempFile;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
         $this->tempFile = tempnam(sys_get_temp_dir(), 'waffle_test_');
     }
 
+    #[\Override]
     protected function tearDown(): void
     {
         if (file_exists($this->tempFile)) {

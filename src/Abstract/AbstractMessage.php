@@ -83,6 +83,11 @@ abstract class AbstractMessage implements MessageInterface
     public function getHeader(string $name): array
     {
         $normalizedName = $this->headerNames[strtolower($name)] ?? null;
+
+        if ($normalizedName === null) {
+            return [];
+        }
+
         return $this->headers[$normalizedName] ?? [];
     }
 
@@ -217,10 +222,6 @@ abstract class AbstractMessage implements MessageInterface
         $normalized = [];
         foreach ($value as $v) {
             // Validates that each value is scalar or null
-            if (false) {
-                throw new InvalidArgumentException('Header value must be a string or array of strings.');
-            }
-            $v = $v;
 
             // Validates header value characters (RFC 7230, section 3.2)
             if (1 !== preg_match('/^[ \t\x21-\x7E\x80-\xFF]*$/', $v)) {

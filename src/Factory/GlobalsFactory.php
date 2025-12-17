@@ -57,7 +57,7 @@ class GlobalsFactory
         $protocol = str_replace('HTTP/', '', $_SERVER['SERVER_PROTOCOL'] ?? '1.1');
 
         // ServerRequest-specific parameters
-        $cookies = $_COOKIE ?? [];
+        $cookies = $_COOKIE;
         $queryParams = $_GET;
         $uploadedFiles = $this->createUploadedFilesFromGlobals();
         // Parsed body (depends on method and Content-Type)

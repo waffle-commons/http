@@ -20,7 +20,7 @@ class UploadedFileFactoryTest extends TestCase
 
         $file = $factory->createUploadedFile($stream);
 
-        $this->assertSame(12345, $file->getSize());
+        static::assertSame(12345, $file->getSize());
     }
 
     public function testCreateUploadedFileUsesStreamPathIfRealFile(): void
@@ -38,7 +38,7 @@ class UploadedFileFactoryTest extends TestCase
 
         // We can't easily check the path as it's private in UploadedFile
         // But we can verify no exception is thrown and it works.
-        $this->assertSame(12, $file->getSize());
+        static::assertSame(12, $file->getSize());
 
         unlink($tmpFile);
     }

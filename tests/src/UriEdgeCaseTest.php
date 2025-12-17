@@ -45,8 +45,8 @@ class UriEdgeCaseTest extends TestCase
         $uri = new Uri('http://example.com');
         $new = $uri->withPath('foo'); // Should become /foo
 
-        $this->assertSame('/foo', $new->getPath());
-        $this->assertSame('http://example.com/foo', (string) $new);
+        static::assertSame('/foo', $new->getPath());
+        static::assertSame('http://example.com/foo', (string) $new);
     }
 
     public function testPathNormalizationWithoutAuthority(): void
@@ -55,9 +55,9 @@ class UriEdgeCaseTest extends TestCase
         $uri = new Uri('foo'); // path 'foo'
         $new = $uri->withPath('//bar'); // Should become /bar
 
-        $this->assertSame('//bar', $new->getPath());
+        static::assertSame('//bar', $new->getPath());
         // string representation: path
-        $this->assertSame('/bar', (string) $new);
+        static::assertSame('/bar', (string) $new);
     }
 
     public function testPathNormalizationEmptyPathWithAuthority(): void
@@ -67,14 +67,14 @@ class UriEdgeCaseTest extends TestCase
         // path is empty by default? parse_url returns null or empty?
         // If empty, __toString adds /?
 
-        $this->assertSame('', $uri->getPath()); // Wait, standard says empty path is allowed?
+        static::assertSame('', $uri->getPath()); // Wait, standard says empty path is allowed?
         // PSR-7: "If the path is empty, and the URI contains an authority component, the path component MUST be empty."
         // BUT RFC 3986 says if authority is present, path must be empty or start with /.
         // Waffle implementation:
         // if ($path === '' && '' !== $authority) { $path = '/'; }
         // So it forces /.
 
-        $this->assertSame('http://example.com/', (string) $uri);
+        static::assertSame('http://example.com/', (string) $uri);
     }
 
     public function testImmutabilityChecks(): void
@@ -84,18 +84,18 @@ class UriEdgeCaseTest extends TestCase
         // withScheme does not optimize for immutability in current implementation
         // $this->assertSame($uri, $uri->withScheme('http'));
 
-        $this->assertSame($uri, $uri->withHost('example.com'));
-        $this->assertSame($uri, $uri->withPath('/foo'));
-        $this->assertSame($uri, $uri->withQuery('query=1'));
-        $this->assertSame($uri, $uri->withFragment('frag'));
+        static::assertSame($uri, $uri->withHost('example.com'));
+        static::assertSame($uri, $uri->withPath('/foo'));
+        static::assertSame($uri, $uri->withQuery('query=1'));
+        static::assertSame($uri, $uri->withFragment('frag'));
 
-        $this->assertNotSame($uri, $uri->withScheme('https'));
+        static::assertNotSame($uri, $uri->withScheme('https'));
     }
 
     public function testGetAuthorityReturnsEmptyIfNoHost(): void
     {
         $uri = new Uri('/path');
-        $this->assertSame('', $uri->getAuthority());
-        $this->assertSame('', $uri->getHost());
+        static::assertSame('', $uri->getAuthority());
+        static::assertSame('', $uri->getHost());
     }
 }

@@ -20,6 +20,7 @@ class StreamFactoryTest extends TestCase
 {
     public static bool $mockFopenFail = false;
 
+    #[\Override]
     protected function tearDown(): void
     {
         self::$mockFopenFail = false;
@@ -42,7 +43,7 @@ class StreamFactoryTest extends TestCase
         $factory = new StreamFactory();
         $stream = $factory->createStream('test');
 
-        $this->assertSame('test', (string) $stream);
+        static::assertSame('test', (string) $stream);
     }
 
     public function testCreateStreamFromFile(): void
@@ -52,7 +53,7 @@ class StreamFactoryTest extends TestCase
         file_put_contents($tmp, 'file content');
 
         $stream = $factory->createStreamFromFile($tmp);
-        $this->assertSame('file content', (string) $stream);
+        static::assertSame('file content', (string) $stream);
 
         unlink($tmp);
     }
@@ -64,6 +65,6 @@ class StreamFactoryTest extends TestCase
         fwrite($resource, 'resource content');
 
         $stream = $factory->createStreamFromResource($resource);
-        $this->assertSame('resource content', (string) $stream);
+        static::assertSame('resource content', (string) $stream);
     }
 }
