@@ -13,7 +13,7 @@ class UploadedFileFactoryTest extends TestCase
     public function testCreateUploadedFileCalculatesSizeIfNull(): void
     {
         $factory = new UploadedFileFactory();
-        $stream = $this->createMock(StreamInterface::class);
+        $stream = $this->createStub(StreamInterface::class);
         $stream->method('getSize')->willReturn(12345);
         $stream->method('getMetadata')->with('uri')->willReturn('php://temp');
         $stream->method('__toString')->willReturn('content');
@@ -30,7 +30,7 @@ class UploadedFileFactoryTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_upload');
         file_put_contents($tmpFile, 'test content');
 
-        $stream = $this->createMock(StreamInterface::class);
+        $stream = $this->createStub(StreamInterface::class);
         $stream->method('getSize')->willReturn(12);
         $stream->method('getMetadata')->with('uri')->willReturn($tmpFile);
 

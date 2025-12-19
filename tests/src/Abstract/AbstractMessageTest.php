@@ -104,7 +104,7 @@ class AbstractMessageTest extends AbstractTestCase
 
     public function testWithBodyReturnsClone(): void
     {
-        $stream = $this->createMock(StreamInterface::class);
+        $stream = $this->createStub(StreamInterface::class);
         $new = $this->message->withBody($stream);
 
         static::assertNotSame($this->message, $new);
