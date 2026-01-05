@@ -21,6 +21,7 @@ class ResponseEmitter implements ResponseEmitterInterface
      * @param ResponseInterface $response The response to emit.
      * @throws \RuntimeException If headers have already been sent.
      */
+    #[\Override]
     public function emit(ResponseInterface $response): void
     {
         if (headers_sent()) {

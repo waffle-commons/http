@@ -103,10 +103,9 @@ class GlobalsFactoryTest extends AbstractTestCase
 
     public function testParsedBodyForFormData(): void
     {
-        $this->setGlobals(
-            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'],
-            post: ['user' => 'waffle'],
-        );
+        $this->setGlobals(server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'], post: [
+            'user' => 'waffle',
+        ]);
 
         $request = new GlobalsFactory()->createFromGlobals();
         static::assertSame(['user' => 'waffle'], $request->getParsedBody());

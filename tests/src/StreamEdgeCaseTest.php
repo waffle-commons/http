@@ -28,7 +28,7 @@ class StreamEdgeCaseTest extends TestCase
 
         // Attempting to read from a closed stream inside __toString should catch the exception
         // and return ""
-        $this->assertSame('', (string) $stream);
+        static::assertSame('', (string) $stream);
     }
 
     public function testDetachReturnsNullIfAlreadyDetached(): void
@@ -37,10 +37,10 @@ class StreamEdgeCaseTest extends TestCase
         $stream = new Stream($resource);
 
         // First detach returns the resource
-        $this->assertIsResource($stream->detach());
+        static::assertIsResource($stream->detach());
 
         // Second detach should return null (idempotency check)
-        $this->assertNull($stream->detach());
+        static::assertNull($stream->detach());
     }
 
     public function testSeekThrowsExceptionOnClosedStream(): void
@@ -89,6 +89,6 @@ class StreamEdgeCaseTest extends TestCase
         $stream = new Stream($resource);
         $stream->close();
 
-        $this->assertNull($stream->getSize());
+        static::assertNull($stream->getSize());
     }
 }

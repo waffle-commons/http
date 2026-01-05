@@ -23,12 +23,12 @@ class Stream implements StreamInterface
     /**
      * @var array|null Known stream metadata.
      */
-    private null|array $meta = null;
+    private ?array $meta = null;
 
     /**
      * @var array|null Detached resource metadata cache.
      */
-    private null|array $detachedMeta = null;
+    private ?array $detachedMeta = null;
 
     /**
      * Stream modes considered readable.
@@ -133,7 +133,7 @@ class Stream implements StreamInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function getSize(): null|int
+    public function getSize(): ?int
     {
         if (null === $this->resource) {
             // If detached, return cached size if available
@@ -195,10 +195,9 @@ class Stream implements StreamInterface
         }
 
         if (0 !== fseek($this->resource, $offset, $whence)) {
-            throw new RuntimeException('Unable to seek to stream position '
-            . $offset
-            . ' with whence '
-            . var_export($whence, true));
+            throw new RuntimeException(
+                'Unable to seek to stream position ' . $offset . ' with whence ' . var_export($whence, true),
+            );
         }
     }
 
@@ -301,7 +300,7 @@ class Stream implements StreamInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function getMetadata(null|string $key = null)
+    public function getMetadata(?string $key = null)
     {
         if (null === $this->resource) {
             // Returns detached metadata if available

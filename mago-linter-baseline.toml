@@ -2,12 +2,6 @@ variant = "loose"
 
 [[issues]]
 file = "src/Abstract/AbstractMessage.php"
-code = "constant-condition"
-message = "Redundant `if` statement."
-count = 1
-
-[[issues]]
-file = "src/Abstract/AbstractMessage.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
 count = 1
@@ -26,12 +20,6 @@ count = 1
 
 [[issues]]
 file = "src/Abstract/AbstractMessage.php"
-code = "no-self-assignment"
-message = "Self-assignment has no effect."
-count = 1
-
-[[issues]]
-file = "src/Abstract/AbstractMessage.php"
 code = "strict-behavior"
 message = "Call to `in_array` must enforce strict comparison."
 count = 1
@@ -43,6 +31,30 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "src/Emitter/ResponseEmitter.php"
+code = "literal-named-argument"
+message = "Literal argument `' '` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Emitter/ResponseEmitter.php"
+code = "literal-named-argument"
+message = "Literal argument `'-'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Emitter/ResponseEmitter.php"
+code = "literal-named-argument"
+message = "Literal argument `false` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Emitter/ResponseEmitter.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -50,9 +62,57 @@ count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
+code = "halstead"
+message = "Method has a high halstead effort"
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (2.1000000000000005)."
 count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `''` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `'-'` should be passed as a named argument for clarity."
+count = 2
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `'r'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `2` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `512` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `5` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 2
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
@@ -73,6 +133,24 @@ message = "Use of the `empty` construct."
 count = 1
 
 [[issues]]
+file = "src/Factory/StreamFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Factory/StreamFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `0` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Factory/UploadedFileFactory.php"
+code = "literal-named-argument"
+message = "Literal argument `'waffle_upload_factory'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
 file = "src/Factory/UploadedFileFactory.php"
 code = "no-else-clause"
 message = "Avoid `else` clauses."
@@ -85,6 +163,24 @@ message = "Avoid boolean flag parameters."
 count = 1
 
 [[issues]]
+file = "src/Response.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "src/Response.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Response.php"
+code = "literal-named-argument"
+message = "Literal argument `0` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
 file = "src/ServerRequest.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -94,6 +190,18 @@ count = 1
 file = "src/ServerRequest.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "src/ServerRequest.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/ServerRequest.php"
+code = "literal-named-argument"
+message = "Literal argument `0` should be passed as a named argument for clarity."
 count = 1
 
 [[issues]]
@@ -122,6 +230,12 @@ count = 1
 
 [[issues]]
 file = "src/Stream.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Stream.php"
 code = "no-else-clause"
 message = "Avoid `else` clauses."
 count = 1
@@ -146,6 +260,18 @@ count = 1
 
 [[issues]]
 file = "src/UploadedFile.php"
+code = "literal-named-argument"
+message = "Literal argument `'r'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/UploadedFile.php"
+code = "literal-named-argument"
+message = "Literal argument `true` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/UploadedFile.php"
 code = "no-else-clause"
 message = "Avoid `else` clauses."
 count = 1
@@ -164,6 +290,24 @@ count = 1
 
 [[issues]]
 file = "src/Uri.php"
+code = "literal-named-argument"
+message = "Literal argument `'#'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Uri.php"
+code = "literal-named-argument"
+message = "Literal argument `'/'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Uri.php"
+code = "literal-named-argument"
+message = "Literal argument `'?'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "src/Uri.php"
 code = "no-else-clause"
 message = "Avoid `elseif` clauses."
 count = 1
@@ -176,8 +320,20 @@ count = 1
 
 [[issues]]
 file = "tests/src/Abstract/AbstractMessageTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Abstract/AbstractMessageTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "tests/src/AbstractTestCase.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
 count = 1
 
 [[issues]]
@@ -194,26 +350,116 @@ count = 3
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'file1'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'file2'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'test'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_test_upload'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_test_upload1'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_test_upload2'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "tests/src/Factory/Psr17FactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'file content'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/Psr17FactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/Psr17FactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_stream_factory'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
 file = "tests/src/Factory/StreamFactoryTest.php"
-code = "assertion-style"
-message = "Inconsistent assertions style."
-count = 3
+code = "literal-named-argument"
+message = "Literal argument `'file content'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/StreamFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/StreamFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'resource content'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/StreamFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'test'` should be passed as a named argument for clarity."
+count = 1
 
 [[issues]]
 file = "tests/src/Factory/UploadedFileFactoryTest.php"
-code = "assertion-style"
-message = "Inconsistent assertions style."
-count = 2
+code = "literal-named-argument"
+message = "Literal argument `'test content'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/UploadedFileFactoryTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'test_upload'` should be passed as a named argument for clarity."
+count = 1
 
 [[issues]]
 file = "tests/src/RequestTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "tests/src/ResponseTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'Resource Content'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/ResponseTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
 count = 1
 
 [[issues]]
@@ -230,15 +476,81 @@ count = 1
 
 [[issues]]
 file = "tests/src/ServerRequestTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'Resource Body'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
+code = "literal-named-argument"
+message = "Literal argument `0` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
 
 [[issues]]
 file = "tests/src/StreamEdgeCaseTest.php"
-code = "assertion-style"
-message = "Inconsistent assertions style."
-count = 4
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 7
+
+[[issues]]
+file = "tests/src/StreamTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'File Content'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/StreamTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 2
+
+[[issues]]
+file = "tests/src/StreamTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'readonly'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/StreamTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'w'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/StreamTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_stream_test'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/StreamTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'write_only'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/StreamTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'writeonly'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/StreamTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'writeonly_contents'` should be passed as a named argument for clarity."
+count = 1
 
 [[issues]]
 file = "tests/src/StreamTest.php"
@@ -248,27 +560,45 @@ count = 1
 
 [[issues]]
 file = "tests/src/UploadedFileEdgeCaseTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'waffle_test_'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 4
 
 [[issues]]
-file = "tests/src/UploadedFileEdgeCaseTest.php"
-code = "no-redundant-use"
-message = "Unused import: `InvalidArgumentException`."
+file = "tests/src/UploadedFileTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'Test content'` should be passed as a named argument for clarity."
 count = 1
 
 [[issues]]
-file = "tests/src/UploadedFileEdgeCaseTest.php"
-code = "no-redundant-use"
-message = "Unused import: `Stream`."
+file = "tests/src/UploadedFileTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_dest'` should be passed as a named argument for clarity."
 count = 1
 
 [[issues]]
-file = "tests/src/UriEdgeCaseTest.php"
-code = "assertion-style"
-message = "Inconsistent assertions style."
-count = 13
+file = "tests/src/UploadedFileTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_dest_test'` should be passed as a named argument for clarity."
+count = 3
+
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_dest_test_2'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/UploadedFileTest.php"
+code = "literal-named-argument"
+message = "Literal argument `'wfl_upload_test'` should be passed as a named argument for clarity."
+count = 1
 
 [[issues]]
 file = "tests/src/UriTest.php"

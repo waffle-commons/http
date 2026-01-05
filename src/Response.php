@@ -101,7 +101,7 @@ class Response extends AbstractMessage implements ResponseInterface
         array $headers = [],
         $body = null,
         string $version = '1.1',
-        null|string $reasonPhrase = null,
+        ?string $reasonPhrase = null,
     ) {
         $this->validateStatusCode($statusCode);
         $this->statusCode = $statusCode;
