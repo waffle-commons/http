@@ -16,7 +16,7 @@ use RuntimeException;
 class UploadedFile implements UploadedFileInterface
 {
     /** @var StreamInterface|null */
-    private null|StreamInterface $stream = null;
+    private ?StreamInterface $stream = null;
     /** @var bool Indicates if moveTo() has been called. */
     private bool $hasMoved = false;
 
@@ -31,8 +31,8 @@ class UploadedFile implements UploadedFileInterface
         private string $tmpName,
         private int $size,
         private int $error,
-        private null|string $clientFilename = null,
-        private null|string $clientMediaType = null,
+        private ?string $clientFilename = null,
+        private ?string $clientMediaType = null,
     ) {
         // No action needed here, properties are promoted.
     }
@@ -109,7 +109,7 @@ class UploadedFile implements UploadedFileInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function getClientFilename(): null|string
+    public function getClientFilename(): ?string
     {
         return $this->clientFilename;
     }
@@ -118,7 +118,7 @@ class UploadedFile implements UploadedFileInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function getClientMediaType(): null|string
+    public function getClientMediaType(): ?string
     {
         return $this->clientMediaType;
     }

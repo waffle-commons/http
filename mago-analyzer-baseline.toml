@@ -242,12 +242,6 @@ count = 1
 
 [[issues]]
 file = "src/Request.php"
-code = "possibly-undefined-array-index"
-message = "Possibly undefined array key `string('host')` accessed on `array<string, string>`."
-count = 1
-
-[[issues]]
-file = "src/Request.php"
 code = "unhandled-thrown-type"
 message = 'Potentially unhandled exception `InvalidArgumentException` in `Waffle\Commons\Http\Request::__construct`.'
 count = 1
@@ -416,12 +410,6 @@ count = 1
 
 [[issues]]
 file = "src/Uri.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `Waffle\Commons\Http\Uri::applyparts`: expected `array<array-key, mixed>`, but possibly received `array<array-key, mixed>|int|null|string`.'
-count = 1
-
-[[issues]]
-file = "src/Uri.php"
 code = "possibly-null-argument"
 message = "Argument #1 of function `ltrim` is possibly `null`, but parameter type `string` does not accept it."
 count = 2
@@ -430,12 +418,6 @@ count = 2
 file = "src/Uri.php"
 code = "possibly-null-argument"
 message = "Argument #1 of function `str_starts_with` is possibly `null`, but parameter type `string` does not accept it."
-count = 1
-
-[[issues]]
-file = "src/Uri.php"
-code = "possibly-null-argument"
-message = 'Argument #1 of method `Waffle\Commons\Http\Uri::applyparts` is possibly `null`, but parameter type `array<array-key, mixed>` does not accept it.'
 count = 1
 
 [[issues]]

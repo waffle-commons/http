@@ -14,10 +14,10 @@ class UploadedFileFactory implements UploadedFileFactoryInterface
     #[\Override]
     public function createUploadedFile(
         StreamInterface $stream,
-        null|int $size = null,
+        ?int $size = null,
         int $error = UPLOAD_ERR_OK,
-        null|string $clientFilename = null,
-        null|string $clientMediaType = null,
+        ?string $clientFilename = null,
+        ?string $clientMediaType = null,
     ): UploadedFileInterface {
         if ($size === null) {
             $size = $stream->getSize();

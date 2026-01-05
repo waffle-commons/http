@@ -17,7 +17,7 @@ class Uri implements UriInterface
     private string $scheme = '';
     private string $userInfo = '';
     private string $host = '';
-    private null|int $port = null;
+    private ?int $port = null;
     private string $path = '';
     private string $query = '';
     private string $fragment = '';
@@ -85,7 +85,7 @@ class Uri implements UriInterface
     /**
      * Filters and assembles user info.
      */
-    private function filterUserInfo(string $user, #[\SensitiveParameter] null|string $password = null): string
+    private function filterUserInfo(string $user, #[\SensitiveParameter] ?string $password = null): string
     {
         $userInfo = $user;
         if (null !== $password && '' !== $password) {
@@ -106,7 +106,7 @@ class Uri implements UriInterface
      * Validates the port.
      * @throws InvalidArgumentException For invalid ports.
      */
-    private function filterPort(null|int $port): null|int
+    private function filterPort(?int $port): ?int
     {
         if (null === $port) {
             return null;
@@ -271,7 +271,7 @@ class Uri implements UriInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function getPort(): null|int
+    public function getPort(): ?int
     {
         if (null === $this->port) {
             return null; // Port not defined
@@ -330,7 +330,7 @@ class Uri implements UriInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function withUserInfo(string $user, #[\SensitiveParameter] null|string $password = null): UriInterface
+    public function withUserInfo(string $user, #[\SensitiveParameter] ?string $password = null): UriInterface
     {
         $new = clone $this;
         $new->userInfo = $this->filterUserInfo($user, $password);
@@ -355,7 +355,7 @@ class Uri implements UriInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function withPort(null|int $port): UriInterface
+    public function withPort(?int $port): UriInterface
     {
         $new = clone $this;
         $new->port = $this->filterPort($port);

@@ -16,7 +16,7 @@ class Request extends AbstractMessage implements RequestInterface
 {
     private string $method;
     private UriInterface $uri;
-    private null|string $requestTarget = null;
+    private ?string $requestTarget = null;
 
     /**
      * @param string $method HTTP method.

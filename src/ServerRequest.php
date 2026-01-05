@@ -24,7 +24,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     private array $queryParams = [];
     private array $serverParams = [];
     private array $uploadedFiles = [];
-    private null|string $requestTarget = null;
+    private ?string $requestTarget = null;
     private string $method;
     private UriInterface $uri;
 

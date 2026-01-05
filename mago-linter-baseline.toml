@@ -45,12 +45,6 @@ count = 1
 [[issues]]
 file = "src/Emitter/ResponseEmitter.php"
 code = "literal-named-argument"
-message = "Literal argument `'Set-Cookie'` should be passed as a named argument for clarity."
-count = 1
-
-[[issues]]
-file = "src/Emitter/ResponseEmitter.php"
-code = "literal-named-argument"
 message = "Literal argument `false` should be passed as a named argument for clarity."
 count = 1
 
@@ -89,12 +83,6 @@ file = "src/Factory/GlobalsFactory.php"
 code = "literal-named-argument"
 message = "Literal argument `'-'` should be passed as a named argument for clarity."
 count = 2
-
-[[issues]]
-file = "src/Factory/GlobalsFactory.php"
-code = "literal-named-argument"
-message = "Literal argument `'HTTP_'` should be passed as a named argument for clarity."
-count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
@@ -310,12 +298,6 @@ count = 1
 file = "src/Uri.php"
 code = "literal-named-argument"
 message = "Literal argument `'/'` should be passed as a named argument for clarity."
-count = 3
-
-[[issues]]
-file = "src/Uri.php"
-code = "literal-named-argument"
-message = "Literal argument `'//'` should be passed as a named argument for clarity."
 count = 1
 
 [[issues]]

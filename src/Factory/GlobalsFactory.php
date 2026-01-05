@@ -30,7 +30,7 @@ class GlobalsFactory
     /**
      * @param callable|null $bodyStreamFactory Factory to create a Stream for php://input.
      */
-    public function __construct(null|callable $bodyStreamFactory = null)
+    public function __construct(?callable $bodyStreamFactory = null)
     {
         // Provides a default factory if none is given
         $this->bodyStreamFactory = $bodyStreamFactory ?? static function (): Stream {
