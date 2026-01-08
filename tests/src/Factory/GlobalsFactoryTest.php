@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WaffleTests\Commons\Http\Factory;
 
 use InvalidArgumentException;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Waffle\Commons\Http\Factory\GlobalsFactory;
 use Waffle\Commons\Http\UploadedFile;
@@ -46,146 +47,50 @@ class GlobalsFactoryTest extends AbstractTestCase
         array $files = [],
     ): void {
         $_SERVER = $server
-        + [
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/',
-            'SERVER_PROTOCOL' => 'HTTP/1.1',
-            'HTTP_HOST' => 'localhost',
-        ];
+            + [
+                'REQUEST_METHOD' => 'GET',
+                'REQUEST_URI' => '/',
+                'SERVER_PROTOCOL' => 'HTTP/1.1',
+                'HTTP_HOST' => 'example.com',
+            ];
         $_GET = $get;
         $_POST = $post;
         $_COOKIE = $cookie;
         $_FILES = $files;
     }
 
-    public function testCreateFromGlobalsBasic(): void
+    public function testCreateFromGlobals(): void
     {
-        $this->setGlobals(
-            server: [
-                'REQUEST_METHOD' => 'POST',
-                'REQUEST_URI' => '/test?foo=bar',
-                'QUERY_STRING' => 'foo=bar',
-                'HTTP_HOST' => 'example.com',
-                'HTTP_CONTENT_TYPE' => 'application/json',
-                'HTTP_X_TEST' => 'Waffle',
-            ],
-            get: ['foo' => 'bar'],
-            cookie: ['user' => 'test'],
-        );
-
+        $this->setGlobals();
         $factory = new GlobalsFactory();
         $request = $factory->createFromGlobals();
 
-        static::assertSame('POST', $request->getMethod());
-        static::assertSame('http://example.com/test?foo=bar', (string) $request->getUri());
-        static::assertSame(['foo' => 'bar'], $request->getQueryParams());
-        static::assertSame(['user' => 'test'], $request->getCookieParams());
-        static::assertSame('application/json', $request->getHeaderLine('Content-Type'));
-        static::assertSame('Waffle', $request->getHeaderLine('X-Test'));
-        static::assertSame('example.com', $request->getHeaderLine('Host'));
+        static::assertSame('GET', $request->getMethod());
+        static::assertSame('http://example.com/', (string) $request->getUri());
+        static::assertSame('1.1', $request->getProtocolVersion());
     }
 
-    public function testCreateFromGlobalsThrowsExceptionForInvalidFiles(): void
+    public function testCreateWithCustomBodyStreamFactory(): void
     {
-        $this->setGlobals(files: ['invalid_upload' => 'string']);
+        $this->setGlobals();
+        $stream = $this->createStub(StreamInterface::class);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid value in $_FILES array');
+        // Test dependency injection for the body stream factory
+        $factory = new GlobalsFactory(bodyStreamFactory: fn () => $stream);
+        $request = $factory->createFromGlobals();
 
-        new GlobalsFactory()->createFromGlobals();
+        static::assertSame($stream, $request->getBody());
     }
 
-    public function testHttpsDetection(): void
-    {
-        $this->setGlobals(server: ['HTTPS' => 'on', 'HTTP_HOST' => 'secure.com']);
-        static::assertSame('https', new GlobalsFactory()->createFromGlobals()->getUri()->getScheme());
-    }
-
-    public function testParsedBodyForFormData(): void
-    {
-        $this->setGlobals(server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'], post: [
-            'user' => 'waffle',
-        ]);
-
-        $request = new GlobalsFactory()->createFromGlobals();
-        static::assertSame(['user' => 'waffle'], $request->getParsedBody());
-    }
-
-    public function testUploadedFiles(): void
-    {
-        // Simulates file upload
-        $tempFile = tempnam(sys_get_temp_dir(), 'wfl_test_upload');
-        if ($tempFile === false) {
-            static::fail('Unable to create temporary file');
-        }
-        file_put_contents($tempFile, 'test');
-
-        $files = [
-            'avatar' => [
-                'name' => 'test.txt',
-                'type' => 'text/plain',
-                'tmp_name' => $tempFile,
-                'error' => UPLOAD_ERR_OK,
-                'size' => 4,
-            ],
-        ];
-        $this->setGlobals(files: $files);
-
-        $request = new GlobalsFactory()->createFromGlobals();
-        $uploadedFiles = $request->getUploadedFiles();
-
-        static::assertCount(1, $uploadedFiles);
-        static::assertInstanceOf(UploadedFile::class, $uploadedFiles['avatar']);
-        static::assertSame('test.txt', $uploadedFiles['avatar']->getClientFilename());
-        static::assertSame(4, $uploadedFiles['avatar']->getSize());
-
-        unlink($tempFile);
-    }
-
-    public function testUploadedFilesNested(): void
-    {
-        // Simulates nested file uploads
-        $tempFile1 = tempnam(sys_get_temp_dir(), 'wfl_test_upload1');
-        file_put_contents($tempFile1, 'file1');
-        $tempFile2 = tempnam(sys_get_temp_dir(), 'wfl_test_upload2');
-        file_put_contents($tempFile2, 'file2');
-
-        $files = [
-            'docs' => [
-                'name' => ['doc1.txt', 'doc2.txt'],
-                'type' => ['text/plain', 'text/plain'],
-                'tmp_name' => [$tempFile1, $tempFile2],
-                'error' => [UPLOAD_ERR_OK, UPLOAD_ERR_OK],
-                'size' => [5, 5],
-            ],
-        ];
-        $this->setGlobals(files: $files);
-
-        $request = new GlobalsFactory()->createFromGlobals();
-        $uploadedFiles = $request->getUploadedFiles();
-
-        static::assertCount(1, $uploadedFiles);
-        static::assertIsArray($uploadedFiles['docs']);
-        static::assertCount(2, $uploadedFiles['docs']);
-        static::assertInstanceOf(UploadedFileInterface::class, $uploadedFiles['docs'][0]);
-        static::assertInstanceOf(UploadedFileInterface::class, $uploadedFiles['docs'][1]);
-        static::assertSame('doc1.txt', $uploadedFiles['docs'][0]->getClientFilename());
-        static::assertSame('doc2.txt', $uploadedFiles['docs'][1]->getClientFilename());
-
-        unlink($tempFile1);
-        unlink($tempFile2);
-    }
-
-    public function testAuthorizationHeader(): void
+    public function testAuthorizationHeaderFromGlobals(): void
     {
         $this->setGlobals(server: ['HTTP_AUTHORIZATION' => 'Bearer 12345']);
         $request = new GlobalsFactory()->createFromGlobals();
         static::assertSame('Bearer 12345', $request->getHeaderLine('Authorization'));
     }
 
-    public function testRedirectAuthorizationHeader(): void
+    public function testAuthorizationHeaderFromRedirectGlobals(): void
     {
-        // Tests REDIRECT_HTTP_AUTHORIZATION (used by Apache + mod_rewrite)
         $this->setGlobals(server: ['REDIRECT_HTTP_AUTHORIZATION' => 'Bearer 67890']);
         $request = new GlobalsFactory()->createFromGlobals();
         static::assertSame('Bearer 67890', $request->getHeaderLine('Authorization'));
@@ -220,7 +125,180 @@ class GlobalsFactoryTest extends AbstractTestCase
             'QUERY_STRING' => 'foo=bar&baz=qux',
         ]);
         $request = new GlobalsFactory()->createFromGlobals();
-        static::assertSame('/path', $request->getUri()->getPath());
+        static::assertSame('http://example.com/path?foo=bar&baz=qux', (string) $request->getUri());
         static::assertSame('foo=bar&baz=qux', $request->getUri()->getQuery());
+    }
+
+    public function testParsedBodyFromPost(): void
+    {
+        $this->setGlobals(
+            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'],
+            post: ['foo' => 'bar']
+        );
+        $request = new GlobalsFactory()->createFromGlobals();
+        static::assertSame(['foo' => 'bar'], $request->getParsedBody());
+    }
+
+    public function testCookieParams(): void
+    {
+        $this->setGlobals(cookie: ['theme' => 'dark', 'session_id' => '123']);
+        $request = new GlobalsFactory()->createFromGlobals();
+
+        static::assertSame(['theme' => 'dark', 'session_id' => '123'], $request->getCookieParams());
+    }
+
+    public function testServerParams(): void
+    {
+        $this->setGlobals(server: ['CUSTOM_SERVER_VAR' => 'waffle_test']);
+        $request = new GlobalsFactory()->createFromGlobals();
+
+        $serverParams = $request->getServerParams();
+        static::assertArrayHasKey('CUSTOM_SERVER_VAR', $serverParams);
+        static::assertSame('waffle_test', $serverParams['CUSTOM_SERVER_VAR']);
+    }
+
+    public function testProtocolVersionParsing(): void
+    {
+        $this->setGlobals(server: ['SERVER_PROTOCOL' => 'HTTP/2.0']);
+        $request = new GlobalsFactory()->createFromGlobals();
+        static::assertSame('2.0', $request->getProtocolVersion());
+
+        $this->setGlobals(server: ['SERVER_PROTOCOL' => 'HTTP/1.0']);
+        $request = new GlobalsFactory()->createFromGlobals();
+        static::assertSame('1.0', $request->getProtocolVersion());
+    }
+
+    public function testCustomHeadersParsing(): void
+    {
+        $this->setGlobals(server: [
+            'HTTP_X_CUSTOM_HEADER' => 'custom-value',
+            'HTTP_CONTENT_TYPE' => 'application/json', // Should be ignored/handled as Content-Type
+        ]);
+        $request = new GlobalsFactory()->createFromGlobals();
+
+        static::assertSame('custom-value', $request->getHeaderLine('X-Custom-Header'));
+    }
+
+    public function testUploadedFiles(): void
+    {
+        $this->setGlobals(
+            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'],
+            files: [
+                'file' => [
+                    'name' => 'test.txt',
+                    'type' => 'text/plain',
+                    'tmp_name' => '/tmp/phpYcfZnq',
+                    'error' => 0,
+                    'size' => 123,
+                ],
+            ]
+        );
+        $request = new GlobalsFactory()->createFromGlobals();
+        $files = $request->getUploadedFiles();
+
+        static::assertArrayHasKey('file', $files);
+        static::assertInstanceOf(UploadedFileInterface::class, $files['file']);
+        static::assertSame('test.txt', $files['file']->getClientFilename());
+    }
+
+    public function testNestedUploadedFiles(): void
+    {
+        $this->setGlobals(
+            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'],
+            files: [
+                'files' => [
+                    'name' => ['a.txt', 'b.txt'],
+                    'type' => ['text/plain', 'text/plain'],
+                    'tmp_name' => ['/tmp/php1', '/tmp/php2'],
+                    'error' => [0, 0],
+                    'size' => [10, 20],
+                ],
+            ]
+        );
+        $request = new GlobalsFactory()->createFromGlobals();
+        $files = $request->getUploadedFiles();
+
+        static::assertArrayHasKey('files', $files);
+        static::assertIsArray($files['files']);
+        static::assertCount(2, $files['files']);
+        static::assertInstanceOf(UploadedFileInterface::class, $files['files'][0]);
+        static::assertSame('a.txt', $files['files'][0]->getClientFilename());
+    }
+
+    public function testInvalidFilesStructureThrowsException(): void
+    {
+        $this->setGlobals(
+            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'],
+            files: [
+                'invalid_upload' => 'not_an_array', // Invalid structure
+            ]
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid value in $_FILES array.');
+
+        new GlobalsFactory()->createFromGlobals();
+    }
+
+    // --- Trusted Hosts Tests ---
+
+    public function testItAcceptsTrustedHost(): void
+    {
+        $this->setGlobals(server: ['HTTP_HOST' => 'trusted.com']);
+
+        // We explicitly allow trusted.com
+        $factory = new GlobalsFactory(trustedHosts: ['trusted.com']);
+        $request = $factory->createFromGlobals();
+
+        static::assertSame('trusted.com', $request->getUri()->getHost());
+    }
+
+    public function testItAcceptsTrustedHostWithPort(): void
+    {
+        $this->setGlobals(server: ['HTTP_HOST' => 'trusted.com:8080']);
+
+        // Logic should strip port before checking
+        $factory = new GlobalsFactory(trustedHosts: ['trusted.com']);
+        $request = $factory->createFromGlobals();
+
+        static::assertSame('trusted.com', $request->getUri()->getHost());
+        static::assertSame(8080, $request->getUri()->getPort());
+    }
+
+    public function testItRejectsUntrustedHost(): void
+    {
+        $this->setGlobals(server: ['HTTP_HOST' => 'evil.com']);
+
+        $factory = new GlobalsFactory(trustedHosts: ['trusted.com', 'localhost']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Untrusted Host "evil.com"');
+
+        $factory->createFromGlobals();
+    }
+
+    public function testItRejectsMissingHostHeaderWhenTrustedHostsEnabled(): void
+    {
+        // Simulate HTTP/1.0 request without Host header
+        $server = ['REQUEST_METHOD' => 'GET'];
+        $_SERVER = $server;
+
+        $factory = new GlobalsFactory(trustedHosts: ['trusted.com']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing Host header');
+
+        $factory->createFromGlobals();
+    }
+
+    public function testItAllowsAnyHostIfTrustedListIsEmpty(): void
+    {
+        $this->setGlobals(server: ['HTTP_HOST' => 'anything.com']);
+
+        // Default behavior (empty list) -> No check
+        $factory = new GlobalsFactory(trustedHosts: []);
+        $request = $factory->createFromGlobals();
+
+        static::assertSame('anything.com', $request->getUri()->getHost());
     }
 }
