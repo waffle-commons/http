@@ -47,12 +47,12 @@ class GlobalsFactoryTest extends AbstractTestCase
         array $files = [],
     ): void {
         $_SERVER = $server
-            + [
-                'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/',
-                'SERVER_PROTOCOL' => 'HTTP/1.1',
-                'HTTP_HOST' => 'example.com',
-            ];
+        + [
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/',
+            'SERVER_PROTOCOL' => 'HTTP/1.1',
+            'HTTP_HOST' => 'example.com',
+        ];
         $_GET = $get;
         $_POST = $post;
         $_COOKIE = $cookie;
@@ -76,7 +76,7 @@ class GlobalsFactoryTest extends AbstractTestCase
         $stream = $this->createStub(StreamInterface::class);
 
         // Test dependency injection for the body stream factory
-        $factory = new GlobalsFactory(bodyStreamFactory: fn () => $stream);
+        $factory = new GlobalsFactory(bodyStreamFactory: fn() => $stream);
         $request = $factory->createFromGlobals();
 
         static::assertSame($stream, $request->getBody());
@@ -131,10 +131,10 @@ class GlobalsFactoryTest extends AbstractTestCase
 
     public function testParsedBodyFromPost(): void
     {
-        $this->setGlobals(
-            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'],
-            post: ['foo' => 'bar']
-        );
+        $this->setGlobals(server: [
+            'REQUEST_METHOD' => 'POST',
+            'CONTENT_TYPE' => 'application/x-www-form-urlencoded',
+        ], post: ['foo' => 'bar']);
         $request = new GlobalsFactory()->createFromGlobals();
         static::assertSame(['foo' => 'bar'], $request->getParsedBody());
     }
@@ -181,18 +181,15 @@ class GlobalsFactoryTest extends AbstractTestCase
 
     public function testUploadedFiles(): void
     {
-        $this->setGlobals(
-            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'],
-            files: [
-                'file' => [
-                    'name' => 'test.txt',
-                    'type' => 'text/plain',
-                    'tmp_name' => '/tmp/phpYcfZnq',
-                    'error' => 0,
-                    'size' => 123,
-                ],
-            ]
-        );
+        $this->setGlobals(server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'], files: [
+            'file' => [
+                'name' => 'test.txt',
+                'type' => 'text/plain',
+                'tmp_name' => '/tmp/phpYcfZnq',
+                'error' => 0,
+                'size' => 123,
+            ],
+        ]);
         $request = new GlobalsFactory()->createFromGlobals();
         $files = $request->getUploadedFiles();
 
@@ -203,18 +200,15 @@ class GlobalsFactoryTest extends AbstractTestCase
 
     public function testNestedUploadedFiles(): void
     {
-        $this->setGlobals(
-            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'],
-            files: [
-                'files' => [
-                    'name' => ['a.txt', 'b.txt'],
-                    'type' => ['text/plain', 'text/plain'],
-                    'tmp_name' => ['/tmp/php1', '/tmp/php2'],
-                    'error' => [0, 0],
-                    'size' => [10, 20],
-                ],
-            ]
-        );
+        $this->setGlobals(server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'], files: [
+            'files' => [
+                'name' => ['a.txt', 'b.txt'],
+                'type' => ['text/plain', 'text/plain'],
+                'tmp_name' => ['/tmp/php1', '/tmp/php2'],
+                'error' => [0, 0],
+                'size' => [10, 20],
+            ],
+        ]);
         $request = new GlobalsFactory()->createFromGlobals();
         $files = $request->getUploadedFiles();
 
@@ -227,12 +221,9 @@ class GlobalsFactoryTest extends AbstractTestCase
 
     public function testInvalidFilesStructureThrowsException(): void
     {
-        $this->setGlobals(
-            server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'],
-            files: [
-                'invalid_upload' => 'not_an_array', // Invalid structure
-            ]
-        );
+        $this->setGlobals(server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'], files: [
+            'invalid_upload' => 'not_an_array', // Invalid structure
+        ]);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value in $_FILES array.');

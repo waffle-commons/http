@@ -69,14 +69,14 @@ count = 1
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.1000000000000005)."
+message = "Class has a high kan defect score (2.3100000000000005)."
 count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "literal-named-argument"
 message = "Literal argument `''` should be passed as a named argument for clarity."
-count = 1
+count = 2
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
@@ -112,7 +112,7 @@ count = 1
 file = "src/Factory/GlobalsFactory.php"
 code = "literal-named-argument"
 message = "Literal argument `true` should be passed as a named argument for clarity."
-count = 2
+count = 3
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
@@ -130,7 +130,7 @@ count = 5
 file = "src/Factory/GlobalsFactory.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
-count = 1
+count = 2
 
 [[issues]]
 file = "src/Factory/StreamFactory.php"
@@ -350,38 +350,14 @@ count = 3
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "literal-named-argument"
-message = "Literal argument `'file1'` should be passed as a named argument for clarity."
+code = "no-redundant-use"
+message = "Unused import: `UploadedFile`."
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "literal-named-argument"
-message = "Literal argument `'file2'` should be passed as a named argument for clarity."
-count = 1
-
-[[issues]]
-file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "literal-named-argument"
-message = "Literal argument `'test'` should be passed as a named argument for clarity."
-count = 1
-
-[[issues]]
-file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "literal-named-argument"
-message = "Literal argument `'wfl_test_upload'` should be passed as a named argument for clarity."
-count = 1
-
-[[issues]]
-file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "literal-named-argument"
-message = "Literal argument `'wfl_test_upload1'` should be passed as a named argument for clarity."
-count = 1
-
-[[issues]]
-file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "literal-named-argument"
-message = "Literal argument `'wfl_test_upload2'` should be passed as a named argument for clarity."
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
 count = 1
 
 [[issues]]

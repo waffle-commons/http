@@ -71,7 +71,7 @@ class GlobalsFactory
                 throw new InvalidArgumentException(sprintf(
                     'Untrusted Host "%s". Allowed hosts: %s',
                     $host,
-                    implode(', ', $this->trustedHosts)
+                    implode(', ', $this->trustedHosts),
                 ));
             }
         }
@@ -111,6 +111,8 @@ class GlobalsFactory
      */
     private function createUriFromGlobals(): UriInterface
     {
+        $matches = [];
+
         $scheme = 'http';
         if (isset($_SERVER['HTTPS']) && ('on' === $_SERVER['HTTPS'] || 1 === (int) $_SERVER['HTTPS'])) {
             $scheme = 'https';

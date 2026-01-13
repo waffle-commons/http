@@ -44,6 +44,12 @@ count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #2 of `implode`: expected `array<array-key, Stringable|null|scalar>|null`, but provided type `non-empty-array<array-key, mixed>` is less specific."
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
 code = "less-specific-return-statement"
 message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, Psr\Http\Message\UploadedFileInterface>` for function `waffle\commons\http\factory\globalsfactory::createuploadedfilesfromglobals`.'
 count = 1
@@ -146,8 +152,8 @@ count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
-code = "reference-to-undefined-variable"
-message = "Reference created from a previously undefined variable `$matches`."
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `InvalidArgumentException` in `Waffle\Commons\Http\Factory\GlobalsFactory::createFromGlobals`.'
 count = 1
 
 [[issues]]
@@ -340,6 +346,12 @@ count = 1
 file = "src/Stream.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `waffle\commons\http\stream::isseekable`. Saw type `nonnull`.'
+count = 1
+
+[[issues]]
+file = "src/UploadedFile.php"
+code = "docblock-type-mismatch"
+message = "Docblock return type `int|null` is incompatible with native return type `int`."
 count = 1
 
 [[issues]]
@@ -608,18 +620,6 @@ count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "possibly-false-argument"
-message = "Argument #1 of function `file_put_contents` is possibly `false`, but parameter type `string` does not accept it."
-count = 2
-
-[[issues]]
-file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "possibly-false-argument"
-message = "Argument #1 of function `unlink` is possibly `false`, but parameter type `string` does not accept it."
-count = 2
-
-[[issues]]
-file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "possibly-undefined-array-index"
 message = "Possibly undefined array key `int(0)` accessed on `array<array-key, mixed>`."
 count = 1
@@ -627,31 +627,37 @@ count = 1
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "possibly-undefined-array-index"
-message = "Possibly undefined array key `int(1)` accessed on `array<array-key, mixed>`."
+message = "Possibly undefined array key `string('CUSTOM_SERVER_VAR')` accessed on `array<array-key, mixed>`."
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "possibly-undefined-array-index"
-message = "Possibly undefined array key `string('avatar')` accessed on `array<array-key, mixed>`."
+message = "Possibly undefined array key `string('file')` accessed on `array<array-key, mixed>`."
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "possibly-undefined-array-index"
-message = "Possibly undefined array key `string('docs')` accessed on `array<array-key, mixed>`."
+message = "Possibly undefined array key `string('files')` accessed on `array<array-key, mixed>`."
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\AssertionFailedError` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testUploadedFiles`.'
+message = 'Potentially unhandled exception `PHPUnit\Event\NoPreviousThrowableException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testCreateWithCustomBodyStreamFactory`.'
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testUploadedFilesNested`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testNestedUploadedFiles`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\Exception` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testServerParams`.'
 count = 1
 
 [[issues]]
@@ -663,7 +669,13 @@ count = 1
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testAuthorizationHeader`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testAuthorizationHeaderFromGlobals`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testAuthorizationHeaderFromRedirectGlobals`.'
 count = 1
 
 [[issues]]
@@ -675,31 +687,67 @@ count = 1
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testCreateFromGlobalsBasic`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testCookieParams`.'
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testHttpsDetection`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testCreateFromGlobals`.'
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testParsedBodyForFormData`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testCreateWithCustomBodyStreamFactory`.'
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testRedirectAuthorizationHeader`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testCustomHeadersParsing`.'
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testUploadedFilesNested`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testItAcceptsTrustedHostWithPort`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testItAcceptsTrustedHost`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testItAllowsAnyHostIfTrustedListIsEmpty`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testNestedUploadedFiles`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testParsedBodyFromPost`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testProtocolVersionParsing`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\ExpectationFailedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testServerParams`.'
 count = 1
 
 [[issues]]
@@ -723,19 +771,25 @@ count = 1
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testUploadedFilesNested`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testNestedUploadedFiles`.'
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\GeneratorNotSupportedException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testUploadedFiles`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\InvalidArgumentException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testCreateWithCustomBodyStreamFactory`.'
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
 code = "unhandled-thrown-type"
-message = 'Potentially unhandled exception `PHPUnit\Framework\UnknownClassOrInterfaceException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testUploadedFilesNested`.'
+message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testCreateWithCustomBodyStreamFactory`.'
+count = 1
+
+[[issues]]
+file = "tests/src/Factory/GlobalsFactoryTest.php"
+code = "unhandled-thrown-type"
+message = 'Potentially unhandled exception `PHPUnit\Framework\UnknownClassOrInterfaceException` in `WaffleTests\Commons\Http\Factory\GlobalsFactoryTest::testNestedUploadedFiles`.'
 count = 1
 
 [[issues]]
@@ -1061,6 +1115,24 @@ file = "tests/src/Factory/UploadedFileFactoryTest.php"
 code = "unhandled-thrown-type"
 message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Http\Factory\UploadedFileFactoryTest::testCreateUploadedFileUsesStreamPathIfRealFile`.'
 count = 1
+
+[[issues]]
+file = "tests/src/RequestTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "tests/src/RequestTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "tests/src/RequestTest.php"
+code = "non-existent-method"
+message = 'Method `withuri` does not exist on type `psr\http\message\messageinterface`.'
+count = 2
 
 [[issues]]
 file = "tests/src/RequestTest.php"
