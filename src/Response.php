@@ -189,7 +189,7 @@ class Response extends AbstractMessage implements ResponseInterface
             throw new InvalidArgumentException(sprintf(
                 'Invalid status code "%d"; must be an integer between 100 and 599.',
                 $code,
-            ));
+            ), 500);
         }
     }
 }
