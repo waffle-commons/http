@@ -23,12 +23,12 @@ use Waffle\Commons\Http\Uri;
 class GlobalsFactory
 {
     /**
-     * @var callable Factory to create a Stream for php://input.
+     * @var callable(): StreamInterface
      */
     private $bodyStreamFactory;
 
     /**
-     * @param callable|null $bodyStreamFactory Factory to create a Stream for php://input.
+     * @param (callable(): StreamInterface)|null $bodyStreamFactory Factory to create a Stream for php://input.
      */
     public function __construct(
         ?callable $bodyStreamFactory = null,

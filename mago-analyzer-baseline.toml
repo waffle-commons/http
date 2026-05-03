@@ -3,7 +3,7 @@ variant = "loose"
 [[issues]]
 file = "src/Abstract/AbstractMessage.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Abstract\AbstractMessage::normalizeheadervalue`: expected `array<array-key, string>|string`, but found `mixed`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Abstract\AbstractMessage::normalizeHeaderValue`: expected `array<array-key, string>|string`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -27,7 +27,7 @@ count = 1
 [[issues]]
 file = "src/Emitter/ResponseEmitter.php"
 code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `Waffle\Commons\Http\Emitter\ResponseEmitter::emitheaders`: expected `array<string, array<array-key, string>>`, but provided type `array<array-key, array<array-key, string>>` is less specific.'
+message = 'Argument type mismatch for argument #1 of `Waffle\Commons\Http\Emitter\ResponseEmitter::emitHeaders`: expected `array<string, array<array-key, string>>`, but provided type `array<array-key, array<array-key, string>>` is less specific.'
 count = 1
 
 [[issues]]
@@ -39,7 +39,7 @@ count = 1
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "invalid-return-statement"
-message = 'Invalid return type for function `waffle\commons\http\factory\globalsfactory::getheadersfromglobals`: expected `array<string, string>`, but found `array<string, bool|float|non-empty-list<string>|positive-int|string>`.'
+message = 'Invalid return type for function `Waffle\Commons\Http\Factory\GlobalsFactory::getHeadersFromGlobals`: expected `array<string, string>`, but found `array<string, bool|float|non-empty-list<string>|positive-int|string>`.'
 count = 1
 
 [[issues]]
@@ -51,7 +51,19 @@ count = 1
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "less-specific-return-statement"
-message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, Psr\Http\Message\UploadedFileInterface>` for function `waffle\commons\http\factory\globalsfactory::createuploadedfilesfromglobals`.'
+message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, Psr\Http\Message\UploadedFileInterface>` for function `Waffle\Commons\Http\Factory\GlobalsFactory::createUploadedFilesFromGlobals`.'
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Stream::__construct`: expected `resource|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\UploadedFile::__construct`: expected `string`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -63,43 +75,19 @@ count = 1
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `waffle\commons\http\stream::__construct`: expected `resource|string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "src/Factory/GlobalsFactory.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `waffle\commons\http\uploadedfile::__construct`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "src/Factory/GlobalsFactory.php"
-code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `explode`: expected `string`, but found `nonnull`."
 count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `Waffle\Commons\Http\Factory\GlobalsFactory::getparsedbody`: expected `Psr\Http\Message\StreamInterface`, but found `mixed`.'
+message = 'Invalid argument type for argument #4 of `Waffle\Commons\Http\UploadedFile::__construct`: expected `null|string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #4 of `waffle\commons\http\serverrequest::__construct`: expected `Psr\Http\Message\StreamInterface|null|resource|string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "src/Factory/GlobalsFactory.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #4 of `waffle\commons\http\uploadedfile::__construct`: expected `null|string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "src/Factory/GlobalsFactory.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #5 of `waffle\commons\http\uploadedfile::__construct`: expected `null|string`, but found `mixed`.'
+message = 'Invalid argument type for argument #5 of `Waffle\Commons\Http\UploadedFile::__construct`: expected `null|string`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -112,7 +100,7 @@ count = 1
 file = "src/Factory/GlobalsFactory.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 2
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
@@ -123,32 +111,26 @@ count = 1
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `waffle\commons\http\factory\globalsfactory::getparsedbody`. Saw type `mixed`.'
+message = 'Could not infer a precise return type for function `Waffle\Commons\Http\Factory\GlobalsFactory::getParsedBody`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
-code = "possibly-undefined-array-index"
+code = "possibly-undefined-int-array-index"
 message = "Possibly undefined array key `int(1)` accessed on `array<array-key, string>`."
 count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
-code = "possibly-undefined-array-index"
+code = "possibly-undefined-int-array-index"
 message = "Possibly undefined array key `int(2)` accessed on `array<array-key, string>`."
 count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
-code = "possibly-undefined-array-index"
+code = "possibly-undefined-string-array-index"
 message = "Possibly undefined array key `string('tmp_name')` accessed on `array<array-key, mixed>`."
 count = 3
-
-[[issues]]
-file = "src/Factory/GlobalsFactory.php"
-code = "redundant-condition"
-message = "This condition (type `true`) will always evaluate to true."
-count = 1
 
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
@@ -189,6 +171,12 @@ count = 1
 [[issues]]
 file = "src/Factory/StreamFactory.php"
 code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Stream::__construct`: expected `resource|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Factory/StreamFactory.php"
+code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `fseek`: expected `resource`, but found `mixed`."
 count = 1
 
@@ -196,12 +184,6 @@ count = 1
 file = "src/Factory/StreamFactory.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `fwrite`: expected `resource`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "src/Factory/StreamFactory.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `waffle\commons\http\stream::__construct`: expected `resource|string`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -333,25 +315,37 @@ count = 2
 [[issues]]
 file = "src/Stream.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `waffle\commons\http\stream::getmetadata`. Saw type `mixed`.'
+message = 'Could not infer a precise return type for function `Waffle\Commons\Http\Stream::getMetadata`. Saw type `mixed`.'
 count = 2
 
 [[issues]]
 file = "src/Stream.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `waffle\commons\http\stream::getsize`. Saw type `mixed`.'
+message = 'Could not infer a precise return type for function `Waffle\Commons\Http\Stream::getSize`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
 file = "src/Stream.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `waffle\commons\http\stream::isseekable`. Saw type `nonnull`.'
+message = 'Could not infer a precise return type for function `Waffle\Commons\Http\Stream::isSeekable`. Saw type `nonnull`.'
 count = 1
 
 [[issues]]
-file = "src/UploadedFile.php"
-code = "docblock-type-mismatch"
-message = "Docblock return type `int|null` is incompatible with native return type `int`."
+file = "src/Stream.php"
+code = "possibly-false-array-access"
+message = "Cannot perform array access on possibly `false` value."
+count = 1
+
+[[issues]]
+file = "src/Stream.php"
+code = "possibly-null-argument"
+message = "Argument #1 of function `fstat` is possibly `null`, but parameter type `resource` does not accept it."
+count = 1
+
+[[issues]]
+file = "src/Stream.php"
+code = "possibly-null-array-index"
+message = "Possibly using `null` as an array index to access elementof variable $this->detachedMeta."
 count = 1
 
 [[issues]]
@@ -363,61 +357,61 @@ count = 1
 [[issues]]
 file = "src/Uri.php"
 code = "invalid-return-statement"
-message = 'Invalid return type for function `waffle\commons\http\uri::filterpath`: expected `string`, but found `null|string`.'
+message = 'Invalid return type for function `Waffle\Commons\Http\Uri::filterPath`: expected `string`, but found `null|string`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterfragment`: expected `string`, but found `nonnull`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterFragment`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterhost`: expected `string`, but found `nonnull`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterHost`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterpath`: expected `string`, but found `nonnull`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterPath`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterport`: expected `int|null`, but found `nonnull`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterPort`: expected `int|null`, but found `nonnull`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterquery`: expected `string`, but found `nonnull`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterQuery`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterscheme`: expected `string`, but found `nonnull`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterScheme`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filteruserinfo`: expected `string`, but found `nonnull`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Uri::filterUserInfo`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `Waffle\Commons\Http\Uri::filteruserinfo`: expected `null|string`, but found `mixed`.'
+message = 'Invalid argument type for argument #2 of `Waffle\Commons\Http\Uri::filterUserInfo`: expected `null|string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "src/Uri.php"
 code = "nullable-return-statement"
-message = 'Function `waffle\commons\http\uri::filterpath` is declared to return `string` but possibly returns a nullable value (inferred as `null|string`).'
+message = 'Function `Waffle\Commons\Http\Uri::filterPath` is declared to return `string` but possibly returns a nullable value (inferred as `null|string`).'
 count = 1
 
 [[issues]]
@@ -440,7 +434,7 @@ count = 1
 
 [[issues]]
 file = "src/Uri.php"
-code = "possibly-undefined-array-index"
+code = "possibly-undefined-int-array-index"
 message = "Possibly undefined array key `int(0)` accessed on `array<array-key, string>`."
 count = 3
 
@@ -567,7 +561,7 @@ count = 1
 [[issues]]
 file = "tests/src/Emitter/ResponseEmitterTest.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `waffle\commons\http\emitter\headers_sent`. Saw type `nonnull`.'
+message = 'Could not infer a precise return type for function `Waffle\Commons\Http\Emitter\headers_sent`. Saw type `nonnull`.'
 count = 1
 
 [[issues]]
@@ -620,25 +614,25 @@ count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "possibly-undefined-array-index"
+code = "possibly-undefined-int-array-index"
 message = "Possibly undefined array key `int(0)` accessed on `array<array-key, mixed>`."
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "possibly-undefined-array-index"
+code = "possibly-undefined-string-array-index"
 message = "Possibly undefined array key `string('CUSTOM_SERVER_VAR')` accessed on `array<array-key, mixed>`."
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "possibly-undefined-array-index"
+code = "possibly-undefined-string-array-index"
 message = "Possibly undefined array key `string('file')` accessed on `array<array-key, mixed>`."
 count = 1
 
 [[issues]]
 file = "tests/src/Factory/GlobalsFactoryTest.php"
-code = "possibly-undefined-array-index"
+code = "possibly-undefined-string-array-index"
 message = "Possibly undefined array key `string('files')` accessed on `array<array-key, mixed>`."
 count = 1
 
@@ -813,7 +807,7 @@ count = 1
 [[issues]]
 file = "tests/src/Factory/Psr17FactoryTest.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `Waffle\Commons\Http\Factory\StreamFactory::createstreamfromfile` is possibly `false`, but parameter type `string` does not accept it.'
+message = 'Argument #1 of method `Waffle\Commons\Http\Factory\StreamFactory::createStreamFromFile` is possibly `false`, but parameter type `string` does not accept it.'
 count = 1
 
 [[issues]]
@@ -1011,7 +1005,7 @@ count = 1
 [[issues]]
 file = "tests/src/Factory/StreamFactoryTest.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `Waffle\Commons\Http\Factory\StreamFactory::createstreamfromfile` is possibly `false`, but parameter type `string` does not accept it.'
+message = 'Argument #1 of method `Waffle\Commons\Http\Factory\StreamFactory::createStreamFromFile` is possibly `false`, but parameter type `string` does not accept it.'
 count = 1
 
 [[issues]]
@@ -1115,24 +1109,6 @@ file = "tests/src/Factory/UploadedFileFactoryTest.php"
 code = "unhandled-thrown-type"
 message = 'Potentially unhandled exception `PHPUnit\Framework\MockObject\Exception` in `WaffleTests\Commons\Http\Factory\UploadedFileFactoryTest::testCreateUploadedFileUsesStreamPathIfRealFile`.'
 count = 1
-
-[[issues]]
-file = "tests/src/RequestTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "tests/src/RequestTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 3
-
-[[issues]]
-file = "tests/src/RequestTest.php"
-code = "non-existent-method"
-message = 'Method `withuri` does not exist on type `psr\http\message\messageinterface`.'
-count = 2
 
 [[issues]]
 file = "tests/src/RequestTest.php"
@@ -1263,7 +1239,7 @@ count = 1
 [[issues]]
 file = "tests/src/ResponseTest.php"
 code = "invalid-argument"
-message = 'Invalid argument type for argument #3 of `waffle\commons\http\response::__construct`: expected `Psr\Http\Message\StreamInterface|null|resource|string`, but found `int(12345)`.'
+message = 'Invalid argument type for argument #3 of `Waffle\Commons\Http\Response::__construct`: expected `Psr\Http\Message\StreamInterface|null|resource|string`, but found `int(12345)`.'
 count = 1
 
 [[issues]]
@@ -1461,19 +1437,19 @@ count = 1
 [[issues]]
 file = "tests/src/ServerRequestTest.php"
 code = "invalid-argument"
-message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\ServerRequest::withparsedbody`: expected `array<array-key, mixed>|null|object`, but found `int(123)`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\ServerRequest::withParsedBody`: expected `array<array-key, mixed>|null|object`, but found `int(123)`.'
 count = 1
 
 [[issues]]
 file = "tests/src/ServerRequestTest.php"
 code = "invalid-argument"
-message = 'Invalid argument type for argument #4 of `waffle\commons\http\serverrequest::__construct`: expected `Psr\Http\Message\StreamInterface|null|resource|string`, but found `int(12345)`.'
+message = 'Invalid argument type for argument #4 of `Waffle\Commons\Http\ServerRequest::__construct`: expected `Psr\Http\Message\StreamInterface|null|resource|string`, but found `int(12345)`.'
 count = 1
 
 [[issues]]
 file = "tests/src/ServerRequestTest.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #9 of `waffle\commons\http\serverrequest::__construct`: expected `array<array-key, mixed>|null|object`, but found `mixed`.'
+message = 'Invalid argument type for argument #9 of `Waffle\Commons\Http\ServerRequest::__construct`: expected `array<array-key, mixed>|null|object`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -1791,7 +1767,7 @@ count = 1
 [[issues]]
 file = "tests/src/StreamTest.php"
 code = "invalid-argument"
-message = 'Invalid argument type for argument #1 of `waffle\commons\http\stream::__construct`: expected `resource|string`, but found `int(12345)`.'
+message = 'Invalid argument type for argument #1 of `Waffle\Commons\Http\Stream::__construct`: expected `resource|string`, but found `int(12345)`.'
 count = 1
 
 [[issues]]
@@ -1839,7 +1815,7 @@ count = 5
 [[issues]]
 file = "tests/src/StreamTest.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `waffle\commons\http\stream::__construct` is possibly `false`, but parameter type `resource|string` does not accept it.'
+message = 'Argument #1 of method `Waffle\Commons\Http\Stream::__construct` is possibly `false`, but parameter type `resource|string` does not accept it.'
 count = 5
 
 [[issues]]
@@ -2187,7 +2163,7 @@ count = 1
 [[issues]]
 file = "tests/src/UploadedFileEdgeCaseTest.php"
 code = "invalid-argument"
-message = '''Invalid argument type for argument #1 of `waffle\commons\http\uploadedfile::__construct`: expected `string`, but found `list{string('not a string')}`.'''
+message = '''Invalid argument type for argument #1 of `Waffle\Commons\Http\UploadedFile::__construct`: expected `string`, but found `list{string('not a string')}`.'''
 count = 1
 
 [[issues]]
@@ -2265,14 +2241,14 @@ count = 3
 [[issues]]
 file = "tests/src/UploadedFileTest.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `Waffle\Commons\Http\UploadedFile::moveto` is possibly `false`, but parameter type `string` does not accept it.'
-count = 5
+message = 'Argument #1 of method `PHPUnit\Framework\Assert::assertFileExists` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
 
 [[issues]]
 file = "tests/src/UploadedFileTest.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `phpunit\framework\assert::assertfileexists` is possibly `false`, but parameter type `string` does not accept it.'
-count = 1
+message = 'Argument #1 of method `Waffle\Commons\Http\UploadedFile::moveTo` is possibly `false`, but parameter type `string` does not accept it.'
+count = 5
 
 [[issues]]
 file = "tests/src/UploadedFileTest.php"

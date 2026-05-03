@@ -20,6 +20,12 @@ count = 1
 
 [[issues]]
 file = "src/Abstract/AbstractMessage.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "src/Abstract/AbstractMessage.php"
 code = "strict-behavior"
 message = "Call to `in_array` must enforce strict comparison."
 count = 1
@@ -69,7 +75,7 @@ count = 1
 [[issues]]
 file = "src/Factory/GlobalsFactory.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.3100000000000005)."
+message = "Class has a high kan defect score."
 count = 1
 
 [[issues]]
@@ -133,6 +139,12 @@ message = "Use of the `empty` construct."
 count = 2
 
 [[issues]]
+file = "src/Factory/GlobalsFactory.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 6
+
+[[issues]]
 file = "src/Factory/StreamFactory.php"
 code = "literal-named-argument"
 message = "Literal argument `'r+'` should be passed as a named argument for clarity."
@@ -160,6 +172,12 @@ count = 1
 file = "src/Request.php"
 code = "no-boolean-flag-parameter"
 message = "Avoid boolean flag parameters."
+count = 1
+
+[[issues]]
+file = "src/Request.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -225,7 +243,7 @@ count = 1
 [[issues]]
 file = "src/Stream.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (1.76)."
+message = "Class has a high kan defect score."
 count = 1
 
 [[issues]]
@@ -310,6 +328,18 @@ count = 1
 file = "src/Uri.php"
 code = "no-else-clause"
 message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "src/Uri.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 8
+
+[[issues]]
+file = "src/Uri.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
 count = 1
 
 [[issues]]
@@ -421,6 +451,12 @@ message = "Literal argument `'test_upload'` should be passed as a named argument
 count = 1
 
 [[issues]]
+file = "tests/src/Factory/UploadedFileFactoryTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 2
+
+[[issues]]
 file = "tests/src/RequestTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
@@ -436,6 +472,12 @@ count = 1
 file = "tests/src/ResponseTest.php"
 code = "literal-named-argument"
 message = "Literal argument `'r+'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/ResponseTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
 count = 1
 
 [[issues]]
@@ -467,6 +509,12 @@ file = "tests/src/ServerRequestTest.php"
 code = "literal-named-argument"
 message = "Literal argument `0` should be passed as a named argument for clarity."
 count = 1
+
+[[issues]]
+file = "tests/src/ServerRequestTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 2
 
 [[issues]]
 file = "tests/src/ServerRequestTest.php"
@@ -530,6 +578,12 @@ count = 1
 
 [[issues]]
 file = "tests/src/StreamTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "tests/src/StreamTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -574,6 +628,12 @@ count = 1
 file = "tests/src/UploadedFileTest.php"
 code = "literal-named-argument"
 message = "Literal argument `'wfl_upload_test'` should be passed as a named argument for clarity."
+count = 1
+
+[[issues]]
+file = "tests/src/UriTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
 count = 1
 
 [[issues]]
