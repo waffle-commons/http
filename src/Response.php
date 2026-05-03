@@ -186,10 +186,10 @@ class Response extends AbstractMessage implements ResponseInterface
     private function validateStatusCode(int $code): void
     {
         if ($code < 100 || $code > 599) {
-            throw new InvalidArgumentException(sprintf(
-                'Invalid status code "%d"; must be an integer between 100 and 599.',
-                $code,
-            ));
+            throw new InvalidArgumentException(
+                sprintf('Invalid status code "%d"; must be an integer between 100 and 599.', $code),
+                500,
+            );
         }
     }
 }

@@ -23,15 +23,17 @@ use Waffle\Commons\Http\Uri;
 class GlobalsFactory
 {
     /**
-     * @var callable Factory to create a Stream for php://input.
+     * @var callable(): StreamInterface
      */
     private $bodyStreamFactory;
 
     /**
-     * @param callable|null $bodyStreamFactory Factory to create a Stream for php://input.
+     * @param (callable(): StreamInterface)|null $bodyStreamFactory Factory to create a Stream for php://input.
      */
-    public function __construct(?callable $bodyStreamFactory = null)
-    {
+    public function __construct(
+        ?callable $bodyStreamFactory = null,
+        private readonly array $trustedHosts = [],
+    ) {
         // Provides a default factory if none is given
         $this->bodyStreamFactory = $bodyStreamFactory ?? static function (): Stream {
             $resource = fopen('php://input', 'r');
@@ -49,6 +51,31 @@ class GlobalsFactory
      */
     public function createFromGlobals(): ServerRequestInterface
     {
+        $server = $_SERVER;
+
+        // Security Check: Trusted Hosts
+        if (!empty($this->trustedHosts)) {
+            $host = $server['HTTP_HOST'] ?? null;
+
+            if (!$host) {
+                // HTTP 1.0 request without Host header? Reject in modern context.
+                throw new InvalidArgumentException('Missing Host header');
+            }
+
+            // Remove port if present
+            $hostName = preg_replace('/:\d+$/', '', $host);
+
+            if (!in_array($hostName, $this->trustedHosts, true)) {
+                // We throw an exception here.
+                // The Kernel/Runtime should catch this and return a 400 Bad Request.
+                throw new InvalidArgumentException(sprintf(
+                    'Untrusted Host "%s". Allowed hosts: %s',
+                    $host,
+                    implode(', ', $this->trustedHosts),
+                ));
+            }
+        }
+
         // Method, URI, Headers, Body, Version
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $uri = $this->createUriFromGlobals();
@@ -84,6 +111,8 @@ class GlobalsFactory
      */
     private function createUriFromGlobals(): UriInterface
     {
+        $matches = [];
+
         $scheme = 'http';
         if (isset($_SERVER['HTTPS']) && ('on' === $_SERVER['HTTPS'] || 1 === (int) $_SERVER['HTTPS'])) {
             $scheme = 'https';
