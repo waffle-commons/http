@@ -36,7 +36,7 @@ class GlobalsFactory
     ) {
         // Provides a default factory if none is given
         $this->bodyStreamFactory = $bodyStreamFactory ?? static function (): Stream {
-            $resource = fopen('php://input', 'r');
+            $resource = fopen('php://input', mode: 'r');
             if (false === $resource) {
                 throw new RuntimeException('Failed to open php://input stream.');
             }
@@ -54,7 +54,7 @@ class GlobalsFactory
         $server = $_SERVER;
 
         // Security Check: Trusted Hosts
-        if (!empty($this->trustedHosts)) {
+        if ($this->trustedHosts !== []) {
             $host = $server['HTTP_HOST'] ?? null;
 
             if (!$host) {
@@ -237,7 +237,7 @@ class GlobalsFactory
      */
     private function createUploadedFilesFromGlobals(): array
     {
-        if (empty($_FILES)) {
+        if ($_FILES === []) {
             return [];
         }
         return $this->normalizeFiles($_FILES);

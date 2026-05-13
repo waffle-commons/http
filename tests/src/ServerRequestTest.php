@@ -51,7 +51,7 @@ class ServerRequestTest extends AbstractTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid body type');
 
-        new ServerRequest('POST', new Uri('/'), [], 12345); // Int is invalid
+        new ServerRequest('POST', new Uri('/'), [], 12_345); // Int is invalid
     }
 
     public function testRequestTargetDefaultsToSlash(): void
@@ -128,7 +128,7 @@ class ServerRequestTest extends AbstractTestCase
 
     public function testGetServerParams(): void
     {
-        $params = ['REQUEST_TIME' => 123456];
+        $params = ['REQUEST_TIME' => 123_456];
         $request = $this->createTestRequest('GET', '/', $params);
         static::assertSame($params, $request->getServerParams());
     }

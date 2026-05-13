@@ -106,7 +106,7 @@ namespace WaffleTests\Commons\Http {
             $this->expectException(InvalidArgumentException::class);
             $this->expectExceptionMessage('Invalid stream provided');
 
-            new Stream(12345);
+            new Stream(12_345);
         }
 
         public function testToStringReadsContent(): void

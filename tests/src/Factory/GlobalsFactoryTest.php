@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Waffle\Commons\Http\Factory\GlobalsFactory;
-use Waffle\Commons\Http\UploadedFile;
+
 use WaffleTests\Commons\Http\AbstractTestCase;
 
 class GlobalsFactoryTest extends AbstractTestCase
@@ -76,7 +76,7 @@ class GlobalsFactoryTest extends AbstractTestCase
         $stream = $this->createStub(StreamInterface::class);
 
         // Test dependency injection for the body stream factory
-        $factory = new GlobalsFactory(bodyStreamFactory: fn() => $stream);
+        $factory = new GlobalsFactory(bodyStreamFactory: static fn() => $stream);
         $request = $factory->createFromGlobals();
 
         static::assertSame($stream, $request->getBody());

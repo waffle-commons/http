@@ -40,6 +40,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
      * @param array|object|null $parsedBody Parsed body (typically $_POST or decoded JSON).
      * @param array $uploadedFiles Uploaded files (typically $_FILES).
      */
+    // @mago-ignore excessive-parameter-list
     public function __construct(
         string $method,
         UriInterface $uri,
@@ -49,7 +50,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         array $serverParams = [],
         array $cookieParams = [],
         array $queryParams = [],
-        $parsedBody = null,
+        array|object|null $parsedBody = null,
         array $uploadedFiles = [],
     ) {
         $this->method = $method;

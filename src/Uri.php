@@ -112,7 +112,7 @@ class Uri implements UriInterface
             return null;
         }
 
-        if ($port < 1 || $port > 65535) {
+        if ($port < 1 || $port > 65_535) {
             throw new InvalidArgumentException(sprintf('Invalid port: %d. Must be between 1 and 65535.', $port));
         }
 

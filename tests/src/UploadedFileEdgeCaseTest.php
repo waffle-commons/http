@@ -30,7 +30,7 @@ class UploadedFileEdgeCaseTest extends TestCase
     protected function tearDown(): void
     {
         if (file_exists($this->tempFile)) {
-            @unlink($this->tempFile);
+            unlink($this->tempFile);
         }
         parent::tearDown();
     }
@@ -46,9 +46,9 @@ class UploadedFileEdgeCaseTest extends TestCase
 
         $this->expectException(RuntimeException::class);
 
-        // FIX: Use the error control operator '@' to suppress the native PHP warning
-        // emitted by rename() failure. We only care about the Exception being thrown.
-        @$uploadedFile->moveTo($invalidPath);
+        // The native PHP warning from rename() is suppressed by PHPUnit's expectException handler.
+        // We only care about the RuntimeException being thrown.
+        $uploadedFile->moveTo($invalidPath);
     }
 
     public function testMoveToThrowsExceptionIfStreamIsMoved(): void
@@ -60,7 +60,9 @@ class UploadedFileEdgeCaseTest extends TestCase
         $uploadedFile->moveTo($target);
 
         // Clean up the moved file
-        @unlink($target);
+        if (file_exists($target)) {
+            unlink($target);
+        }
 
         // Second move should fail because the file is already marked as moved
         $this->expectException(RuntimeException::class);
@@ -83,7 +85,9 @@ class UploadedFileEdgeCaseTest extends TestCase
 
         $target = $this->tempFile . '_moved_stream';
         $uploadedFile->moveTo($target);
-        @unlink($target);
+        if (file_exists($target)) {
+            unlink($target);
+        }
 
         // PSR-7: getStream() must throw if the file has been moved
         $this->expectException(RuntimeException::class);

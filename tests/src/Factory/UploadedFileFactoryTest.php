@@ -14,13 +14,13 @@ class UploadedFileFactoryTest extends TestCase
     {
         $factory = new UploadedFileFactory();
         $stream = $this->createStub(StreamInterface::class);
-        $stream->method('getSize')->willReturn(12345);
+        $stream->method('getSize')->willReturn(12_345);
         $stream->method('getMetadata')->with('uri')->willReturn('php://temp');
         $stream->method('__toString')->willReturn('content');
 
         $file = $factory->createUploadedFile($stream);
 
-        static::assertSame(12345, $file->getSize());
+        static::assertSame(12_345, $file->getSize());
     }
 
     public function testCreateUploadedFileUsesStreamPathIfRealFile(): void

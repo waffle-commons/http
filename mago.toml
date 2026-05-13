@@ -33,6 +33,8 @@ cyclomatic-complexity = { level = "warning", threshold = 20 }
 too-many-methods = { level = "warning", threshold = 20 }
 kan-defect = { level = "warning", threshold = 2.5 }
 no-ini-set = { enabled = false }
+# PSR-7 ServerRequest constructor legitimately requires many parameters; downgrade to warning
+excessive-parameter-list = { level = "warning" }
 
 # Style - Notes (informational)
 prefer-arrow-function = { level = "note" }
@@ -44,31 +46,37 @@ find-unused-definitions = true
 find-unused-expressions = true
 analyze-dead-code = true
 strict-list-index-checks = true
-allow-possibly-undefined-array-keys = false
+strict-array-index-existence = true
 ignore = [
-    { code = "mixed-assignment", in = [
-        "tests/",
-    ] },
-    { code = "mixed-argument", in = [
-        "tests/",
-    ] },
-    { code = "mixed-operand", in = [
-        "tests/",
-    ] },
-    { code = "ambiguous-object-method-access", in = [
-        "tests/",
-    ] },
-    { code = "no-value", in = [
-        "tests/",
-    ] },
-    { code = "invalid-method-access", in = [
-        "tests/",
-    ] },
-    { code = "check-throws", in = [
-        "tests/",
-    ] },
-    { code = "non-existent-class-like", in = [
-        "tests/",
-        "src/",
-    ] },
-]
+      { code = "mixed-assignment", in = [
+          "tests/",
+      ] },
+      { code = "mixed-argument", in = [
+          "tests/",
+      ] },
+      { code = "mixed-operand", in = [
+          "tests/",
+      ] },
+      { code = "ambiguous-object-method-access", in = [
+          "tests/",
+      ] },
+      { code = "no-value", in = [
+          "tests/",
+      ] },
+      { code = "invalid-method-access", in = [
+          "tests/",
+      ] },
+      { code = "check-throws", in = [
+          "tests/",
+      ] },
+      { code = "no-error-control-operator", in = [
+          "tests/",
+      ] },
+      { code = "no-global", in = [
+          "tests/",
+      ] },
+      { code = "non-existent-class-like", in = [
+          "tests/",
+          "src/",
+      ] },
+  ]

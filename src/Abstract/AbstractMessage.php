@@ -215,7 +215,7 @@ abstract class AbstractMessage implements MessageInterface
             $value = [$value];
         }
 
-        if (empty($value)) {
+        if ($value === []) {
             throw new InvalidArgumentException('Header value must not be an empty array.');
         }
 

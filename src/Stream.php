@@ -50,7 +50,7 @@ class Stream implements StreamInterface
     {
         if (is_string($stream)) {
             // If it's a string, assume it's a file path
-            $resource = @fopen($stream, $mode);
+            $resource = fopen($stream, $mode);
             if (false === $resource) {
                 throw new RuntimeException('Failed to open stream: ' . $stream);
             }

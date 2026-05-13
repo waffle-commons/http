@@ -67,7 +67,7 @@ class ResponseTest extends AbstractTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid body type');
 
-        new Response(200, [], 12345); // Int is invalid
+        new Response(200, [], 12_345); // Int is invalid
     }
 
     public function testConstructorThrowsExceptionForInvalidStatusCodeLow(): void

@@ -9,8 +9,7 @@ namespace Waffle\Commons\Http\Emitter {
      */
     function headers_sent(): bool
     {
-        global $mockHeadersSent;
-        return $mockHeadersSent ?? false;
+        return \WaffleTests\Commons\Http\Emitter\MockState::$headersSent;
     }
 
     /**
@@ -41,9 +40,8 @@ namespace WaffleTests\Commons\Http\Emitter {
         #[\Override]
         protected function tearDown(): void
         {
-            // Reset global mock state
-            global $mockHeadersSent;
-            $mockHeadersSent = false;
+            // Reset mock state
+            MockState::$headersSent = false;
             parent::tearDown();
         }
 
@@ -70,9 +68,8 @@ namespace WaffleTests\Commons\Http\Emitter {
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Cannot emit response; headers already sent.');
 
-            // Set the global flag to true, which our namespaced mock will read
-            global $mockHeadersSent;
-            $mockHeadersSent = true;
+            // Set the flag to true, which our namespaced mock will read
+            MockState::$headersSent = true;
 
             $response = new Response(200, [], $this->createStream('test'));
             new ResponseEmitter()->emit($response);
