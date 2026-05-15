@@ -13,7 +13,6 @@ use RuntimeException;
  *
  * @see https://www.php-fig.org/psr/psr-7/#34-psrhttpmessagestreaminterface
  */
-// @mago-ignore lint:cyclomatic-complexity
 class Stream implements StreamInterface
 {
     /**
@@ -317,7 +316,6 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    // @mago-ignore lint:halstead
     #[\Override]
     public function getMetadata(?string $key = null): mixed
     {

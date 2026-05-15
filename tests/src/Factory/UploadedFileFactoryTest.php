@@ -41,8 +41,6 @@ class UploadedFileFactoryTest extends TestCase
         // But we can verify no exception is thrown and it works.
         static::assertSame(12, $file->getSize());
 
-        if (is_string($tmpFile)) {
-            unlink($tmpFile);
-        }
+        unlink($tmpFile);
     }
 }

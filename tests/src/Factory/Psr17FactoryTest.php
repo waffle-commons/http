@@ -52,9 +52,7 @@ class Psr17FactoryTest extends AbstractTestCase
         file_put_contents(filename: $file, data: 'file content');
         $streamFile = $factory->createStreamFromFile($file);
         static::assertSame('file content', (string) $streamFile);
-        if (is_string($file)) {
-            unlink($file);
-        }
+        unlink($file);
 
         $resource = fopen(filename: 'php://temp', mode: 'r+');
         static::assertIsResource($resource);

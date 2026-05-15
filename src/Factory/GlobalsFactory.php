@@ -24,8 +24,6 @@ use Waffle\Commons\Http\Uri;
  * Host Header Injection is rejected by `Waffle\Commons\Pipeline\Middleware\TrustedHostMiddleware`
  * which sits between ErrorHandlerMiddleware and CoreRoutingMiddleware in the PSR-15 stack.
  */
-// @mago-ignore lint:cyclomatic-complexity
-// @mago-ignore lint:kan-defect
 class GlobalsFactory
 {
     /**
@@ -165,9 +163,6 @@ class GlobalsFactory
     {
         $headers = [];
         foreach ($_SERVER as $name => $value) {
-            if (!is_string($name)) {
-                continue;
-            }
             if (str_starts_with($name, 'HTTP_')) {
                 $headerName = str_replace(
                     search: '_',

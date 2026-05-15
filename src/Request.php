@@ -103,7 +103,6 @@ class Request extends AbstractMessage implements RequestInterface
     /**
      * {@inheritdoc}
      */
-    // @mago-ignore lint:no-boolean-flag-parameter
     #[\Override]
     public function withUri(UriInterface $uri, bool $preserveHost = false): RequestInterface
     {

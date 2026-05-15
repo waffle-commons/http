@@ -12,7 +12,6 @@ use Psr\Http\Message\UriInterface;
  *
  * @see https://www.php-fig.org/psr/psr-7/#35-psrhttpmessageuriinterface
  */
-// @mago-ignore lint:cyclomatic-complexity
 class Uri implements UriInterface
 {
     private string $scheme = '';

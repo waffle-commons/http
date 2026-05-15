@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1120d7fec0f4149f2debef62d397a4fb",
+    "content-hash": "4852e61ae560bf2b2f6fd3ff44ff54b7",
     "packages": [
         {
             "name": "psr/cache",
@@ -482,16 +482,16 @@
         },
         {
             "name": "waffle-commons/contracts",
-            "version": "0.1.0-alpha5",
+            "version": "0.1.0-alpha6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/waffle-commons/contracts.git",
-                "reference": "47ad1c565b6144432fb9ecf9bd2e0c0c27206060"
+                "reference": "a95e303bdc38b7ba2da18d491dc9d84ae79e8710"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/waffle-commons/contracts/zipball/47ad1c565b6144432fb9ecf9bd2e0c0c27206060",
-                "reference": "47ad1c565b6144432fb9ecf9bd2e0c0c27206060",
+                "url": "https://api.github.com/repos/waffle-commons/contracts/zipball/a95e303bdc38b7ba2da18d491dc9d84ae79e8710",
+                "reference": "a95e303bdc38b7ba2da18d491dc9d84ae79e8710",
                 "shasum": ""
             },
             "require": {
@@ -531,9 +531,9 @@
             "description": "Contracts component for Waffle framework.",
             "support": {
                 "issues": "https://github.com/waffle-commons/contracts/issues",
-                "source": "https://github.com/waffle-commons/contracts/tree/0.1.0-alpha5"
+                "source": "https://github.com/waffle-commons/contracts/tree/0.1.0-alpha6"
             },
-            "time": "2026-05-02T05:56:30+00:00"
+            "time": "2026-05-15T15:09:06+00:00"
         }
     ],
     "packages-dev": [
