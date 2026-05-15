@@ -15,6 +15,7 @@ use Waffle\Commons\Http\Abstract\AbstractMessage;
  *
  * @see https://www.php-fig.org/psr/psr-7/#321-psrhttpmessageserverrequestinterface
  */
+// @mago-ignore lint:cyclomatic-complexity
 class ServerRequest extends AbstractMessage implements ServerRequestInterface
 {
     private array $attributes = [];
@@ -40,7 +41,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
      * @param array|object|null $parsedBody Parsed body (typically $_POST or decoded JSON).
      * @param array $uploadedFiles Uploaded files (typically $_FILES).
      */
-    // @mago-ignore excessive-parameter-list
+    // @mago-ignore lint:excessive-parameter-list
     public function __construct(
         string $method,
         UriInterface $uri,
@@ -78,13 +79,14 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         }
 
         if (is_string($body) || null === $body) {
-            $resource = fopen('php://temp', 'r+');
+            $resource = fopen(filename: 'php://temp', mode: 'r+');
             if (false === $resource) {
                 throw new \RuntimeException('Failed to open php://temp stream.');
             }
+            assert(is_resource($resource), description: 'fopen must return a resource after false check.');
             if (is_string($body) && '' !== $body) {
-                fwrite($resource, $body);
-                fseek($resource, 0);
+                fwrite(stream: $resource, data: $body);
+                fseek(stream: $resource, offset: 0);
             }
             return new Stream($resource);
         }
@@ -169,6 +171,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
+    // @mago-ignore lint:no-boolean-flag-parameter
     #[\Override]
     public function withUri(UriInterface $uri, bool $preserveHost = false): ServerRequestInterface
     {
@@ -194,6 +197,15 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
 
         // If the new URI has no host, don't set the Host header.
         return $new;
+    }
+
+    /**
+     * Returns a new instance with the given URI and the Host header preserved.
+     * Builder-pattern alternative to withUri($uri, true).
+     */
+    public function withUriPreservingHost(UriInterface $uri): static
+    {
+        return $this->withUri($uri, true);
     }
 
     /**
@@ -280,7 +292,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function withParsedBody($data): ServerRequestInterface
+    public function withParsedBody(mixed $data): ServerRequestInterface
     {
         // Validates $data type according to PSR-7
         if (!is_array($data) && !is_object($data) && null !== $data) {

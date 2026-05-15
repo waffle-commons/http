@@ -44,8 +44,9 @@ class ResponseTest extends AbstractTestCase
 
     public function testConstructorAcceptsResourceBody(): void
     {
-        $resource = fopen('php://memory', 'r+');
-        fwrite($resource, 'Resource Content');
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
+        static::assertIsResource($resource);
+        fwrite(stream: $resource, data: 'Resource Content');
 
         $response = new Response(200, [], $resource);
 
@@ -67,7 +68,7 @@ class ResponseTest extends AbstractTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid body type');
 
-        new Response(200, [], 12_345); // Int is invalid
+        new Response(200, [], 12_345); // @mago-ignore invalid-argument // Int is invalid
     }
 
     public function testConstructorThrowsExceptionForInvalidStatusCodeLow(): void

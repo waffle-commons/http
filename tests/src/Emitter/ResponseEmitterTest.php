@@ -16,7 +16,8 @@ namespace Waffle\Commons\Http\Emitter {
      * Mock for header().
      * Prevents actual output and PHPUnit errors about headers being sent.
      */
-    function header(string $_header, bool $_replace = true, int $_http_response_code = 0): void
+    // @mago-ignore no-boolean-flag-parameter
+    function header(string $header, bool $replace = true, int $response_code = 0): void
     {
         // no-op for tests
     }

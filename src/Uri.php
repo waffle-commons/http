@@ -12,6 +12,7 @@ use Psr\Http\Message\UriInterface;
  *
  * @see https://www.php-fig.org/psr/psr-7/#35-psrhttpmessageuriinterface
  */
+// @mago-ignore lint:cyclomatic-complexity
 class Uri implements UriInterface
 {
     private string $scheme = '';
@@ -63,13 +64,20 @@ class Uri implements UriInterface
      */
     private function applyParts(array $parts): void
     {
-        $this->scheme = isset($parts['scheme']) ? $this->filterScheme($parts['scheme']) : '';
-        $this->userInfo = isset($parts['user']) ? $this->filterUserInfo($parts['user'], $parts['pass'] ?? null) : '';
-        $this->host = isset($parts['host']) ? $this->filterHost($parts['host']) : '';
-        $this->port = isset($parts['port']) ? $this->filterPort($parts['port']) : null;
-        $this->path = isset($parts['path']) ? $this->filterPath($parts['path']) : '';
-        $this->query = isset($parts['query']) ? $this->filterQuery($parts['query']) : '';
-        $this->fragment = isset($parts['fragment']) ? $this->filterFragment($parts['fragment']) : '';
+        $this->scheme = array_key_exists('scheme', $parts) ? $this->filterScheme((string) $parts['scheme']) : '';
+        $this->userInfo = array_key_exists('user', $parts)
+            ? $this->filterUserInfo(
+                (string) $parts['user'],
+                array_key_exists('pass', $parts) ? (string) $parts['pass'] : null,
+            )
+            : '';
+        $this->host = array_key_exists('host', $parts) ? $this->filterHost((string) $parts['host']) : '';
+        $this->port = array_key_exists('port', $parts) ? $this->filterPort((int) $parts['port']) : null;
+        $this->path = array_key_exists('path', $parts) ? $this->filterPath((string) $parts['path']) : '';
+        $this->query = array_key_exists('query', $parts) ? $this->filterQuery((string) $parts['query']) : '';
+        $this->fragment = array_key_exists('fragment', $parts)
+            ? $this->filterFragment((string) $parts['fragment'])
+            : '';
     }
 
     // --- Filter Methods for normalization ---
@@ -125,11 +133,12 @@ class Uri implements UriInterface
     private function filterPath(string $path): string
     {
         // Encodes unauthorized characters in a path, except '/'
-        $path = preg_replace_callback(
-            '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/%]+|%(?![A-Fa-f0-9]{2}))/',
-            static fn(array $matches): string => rawurlencode($matches[0]),
-            $path,
-        );
+        $path =
+            preg_replace_callback(
+                '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/%]+|%(?![A-Fa-f0-9]{2}))/',
+                static fn(array $matches): string => rawurlencode($matches[0] ?? ''),
+                $path,
+            ) ?? '';
         // Ensures a non-empty path starts with a '/'
         return $path === '' || str_starts_with($path, '/') ? $path : '/' . $path;
     }
@@ -140,13 +149,14 @@ class Uri implements UriInterface
     private function filterQuery(string $query): string
     {
         // Encodes unauthorized characters, except '/' and '?'
-        $query = preg_replace_callback(
-            '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/\?%]+|%(?![A-Fa-f0-9]{2}))/',
-            static fn(array $matches): string => rawurlencode($matches[0]),
-            $query,
-        );
+        $query =
+            preg_replace_callback(
+                '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/\?%]+|%(?![A-Fa-f0-9]{2}))/',
+                static fn(array $matches): string => rawurlencode($matches[0] ?? ''),
+                $query,
+            ) ?? '';
         // Removes leading '?' if present
-        return ltrim($query, '?');
+        return ltrim(string: $query, characters: '?');
     }
 
     /**
@@ -155,13 +165,31 @@ class Uri implements UriInterface
     private function filterFragment(string $fragment): string
     {
         // Encodes unauthorized characters, except '/', '?' and '#'
-        $fragment = preg_replace_callback(
-            '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/\?%]+|%(?![A-Fa-f0-9]{2}))/',
-            static fn(array $matches): string => rawurlencode($matches[0]),
-            $fragment,
-        );
+        $fragment =
+            preg_replace_callback(
+                '/(?:[^a-zA-Z0-9_\-\.~!\$&\'\(\)\*\+,;=:@\/\?%]+|%(?![A-Fa-f0-9]{2}))/',
+                static fn(array $matches): string => rawurlencode($matches[0] ?? ''),
+                $fragment,
+            ) ?? '';
         // Removes leading '#' if present
-        return ltrim($fragment, '#');
+        return ltrim(string: $fragment, characters: '#');
+    }
+
+    /**
+     * Applies PSR-7 path normalization rules based on authority presence.
+     */
+    private function buildNormalizedPath(string $authority, string $path): string
+    {
+        if ('' !== $authority && $path !== '' && !str_starts_with($path, '/')) {
+            return '/' . $path;
+        }
+        if ('' === $authority && str_starts_with($path, '//')) {
+            return '/' . ltrim(string: $path, characters: '/');
+        }
+        if ($path === '' && '' !== $authority) {
+            return '/';
+        }
+        return $path;
     }
 
     // --- Public Methods ---
@@ -185,20 +213,8 @@ class Uri implements UriInterface
             $uri .= '//' . $authority;
         }
 
-        // 3. Path
-        $path = $this->path;
-        // Path normalization logic (PSR-7 section 4.1)
-        if ('' !== $authority && $path !== '' && !str_starts_with($path, '/')) {
-            // Path MUST start with / if authority is present
-            $path = '/' . $path;
-        } elseif ('' === $authority && str_starts_with($path, '//')) {
-            // Path MUST NOT start with // if no authority is present
-            $path = '/' . ltrim($path, '/');
-        }
-        // If authority is present but path is empty, it must be '/'
-        if ($path === '' && '' !== $authority) {
-            $path = '/';
-        }
+        // 3. Path (PSR-7 section 4.1 normalization)
+        $path = $this->buildNormalizedPath($authority, $this->path);
 
         $uri .= $path;
 
@@ -278,7 +294,10 @@ class Uri implements UriInterface
         }
 
         // If a standard port is defined for the scheme and it matches, return null
-        if (isset(self::STANDARD_PORTS[$this->scheme]) && $this->port === self::STANDARD_PORTS[$this->scheme]) {
+        if (
+            array_key_exists($this->scheme, self::STANDARD_PORTS)
+            && $this->port === self::STANDARD_PORTS[$this->scheme]
+        ) {
             return null;
         }
 

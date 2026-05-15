@@ -36,9 +36,10 @@ class ServerRequestTest extends AbstractTestCase
 
     public function testConstructorAcceptsResourceBody(): void
     {
-        $resource = fopen('php://memory', 'r+');
-        fwrite($resource, 'Resource Body');
-        fseek($resource, 0);
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
+        static::assertIsResource($resource);
+        fwrite(stream: $resource, data: 'Resource Body');
+        fseek(stream: $resource, offset: 0);
 
         $request = new ServerRequest('POST', new Uri('/'), [], $resource);
 

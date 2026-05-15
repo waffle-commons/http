@@ -127,13 +127,14 @@ class Response extends AbstractMessage implements ResponseInterface
         }
 
         if (is_string($body) || null === $body) {
-            $resource = fopen('php://temp', 'r+');
+            $resource = fopen(filename: 'php://temp', mode: 'r+');
             if (false === $resource) {
                 throw new RuntimeException('Failed to open php://temp stream.');
             }
+            assert(is_resource($resource), description: 'fopen must return a resource after false check.');
             if (is_string($body) && '' !== $body) {
-                fwrite($resource, $body);
-                fseek($resource, 0); // Rewind after writing
+                fwrite(stream: $resource, data: $body);
+                fseek(stream: $resource, offset: 0); // Rewind after writing
             }
             return new Stream($resource);
         }

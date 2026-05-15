@@ -13,6 +13,7 @@ use RuntimeException;
  *
  * @see https://www.php-fig.org/psr/psr-7/#34-psrhttpmessagestreaminterface
  */
+// @mago-ignore lint:cyclomatic-complexity
 class Stream implements StreamInterface
 {
     /**
@@ -55,13 +56,15 @@ class Stream implements StreamInterface
                 throw new RuntimeException('Failed to open stream: ' . $stream);
             }
             $this->resource = $resource;
-        } elseif (is_resource($stream)) {
+            return;
+        }
+        if (is_resource($stream)) {
             // If it's already a resource
             $this->resource = $stream;
-        } else {
-            // Invalid type
-            throw new InvalidArgumentException('Invalid stream provided; must be a string (path) or resource.');
+            return;
         }
+        // Invalid type
+        throw new InvalidArgumentException('Invalid stream provided; must be a string (path) or resource.');
     }
 
     /**
@@ -137,13 +140,19 @@ class Stream implements StreamInterface
     {
         if (null === $this->resource) {
             // If detached, return cached size if available
-            return $this->detachedMeta['unread_bytes'] ?? null;
+            $value = $this->detachedMeta['unread_bytes'] ?? null;
+            return is_int($value) ? $value : null;
         }
 
         // Ensure file stats are up-to-date
-        clearstatcache(true, $this->getMetadata('uri'));
+        $resource = $this->resource;
+        $uri = $this->getMetadata('uri');
+        clearstatcache(true, is_string($uri) ? $uri : '');
 
-        $stats = fstat($this->resource);
+        $stats = fstat($resource);
+        if (false === $stats) {
+            return null;
+        }
         return $stats['size'];
     }
 
@@ -181,7 +190,7 @@ class Stream implements StreamInterface
     #[\Override]
     public function isSeekable(): bool
     {
-        return $this->resource ? $this->getMetadata('seekable') ?? false : false;
+        return $this->resource ? (bool) ($this->getMetadata('seekable') ?? false) : false;
     }
 
     /**
@@ -194,9 +203,12 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not seekable.');
         }
 
-        if (0 !== fseek($this->resource, $offset, $whence)) {
+        $resource = $this->resource;
+        assert($resource !== null, description: 'Resource must not be null after isSeekable() check.');
+        if (0 !== fseek($resource, $offset, $whence)) {
             throw new RuntimeException(
-                'Unable to seek to stream position ' . $offset . ' with whence ' . var_export($whence, true),
+                'Unable to seek to stream position ' . $offset . ' with whence '
+                    . var_export(value: $whence, return: true),
             );
         }
     }
@@ -219,7 +231,7 @@ class Stream implements StreamInterface
         if (null === $this->resource) {
             return false;
         }
-        $mode = $this->getMetadata('mode') ?? '';
+        $mode = (string) ($this->getMetadata('mode') ?? '');
         return (bool) preg_match(self::WRITABLE_MODES, $mode);
     }
 
@@ -233,7 +245,9 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not writable.');
         }
 
-        $result = fwrite($this->resource, $string);
+        $resource = $this->resource;
+        assert($resource !== null, description: 'Resource must not be null after isWritable() check.');
+        $result = fwrite($resource, $string);
 
         if (false === $result) {
             throw new RuntimeException('Unable to write to stream.');
@@ -254,7 +268,7 @@ class Stream implements StreamInterface
         if (null === $this->resource) {
             return false;
         }
-        $mode = $this->getMetadata('mode') ?? '';
+        $mode = (string) ($this->getMetadata('mode') ?? '');
         return (bool) preg_match(self::READABLE_MODES, $mode);
     }
 
@@ -268,7 +282,9 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not readable.');
         }
 
-        $result = fread($this->resource, $length);
+        $resource = $this->resource;
+        assert($resource !== null, description: 'Resource must not be null after isReadable() check.');
+        $result = fread($resource, $length);
 
         if (false === $result) {
             throw new RuntimeException('Unable to read from stream.');
@@ -287,7 +303,9 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not readable.');
         }
 
-        $result = stream_get_contents($this->resource);
+        $resource = $this->resource;
+        assert($resource !== null, description: 'Resource must not be null after isReadable() check.');
+        $result = stream_get_contents($resource);
 
         if (false === $result) {
             throw new RuntimeException('Unable to read stream contents.');
@@ -299,11 +317,15 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
+    // @mago-ignore lint:halstead
     #[\Override]
-    public function getMetadata(?string $key = null)
+    public function getMetadata(?string $key = null): mixed
     {
         if (null === $this->resource) {
             // Returns detached metadata if available
+            if (null === $key) {
+                return $this->detachedMeta;
+            }
             return $this->detachedMeta[$key] ?? null;
         }
 

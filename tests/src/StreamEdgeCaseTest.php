@@ -22,7 +22,7 @@ class StreamEdgeCaseTest extends TestCase
         // Scenario: The underlying resource is closed, but __toString() is called.
         // PSR-7 states __toString must NOT throw an exception but return an empty string.
 
-        $resource = fopen('php://memory', 'r+');
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
         $stream = new Stream($resource);
         $stream->close(); // We manually close it
 
@@ -33,7 +33,7 @@ class StreamEdgeCaseTest extends TestCase
 
     public function testDetachReturnsNullIfAlreadyDetached(): void
     {
-        $resource = fopen('php://memory', 'r+');
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
         $stream = new Stream($resource);
 
         // First detach returns the resource
@@ -45,7 +45,7 @@ class StreamEdgeCaseTest extends TestCase
 
     public function testSeekThrowsExceptionOnClosedStream(): void
     {
-        $resource = fopen('php://memory', 'r+');
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
         $stream = new Stream($resource);
         $stream->close();
 
@@ -55,7 +55,7 @@ class StreamEdgeCaseTest extends TestCase
 
     public function testWriteThrowsExceptionOnClosedStream(): void
     {
-        $resource = fopen('php://memory', 'r+');
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
         $stream = new Stream($resource);
         $stream->close();
 
@@ -65,7 +65,7 @@ class StreamEdgeCaseTest extends TestCase
 
     public function testReadThrowsExceptionOnClosedStream(): void
     {
-        $resource = fopen('php://memory', 'r+');
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
         $stream = new Stream($resource);
         $stream->close();
 
@@ -75,7 +75,7 @@ class StreamEdgeCaseTest extends TestCase
 
     public function testGetContentsThrowsExceptionOnClosedStream(): void
     {
-        $resource = fopen('php://memory', 'r+');
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
         $stream = new Stream($resource);
         $stream->close();
 
@@ -85,7 +85,7 @@ class StreamEdgeCaseTest extends TestCase
 
     public function testGetSizeReturnsNullIfResourceClosed(): void
     {
-        $resource = fopen('php://memory', 'r+');
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
         $stream = new Stream($resource);
         $stream->close();
 

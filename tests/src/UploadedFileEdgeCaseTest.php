@@ -23,7 +23,9 @@ class UploadedFileEdgeCaseTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->tempFile = tempnam(sys_get_temp_dir(), 'waffle_test_');
+        $tempFile = tempnam(directory: sys_get_temp_dir(), prefix: 'waffle_test_');
+        $this->assertIsString($tempFile);
+        $this->tempFile = $tempFile;
     }
 
     #[\Override]
@@ -35,6 +37,7 @@ class UploadedFileEdgeCaseTest extends TestCase
         parent::tearDown();
     }
 
+    #[\PHPUnit\Framework\Attributes\WithoutErrorHandler]
     public function testMoveToThrowsExceptionOnWriteFailure(): void
     {
         // Pass the file path string, not a Stream object

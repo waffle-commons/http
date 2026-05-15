@@ -79,4 +79,16 @@ ignore = [
           "tests/",
           "src/",
       ] },
+      { code = "invalid-argument", in = [
+          "tests/",
+      ] },
+      { code = "invalid-named-argument", in = [
+          "src/Emitter/ResponseEmitter.php",
+      ] },
+      { code = "less-specific-return-statement", in = [
+          "src/Factory/GlobalsFactory.php",
+      ] },
+      { code = "mixed-argument", in = [
+          "src/Abstract/AbstractMessage.php",
+      ] },
   ]

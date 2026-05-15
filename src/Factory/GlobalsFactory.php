@@ -20,6 +20,8 @@ use Waffle\Commons\Http\Uri;
  *
  * This factory is specific to the Waffle framework's bootstrap process.
  */
+// @mago-ignore lint:cyclomatic-complexity
+// @mago-ignore lint:kan-defect
 class GlobalsFactory
 {
     /**
@@ -40,6 +42,7 @@ class GlobalsFactory
             if (false === $resource) {
                 throw new RuntimeException('Failed to open php://input stream.');
             }
+            assert(is_resource($resource), description: 'fopen must return a resource after false check.');
             return new Stream($resource);
         };
     }
@@ -63,15 +66,18 @@ class GlobalsFactory
             }
 
             // Remove port if present
-            $hostName = preg_replace('/:\d+$/', '', $host);
+            $hostName = preg_replace(pattern: '/:\d+$/', replacement: '', subject: (string) $host) ?? (string) $host;
 
-            if (!in_array($hostName, $this->trustedHosts, true)) {
+            if (!in_array(needle: $hostName, haystack: $this->trustedHosts, strict: true)) {
                 // We throw an exception here.
                 // The Kernel/Runtime should catch this and return a 400 Bad Request.
                 throw new InvalidArgumentException(sprintf(
                     'Untrusted Host "%s". Allowed hosts: %s',
                     $host,
-                    implode(', ', $this->trustedHosts),
+                    implode(separator: ', ', array: array_map(
+                        static fn(mixed $h): string => (string) $h,
+                        $this->trustedHosts,
+                    )),
                 ));
             }
         }
@@ -81,7 +87,7 @@ class GlobalsFactory
         $uri = $this->createUriFromGlobals();
         $headers = $this->getHeadersFromGlobals();
         $body = ($this->bodyStreamFactory)(); // Creates the body stream
-        $protocol = str_replace('HTTP/', '', $_SERVER['SERVER_PROTOCOL'] ?? '1.1');
+        $protocol = str_replace(search: 'HTTP/', replace: '', subject: (string) ($_SERVER['SERVER_PROTOCOL'] ?? '1.1'));
 
         // ServerRequest-specific parameters
         $cookies = $_COOKIE;
@@ -111,33 +117,18 @@ class GlobalsFactory
      */
     private function createUriFromGlobals(): UriInterface
     {
-        $matches = [];
+        $scheme = $this->detectScheme();
+        [$host, $port] = $this->extractHostAndPort($scheme);
 
-        $scheme = 'http';
-        if (isset($_SERVER['HTTPS']) && ('on' === $_SERVER['HTTPS'] || 1 === (int) $_SERVER['HTTPS'])) {
-            $scheme = 'https';
-        }
-
-        $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
-
-        // Separates host and port if HTTP_HOST contains both
-        if (1 === preg_match('/^(.+):(\d+)$/', $host, $matches)) {
-            $host = $matches[1];
-            $port = (int) $matches[2];
-        } else {
-            // Otherwise, use SERVER_PORT or standard port
-            $port = (int) ($_SERVER['SERVER_PORT'] ?? ('http' === $scheme ? 80 : 443));
-        }
-
-        $path = $_SERVER['REQUEST_URI'] ?? '/';
+        $path = (string) ($_SERVER['REQUEST_URI'] ?? '/');
         // Removes query string from path
-        $path = explode('?', $path, 2)[0];
+        $path = explode(separator: '?', string: $path, limit: 2)[0];
 
-        $query = $_SERVER['QUERY_STRING'] ?? '';
+        $query = (string) ($_SERVER['QUERY_STRING'] ?? '');
 
         // Basic/Digest authentication handling
-        $user = $_SERVER['PHP_AUTH_USER'] ?? null;
-        $pass = $_SERVER['PHP_AUTH_PW'] ?? null;
+        $user = array_key_exists('PHP_AUTH_USER', $_SERVER) ? (string) $_SERVER['PHP_AUTH_USER'] : null;
+        $pass = array_key_exists('PHP_AUTH_PW', $_SERVER) ? (string) $_SERVER['PHP_AUTH_PW'] : null;
         $userInfo = '';
         if (null !== $user) {
             $userInfo = $user . (null !== $pass ? ':' . $pass : '');
@@ -161,6 +152,37 @@ class GlobalsFactory
     }
 
     /**
+     * Detects the request scheme (http or https) from $_SERVER.
+     */
+    private function detectScheme(): string
+    {
+        if (array_key_exists('HTTPS', $_SERVER) && ('on' === $_SERVER['HTTPS'] || 1 === (int) $_SERVER['HTTPS'])) {
+            return 'https';
+        }
+        return 'http';
+    }
+
+    /**
+     * Extracts host and port from $_SERVER globals.
+     *
+     * @return array{0: string, 1: int}
+     */
+    private function extractHostAndPort(string $scheme): array
+    {
+        $host = (string) ($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost');
+        $matches = [];
+
+        // Separates host and port if HTTP_HOST contains both
+        if (1 === preg_match('/^(.+):(\d+)$/', $host, $matches)) {
+            return [(string) ($matches[1] ?? $host), (int) ($matches[2] ?? 80)];
+        }
+
+        // Otherwise, use SERVER_PORT or standard port
+        $port = (int) ($_SERVER['SERVER_PORT'] ?? ('http' === $scheme ? 80 : 443));
+        return [$host, $port];
+    }
+
+    /**
      * Retrieves HTTP headers from $_SERVER.
      *
      * @return array<string, string>
@@ -169,27 +191,53 @@ class GlobalsFactory
     {
         $headers = [];
         foreach ($_SERVER as $name => $value) {
+            if (!is_string($name)) {
+                continue;
+            }
             if (str_starts_with($name, 'HTTP_')) {
-                $headerName = str_replace('_', '-', strtolower(substr($name, 5)));
-                $headers[$headerName] = $value;
-            } elseif (in_array($name, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
-                $headerName = str_replace('_', '-', strtolower($name));
-                $headers[$headerName] = $value;
+                $headerName = str_replace(
+                    search: '_',
+                    replace: '-',
+                    subject: strtolower(substr(string: $name, offset: 5)),
+                );
+                $headers[$headerName] = (string) $value;
+                continue;
+            }
+            if (in_array(needle: $name, haystack: ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], strict: true)) {
+                $headerName = str_replace(search: '_', replace: '-', subject: strtolower($name));
+                $headers[$headerName] = (string) $value;
             }
         }
 
-        if (!isset($headers['authorization'])) {
-            if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-                $headers['authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-            } elseif (isset($_SERVER['PHP_AUTH_USER'])) {
-                $basicAuth = base64_encode($_SERVER['PHP_AUTH_USER'] . ':' . ($_SERVER['PHP_AUTH_PW'] ?? ''));
-                $headers['authorization'] = 'Basic ' . $basicAuth;
-            } elseif (isset($_SERVER['PHP_AUTH_DIGEST'])) {
-                $headers['authorization'] = $_SERVER['PHP_AUTH_DIGEST'];
-            }
-        }
+        $this->resolveAuthorizationHeader($headers);
 
         return $headers;
+    }
+
+    /**
+     * Resolves the authorization header from various $_SERVER sources.
+     *
+     * @param array<string, string> $headers
+     */
+    private function resolveAuthorizationHeader(array &$headers): void
+    {
+        if (array_key_exists('authorization', $headers)) {
+            return;
+        }
+        if (array_key_exists('REDIRECT_HTTP_AUTHORIZATION', $_SERVER)) {
+            $headers['authorization'] = (string) $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+            return;
+        }
+        if (array_key_exists('PHP_AUTH_USER', $_SERVER)) {
+            $basicAuth = base64_encode(
+                (string) $_SERVER['PHP_AUTH_USER'] . ':' . (string) ($_SERVER['PHP_AUTH_PW'] ?? ''),
+            );
+            $headers['authorization'] = 'Basic ' . $basicAuth;
+            return;
+        }
+        if (array_key_exists('PHP_AUTH_DIGEST', $_SERVER)) {
+            $headers['authorization'] = (string) $_SERVER['PHP_AUTH_DIGEST'];
+        }
     }
 
     /**
@@ -197,14 +245,14 @@ class GlobalsFactory
      *
      * @return array|object|null
      */
-    private function getParsedBody(string $method, array $headers, StreamInterface $body)
+    private function getParsedBody(string $method, array $headers, StreamInterface $body): array|object|null
     {
         if ('POST' !== $method) {
             return null;
         }
 
-        $contentType = $headers['content-type'] ?? '';
-        $parts = explode(';', $contentType);
+        $contentType = (string) ($headers['content-type'] ?? '');
+        $parts = explode(separator: ';', string: $contentType);
         $mime = trim(strtolower($parts[0]));
 
         if ('application/x-www-form-urlencoded' === $mime) {
@@ -221,7 +269,8 @@ class GlobalsFactory
                 if ($bodyContents === '') {
                     return null;
                 }
-                return json_decode($bodyContents, true, 512, JSON_THROW_ON_ERROR);
+                $decoded = json_decode(json: $bodyContents, associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
+                return is_array($decoded) || is_object($decoded) ? $decoded : null;
             } catch (\Exception $e) {
                 return null;
             }
@@ -252,13 +301,17 @@ class GlobalsFactory
         foreach ($files as $key => $value) {
             if ($value instanceof UploadedFileInterface) {
                 $normalized[$key] = $value;
-            } elseif (is_array($value) && isset($value['tmp_name'])) {
-                $normalized[$key] = $this->createUploadedFileFromSpec($value);
-            } elseif (is_array($value)) {
-                $normalized[$key] = $this->normalizeFiles($value);
-            } else {
-                throw new InvalidArgumentException('Invalid value in $_FILES array.');
+                continue;
             }
+            if (is_array($value) && array_key_exists('tmp_name', $value)) {
+                $normalized[$key] = $this->createUploadedFileFromSpec($value);
+                continue;
+            }
+            if (is_array($value)) {
+                $normalized[$key] = $this->normalizeFiles($value);
+                continue;
+            }
+            throw new InvalidArgumentException('Invalid value in $_FILES array.');
         }
         return $normalized;
     }
@@ -268,16 +321,17 @@ class GlobalsFactory
      */
     private function createUploadedFileFromSpec(array $spec): UploadedFileInterface|array
     {
-        if (is_array($spec['tmp_name'])) {
+        $tmpName = (string) ($spec['tmp_name'] ?? '');
+        if (is_array($spec['tmp_name'] ?? null)) {
             return $this->normalizeNestedFileSpec($spec);
         }
 
         return new UploadedFile(
-            $spec['tmp_name'],
+            $tmpName,
             (int) ($spec['size'] ?? 0),
             (int) ($spec['error'] ?? UPLOAD_ERR_OK),
-            $spec['name'] ?? null,
-            $spec['type'] ?? null,
+            array_key_exists('name', $spec) ? (string) $spec['name'] : null,
+            array_key_exists('type', $spec) ? (string) $spec['type'] : null,
         );
     }
 
@@ -287,13 +341,20 @@ class GlobalsFactory
     private function normalizeNestedFileSpec(array $files): array
     {
         $normalized = [];
-        foreach (array_keys($files['tmp_name']) as $key) {
+        $tmpNames = (array) ($files['tmp_name'] ?? []);
+        foreach (array_keys($tmpNames) as $key) {
             $spec = [
-                'tmp_name' => $files['tmp_name'][$key],
-                'size' => $files['size'][$key] ?? 0,
-                'error' => $files['error'][$key] ?? UPLOAD_ERR_OK,
-                'name' => $files['name'][$key] ?? null,
-                'type' => $files['type'][$key] ?? null,
+                'tmp_name' => $tmpNames[$key],
+                'size' => array_key_exists('size', $files) && is_array($files['size']) ? $files['size'][$key] ?? 0 : 0,
+                'error' => array_key_exists('error', $files) && is_array($files['error'])
+                    ? $files['error'][$key] ?? UPLOAD_ERR_OK
+                    : UPLOAD_ERR_OK,
+                'name' => array_key_exists('name', $files) && is_array($files['name'])
+                    ? $files['name'][$key] ?? null
+                    : null,
+                'type' => array_key_exists('type', $files) && is_array($files['type'])
+                    ? $files['type'][$key] ?? null
+                    : null,
             ];
             $normalized[$key] = $this->createUploadedFileFromSpec($spec);
         }

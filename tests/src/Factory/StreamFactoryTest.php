@@ -49,8 +49,9 @@ class StreamFactoryTest extends TestCase
     public function testCreateStreamFromFile(): void
     {
         $factory = new StreamFactory();
-        $tmp = tempnam(sys_get_temp_dir(), 'test');
-        file_put_contents($tmp, 'file content');
+        $tmp = tempnam(directory: sys_get_temp_dir(), prefix: 'test');
+        static::assertIsString($tmp);
+        file_put_contents(filename: $tmp, data: 'file content');
 
         $stream = $factory->createStreamFromFile($tmp);
         static::assertSame('file content', (string) $stream);
@@ -61,8 +62,9 @@ class StreamFactoryTest extends TestCase
     public function testCreateStreamFromResource(): void
     {
         $factory = new StreamFactory();
-        $resource = \fopen('php://memory', 'r+');
-        fwrite($resource, 'resource content');
+        $resource = \fopen(filename: 'php://memory', mode: 'r+');
+        static::assertIsResource($resource);
+        fwrite(stream: $resource, data: 'resource content');
 
         $stream = $factory->createStreamFromResource($resource);
         static::assertSame('resource content', (string) $stream);

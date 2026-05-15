@@ -32,14 +32,14 @@ class ResponseEmitter implements ResponseEmitterInterface
         $statusCode = $response->getStatusCode();
         $reasonPhrase = $response->getReasonPhrase();
         header(
-            sprintf(
+            header: sprintf(
                 'HTTP/%s %d%s',
                 $response->getProtocolVersion(),
                 $statusCode,
                 $reasonPhrase ? ' ' . $reasonPhrase : '', // Don't add space if phrase is empty
             ),
-            true, // Replace any existing status line
-            $statusCode, // Force the HTTP response code
+            replace: true, // Replace any existing status line
+            response_code: $statusCode, // Force the HTTP response code
         );
 
         // 2. Send Headers
@@ -52,19 +52,23 @@ class ResponseEmitter implements ResponseEmitterInterface
     /**
      * Emits all headers.
      *
-     * @param array<string, string[]> $headers
+     * @param array<array-key, string[]> $headers
      */
     private function emitHeaders(array $headers): void
     {
         foreach ($headers as $name => $values) {
             // Normalizes header name for display (e.g., 'content-type' -> 'Content-Type')
-            $name = str_replace(' ', '-', ucwords(str_replace('-', ' ', $name)));
+            $name = str_replace(
+                search: ' ',
+                replace: '-',
+                subject: ucwords(str_replace(search: '-', replace: ' ', subject: (string) $name)),
+            );
             $first = true; // For replacement vs. add logic
 
             // Special case: Set-Cookie cannot be combined into one line
             if (strcasecmp($name, 'Set-Cookie') === 0) {
                 foreach ($values as $value) {
-                    header(sprintf('%s: %s', $name, $value), false); // 'false' to add, not replace
+                    header(header: sprintf('%s: %s', $name, $value), replace: false); // 'false' to add, not replace
                 }
                 continue; // Continue to next header
             }

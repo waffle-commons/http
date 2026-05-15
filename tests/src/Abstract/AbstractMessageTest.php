@@ -13,7 +13,7 @@ use WaffleTests\Commons\Http\AbstractTestCase;
 
 class AbstractMessageTest extends AbstractTestCase
 {
-    private $message;
+    private AbstractMessage $message;
 
     #[\Override]
     protected function setUp(): void
@@ -22,7 +22,7 @@ class AbstractMessageTest extends AbstractTestCase
         $this->message = new class extends AbstractMessage {
             public function __construct()
             {
-                $this->body = new \Waffle\Commons\Http\Stream(fopen('php://temp', 'r+'));
+                $this->body = new \Waffle\Commons\Http\Stream(fopen(filename: 'php://temp', mode: 'r+'));
             }
         };
     }
