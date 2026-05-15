@@ -19,6 +19,10 @@ use Waffle\Commons\Http\Uri;
  * Creates a ServerRequestInterface (PSR-7) instance from PHP superglobals.
  *
  * This factory is specific to the Waffle framework's bootstrap process.
+ *
+ * Trusted-host enforcement is NOT performed here. Per RFC-003 §3.2 (Alpha 6 P0),
+ * Host Header Injection is rejected by `Waffle\Commons\Pipeline\Middleware\TrustedHostMiddleware`
+ * which sits between ErrorHandlerMiddleware and CoreRoutingMiddleware in the PSR-15 stack.
  */
 // @mago-ignore lint:cyclomatic-complexity
 // @mago-ignore lint:kan-defect
@@ -32,10 +36,8 @@ class GlobalsFactory
     /**
      * @param (callable(): StreamInterface)|null $bodyStreamFactory Factory to create a Stream for php://input.
      */
-    public function __construct(
-        ?callable $bodyStreamFactory = null,
-        private readonly array $trustedHosts = [],
-    ) {
+    public function __construct(?callable $bodyStreamFactory = null)
+    {
         // Provides a default factory if none is given
         $this->bodyStreamFactory = $bodyStreamFactory ?? static function (): Stream {
             $resource = fopen('php://input', mode: 'r');
@@ -54,34 +56,6 @@ class GlobalsFactory
      */
     public function createFromGlobals(): ServerRequestInterface
     {
-        $server = $_SERVER;
-
-        // Security Check: Trusted Hosts
-        if ($this->trustedHosts !== []) {
-            $host = $server['HTTP_HOST'] ?? null;
-
-            if (!$host) {
-                // HTTP 1.0 request without Host header? Reject in modern context.
-                throw new InvalidArgumentException('Missing Host header');
-            }
-
-            // Remove port if present
-            $hostName = preg_replace(pattern: '/:\d+$/', replacement: '', subject: (string) $host) ?? (string) $host;
-
-            if (!in_array(needle: $hostName, haystack: $this->trustedHosts, strict: true)) {
-                // We throw an exception here.
-                // The Kernel/Runtime should catch this and return a 400 Bad Request.
-                throw new InvalidArgumentException(sprintf(
-                    'Untrusted Host "%s". Allowed hosts: %s',
-                    $host,
-                    implode(separator: ', ', array: array_map(
-                        static fn(mixed $h): string => (string) $h,
-                        $this->trustedHosts,
-                    )),
-                ));
-            }
-        }
-
         // Method, URI, Headers, Body, Version
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $uri = $this->createUriFromGlobals();

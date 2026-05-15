@@ -257,4 +257,40 @@ class ServerRequestTest extends AbstractTestCase
         static::assertSame(['role' => 'admin'], $r2->getAttributes());
         static::assertNull($r2->getAttribute('user'));
     }
+
+    public function testWithoutAttributeReturnsCloneWhenAttributeAbsent(): void
+    {
+        $r1 = $this->createTestRequest();
+
+        $r2 = $r1->withoutAttribute('never-set');
+
+        // PSR-7 compliance: still returns a new instance even when no-op
+        static::assertNotSame($r1, $r2);
+        static::assertSame([], $r2->getAttributes());
+    }
+
+    public function testWithUriReturnsCloneWithoutHostUpdateWhenNoHost(): void
+    {
+        $r1 = $this->createTestRequest();
+        $noHostUri = new \Waffle\Commons\Http\Uri('/relative/only');
+
+        $r2 = $r1->withUri($noHostUri, false);
+
+        static::assertNotSame($r1, $r2);
+        static::assertSame($noHostUri, $r2->getUri());
+    }
+
+    public function testWithUriPreservingHost(): void
+    {
+        $r1 = $this->createTestRequest();
+        $r1 = $r1->withHeader('Host', 'preserved.example');
+        $newUri = new \Waffle\Commons\Http\Uri('http://other.example.org/api');
+
+        $r2 = $r1->withUriPreservingHost($newUri);
+
+        static::assertNotSame($r1, $r2);
+        static::assertSame($newUri, $r2->getUri());
+        // Host header is preserved
+        static::assertSame('preserved.example', $r2->getHeaderLine('Host'));
+    }
 }

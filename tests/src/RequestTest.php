@@ -131,4 +131,36 @@ class RequestTest extends AbstractTestCase
         // Host header should remain from the original request (example.com)
         static::assertSame('example.com', $newRequest->getHeaderLine('Host'));
     }
+
+    public function testGetRequestTargetReturnsSlashWhenPathIsEmpty(): void
+    {
+        // Uri with no path component → getPath() returns ''
+        $request = new Request('GET', new Uri('http://example.com'));
+
+        static::assertSame('/', $request->getRequestTarget());
+    }
+
+    public function testConstructorAppendsPortToHostHeader(): void
+    {
+        // Uri with explicit non-standard port should produce 'host:port' Host header
+        $request = new Request('GET', new Uri('http://example.com:8080/api'));
+
+        static::assertSame('example.com:8080', $request->getHeaderLine('Host'));
+    }
+
+    public function testWithUriPreservingHost(): void
+    {
+        $uri1 = new Uri('http://example.com');
+        $uri2 = new Uri('http://other.example.org');
+
+        $request = new Request('GET', $uri1);
+        $request = $request->withHeader('Host', 'custom.com');
+
+        $new = $request->withUriPreservingHost($uri2);
+
+        static::assertNotSame($request, $new);
+        static::assertSame($uri2, $new->getUri());
+        // Host preserved from original
+        static::assertSame('custom.com', $new->getHeaderLine('Host'));
+    }
 }
