@@ -142,7 +142,7 @@ abstract class AbstractMessage implements MessageInterface
         }
 
         // Merge if header already exists
-        $originalName = (string) ($this->headerNames[$normalizedName] ?? '');
+        $originalName = $this->headerNames[$normalizedName] ?? '';
         $new->headers[$originalName] = array_merge($this->headers[$originalName] ?? [], $value);
 
         return $new;

@@ -61,7 +61,7 @@ class GlobalsFactory
         $uri = $this->createUriFromGlobals();
         $headers = $this->getHeadersFromGlobals();
         $body = ($this->bodyStreamFactory)(); // Creates the body stream
-        $protocol = str_replace(search: 'HTTP/', replace: '', subject: (string) ($_SERVER['SERVER_PROTOCOL'] ?? '1.1'));
+        $protocol = str_replace(search: 'HTTP/', replace: '', subject: $_SERVER['SERVER_PROTOCOL'] ?? '1.1');
 
         // ServerRequest-specific parameters
         $cookies = $_COOKIE;
@@ -94,15 +94,15 @@ class GlobalsFactory
         $scheme = $this->detectScheme();
         [$host, $port] = $this->extractHostAndPort($scheme);
 
-        $path = (string) ($_SERVER['REQUEST_URI'] ?? '/');
+        $path = $_SERVER['REQUEST_URI'] ?? '/';
         // Removes query string from path
         $path = explode(separator: '?', string: $path, limit: 2)[0];
 
-        $query = (string) ($_SERVER['QUERY_STRING'] ?? '');
+        $query = $_SERVER['QUERY_STRING'] ?? '';
 
         // Basic/Digest authentication handling
-        $user = array_key_exists('PHP_AUTH_USER', $_SERVER) ? (string) $_SERVER['PHP_AUTH_USER'] : null;
-        $pass = array_key_exists('PHP_AUTH_PW', $_SERVER) ? (string) $_SERVER['PHP_AUTH_PW'] : null;
+        $user = array_key_exists('PHP_AUTH_USER', $_SERVER) ? $_SERVER['PHP_AUTH_USER'] : null;
+        $pass = array_key_exists('PHP_AUTH_PW', $_SERVER) ? $_SERVER['PHP_AUTH_PW'] : null;
         $userInfo = '';
         if (null !== $user) {
             $userInfo = $user . (null !== $pass ? ':' . $pass : '');
@@ -143,12 +143,12 @@ class GlobalsFactory
      */
     private function extractHostAndPort(string $scheme): array
     {
-        $host = (string) ($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost');
+        $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
         $matches = [];
 
         // Separates host and port if HTTP_HOST contains both
         if (1 === preg_match('/^(.+):(\d+)$/', $host, $matches)) {
-            return [(string) ($matches[1] ?? $host), (int) ($matches[2] ?? 80)];
+            return [$matches[1] ?? $host, (int) ($matches[2] ?? 80)];
         }
 
         // Otherwise, use SERVER_PORT or standard port
@@ -199,18 +199,16 @@ class GlobalsFactory
             return;
         }
         if (array_key_exists('REDIRECT_HTTP_AUTHORIZATION', $_SERVER)) {
-            $headers['authorization'] = (string) $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+            $headers['authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
             return;
         }
         if (array_key_exists('PHP_AUTH_USER', $_SERVER)) {
-            $basicAuth = base64_encode(
-                (string) $_SERVER['PHP_AUTH_USER'] . ':' . (string) ($_SERVER['PHP_AUTH_PW'] ?? ''),
-            );
+            $basicAuth = base64_encode($_SERVER['PHP_AUTH_USER'] . ':' . ($_SERVER['PHP_AUTH_PW'] ?? ''));
             $headers['authorization'] = 'Basic ' . $basicAuth;
             return;
         }
         if (array_key_exists('PHP_AUTH_DIGEST', $_SERVER)) {
-            $headers['authorization'] = (string) $_SERVER['PHP_AUTH_DIGEST'];
+            $headers['authorization'] = $_SERVER['PHP_AUTH_DIGEST'];
         }
     }
 
