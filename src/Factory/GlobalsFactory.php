@@ -288,10 +288,10 @@ class GlobalsFactory
      */
     private function createUploadedFileFromSpec(array $spec): UploadedFileInterface|array
     {
-        $tmpName = (string) ($spec['tmp_name'] ?? '');
         if (is_array($spec['tmp_name'] ?? null)) {
             return $this->normalizeNestedFileSpec($spec);
         }
+        $tmpName = (string) ($spec['tmp_name'] ?? '');
 
         return new UploadedFile(
             $tmpName,

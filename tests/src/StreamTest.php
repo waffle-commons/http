@@ -100,7 +100,12 @@ namespace WaffleTests\Commons\Http {
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Failed to open stream');
 
-            new Stream('/path/to/non/existent/file/' . uniqid());
+            set_error_handler(static fn(): bool => true);
+            try {
+                new Stream('/path/to/non/existent/file/' . uniqid());
+            } finally {
+                restore_error_handler();
+            }
         }
 
         public function testConstructorThrowsExceptionForInvalidType(): void

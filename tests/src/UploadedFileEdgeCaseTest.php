@@ -49,9 +49,13 @@ class UploadedFileEdgeCaseTest extends TestCase
 
         $this->expectException(RuntimeException::class);
 
-        // The native PHP warning from rename() is suppressed by PHPUnit's expectException handler.
-        // We only care about the RuntimeException being thrown.
-        $uploadedFile->moveTo($invalidPath);
+        // Swallow the native rename() warning so the test output stays clean; the exception is what we assert on.
+        set_error_handler(static fn(): bool => true);
+        try {
+            $uploadedFile->moveTo($invalidPath);
+        } finally {
+            restore_error_handler();
+        }
     }
 
     public function testMoveToThrowsExceptionIfStreamIsMoved(): void
