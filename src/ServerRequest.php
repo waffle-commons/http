@@ -49,7 +49,7 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         array $serverParams = [],
         array $cookieParams = [],
         array $queryParams = [],
-        $parsedBody = null,
+        array|object|null $parsedBody = null,
         array $uploadedFiles = [],
     ) {
         $this->method = $method;
@@ -77,13 +77,13 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
         }
 
         if (is_string($body) || null === $body) {
-            $resource = fopen('php://temp', 'r+');
+            $resource = fopen(filename: 'php://temp', mode: 'r+');
             if (false === $resource) {
                 throw new \RuntimeException('Failed to open php://temp stream.');
             }
             if (is_string($body) && '' !== $body) {
-                fwrite($resource, $body);
-                fseek($resource, 0);
+                fwrite(stream: $resource, data: $body);
+                fseek(stream: $resource, offset: 0);
             }
             return new Stream($resource);
         }
@@ -196,6 +196,15 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
     }
 
     /**
+     * Returns a new instance with the given URI and the Host header preserved.
+     * Builder-pattern alternative to withUri($uri, true).
+     */
+    public function withUriPreservingHost(UriInterface $uri): static
+    {
+        return $this->withUri($uri, true);
+    }
+
+    /**
      * {@inheritdoc}
      */
     #[\Override]
@@ -279,10 +288,11 @@ class ServerRequest extends AbstractMessage implements ServerRequestInterface
      * {@inheritdoc}
      */
     #[\Override]
-    public function withParsedBody($data): ServerRequestInterface
+    public function withParsedBody(mixed $data): ServerRequestInterface
     {
         // Validates $data type according to PSR-7
-        if (!is_array($data) && !is_object($data) && null !== $data) {
+        $isValid = $data === null || is_array($data) || is_object($data);
+        if (!$isValid) {
             throw new InvalidArgumentException('Parsed body must be an array, object, or null.');
         }
         $new = clone $this;

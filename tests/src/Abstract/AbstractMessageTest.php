@@ -13,7 +13,7 @@ use WaffleTests\Commons\Http\AbstractTestCase;
 
 class AbstractMessageTest extends AbstractTestCase
 {
-    private $message;
+    private AbstractMessage $message;
 
     #[\Override]
     protected function setUp(): void
@@ -22,7 +22,7 @@ class AbstractMessageTest extends AbstractTestCase
         $this->message = new class extends AbstractMessage {
             public function __construct()
             {
-                $this->body = new \Waffle\Commons\Http\Stream(fopen('php://temp', 'r+'));
+                $this->body = new \Waffle\Commons\Http\Stream(fopen(filename: 'php://temp', mode: 'r+'));
             }
         };
     }
@@ -126,5 +126,22 @@ class AbstractMessageTest extends AbstractTestCase
         $this->expectExceptionMessage('Header name must be a string');
 
         new Response(200, [0 => 'Invalid Key']);
+    }
+
+    public function testWithAddedHeaderAddsHeaderWhenAbsent(): void
+    {
+        $new = $this->message->withAddedHeader('X-Brand-New', 'Value');
+
+        static::assertNotSame($this->message, $new);
+        static::assertTrue($new->hasHeader('X-Brand-New'));
+        static::assertSame(['Value'], $new->getHeader('X-Brand-New'));
+        static::assertFalse($this->message->hasHeader('X-Brand-New'));
+    }
+
+    public function testWithoutHeaderReturnsSameInstanceWhenHeaderAbsent(): void
+    {
+        $new = $this->message->withoutHeader('X-Never-Set');
+
+        static::assertSame($this->message, $new);
     }
 }

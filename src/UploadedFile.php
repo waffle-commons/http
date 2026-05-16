@@ -51,7 +51,11 @@ class UploadedFile implements UploadedFileInterface
         }
         if ($this->stream === null) {
             // Opens the temporary file in read mode
-            $this->stream = new Stream(fopen($this->tmpName, 'r'));
+            $resource = fopen(filename: $this->tmpName, mode: 'r');
+            if (false === $resource) {
+                throw new RuntimeException('Failed to open uploaded file for reading.');
+            }
+            $this->stream = new Stream($resource);
         }
         return $this->stream;
     }
@@ -70,18 +74,20 @@ class UploadedFile implements UploadedFileInterface
         }
 
         // Determines if environment is SAPI (e.g., FPM, Apache) or not (CLI)
-        $isSapi = !in_array(PHP_SAPI, ['cli', 'phpdbg'], true);
+        $isSapi = !in_array(needle: PHP_SAPI, haystack: ['cli', 'phpdbg'], strict: true);
 
         if ($isSapi && is_uploaded_file($this->tmpName)) {
             // Use move_uploaded_file for SAPI environments (more secure)
             if (!move_uploaded_file($this->tmpName, $targetPath)) {
                 throw new RuntimeException('Failed to move uploaded file.');
             }
-        } else {
-            // Use rename for non-SAPI environments (e.g., CLI tests)
-            if (!rename($this->tmpName, $targetPath)) {
-                throw new RuntimeException('Failed to move file.');
-            }
+            $this->hasMoved = true;
+            return;
+        }
+
+        // Use rename for non-SAPI environments (e.g., CLI tests)
+        if (!rename($this->tmpName, $targetPath)) {
+            throw new RuntimeException('Failed to move file.');
         }
 
         $this->hasMoved = true;

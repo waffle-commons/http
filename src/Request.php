@@ -143,11 +143,20 @@ class Request extends AbstractMessage implements RequestInterface
         $normalizedName = 'host';
 
         // Remove existing
-        if (isset($this->headerNames[$normalizedName])) {
+        if (array_key_exists($normalizedName, $this->headerNames)) {
             unset($this->headers[$this->headerNames[$normalizedName]]);
         }
 
         $this->headerNames[$normalizedName] = $headerName;
         $this->headers[$headerName] = [$host];
+    }
+
+    /**
+     * Returns a new instance with the given URI and the Host header preserved.
+     * Builder-pattern alternative to withUri($uri, true).
+     */
+    public function withUriPreservingHost(UriInterface $uri): static
+    {
+        return $this->withUri($uri, true);
     }
 }

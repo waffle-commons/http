@@ -47,7 +47,7 @@ abstract class AbstractMessage implements MessageInterface
     #[\Override]
     public function withProtocolVersion(string $version): MessageInterface
     {
-        if (!in_array($version, ['1.0', '1.1', '2.0', '2', '3.0'])) {
+        if (!in_array($version, ['1.0', '1.1', '2.0', '2', '3.0'], strict: true)) {
             throw new InvalidArgumentException(sprintf('Unsupported protocol version "%s".', $version));
         }
         if ($this->protocolVersion === $version) {
@@ -73,7 +73,7 @@ abstract class AbstractMessage implements MessageInterface
     #[\Override]
     public function hasHeader(string $name): bool
     {
-        return isset($this->headerNames[strtolower($name)]);
+        return array_key_exists(strtolower($name), $this->headerNames);
     }
 
     /**
@@ -138,11 +138,12 @@ abstract class AbstractMessage implements MessageInterface
             // Simple add if header does not exist
             $new->headerNames[$normalizedName] = $name;
             $new->headers[$name] = $value;
-        } else {
-            // Merge if header already exists
-            $originalName = $this->headerNames[$normalizedName];
-            $new->headers[$originalName] = array_merge($this->headers[$originalName], $value);
+            return $new;
         }
+
+        // Merge if header already exists
+        $originalName = $this->headerNames[$normalizedName] ?? '';
+        $new->headers[$originalName] = array_merge($this->headers[$originalName] ?? [], $value);
 
         return $new;
     }
@@ -154,7 +155,7 @@ abstract class AbstractMessage implements MessageInterface
     public function withoutHeader(string $name): MessageInterface
     {
         $normalizedName = strtolower($name);
-        if (!isset($this->headerNames[$normalizedName])) {
+        if (!array_key_exists($normalizedName, $this->headerNames)) {
             return $this; // No change, return same instance
         }
 
@@ -215,7 +216,7 @@ abstract class AbstractMessage implements MessageInterface
             $value = [$value];
         }
 
-        if (empty($value)) {
+        if ($value === []) {
             throw new InvalidArgumentException('Header value must not be an empty array.');
         }
 

@@ -31,11 +31,10 @@ namespace WaffleTests\Commons\Http {
             // Réinitialise le mock avant chaque test
             self::$mockRenameReturnFalse = false;
 
-            $this->tempFile = tempnam(sys_get_temp_dir(), 'wfl_upload_test');
-            if ($this->tempFile === false) {
-                $this->fail('Unable to create temporary file');
-            }
-            file_put_contents($this->tempFile, 'Test content');
+            $tempFile = tempnam(directory: sys_get_temp_dir(), prefix: 'wfl_upload_test');
+            $this->assertIsString($tempFile);
+            $this->tempFile = $tempFile;
+            file_put_contents(filename: $this->tempFile, data: 'Test content');
         }
 
         #[\Override]
@@ -80,7 +79,8 @@ namespace WaffleTests\Commons\Http {
         public function testGetStreamThrowsExceptionAfterMove(): void
         {
             $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_OK);
-            $dest = tempnam(sys_get_temp_dir(), 'wfl_dest');
+            $dest = tempnam(directory: sys_get_temp_dir(), prefix: 'wfl_dest');
+            static::assertIsString($dest);
 
             $file->moveTo($dest);
 
@@ -97,7 +97,8 @@ namespace WaffleTests\Commons\Http {
         public function testMoveTo(): void
         {
             $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_OK);
-            $destination = tempnam(sys_get_temp_dir(), 'wfl_dest_test');
+            $destination = tempnam(directory: sys_get_temp_dir(), prefix: 'wfl_dest_test');
+            static::assertIsString($destination);
 
             $file->moveTo($destination);
 
@@ -113,18 +114,23 @@ namespace WaffleTests\Commons\Http {
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Cannot move file due to upload error.');
             $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_FORM_SIZE);
-            $file->moveTo(tempnam(sys_get_temp_dir(), 'wfl_dest_test'));
+            $dest = tempnam(directory: sys_get_temp_dir(), prefix: 'wfl_dest_test');
+            static::assertIsString($dest);
+            $file->moveTo($dest);
         }
 
         public function testMoveToThrowsExceptionIfAlreadyMoved(): void
         {
             $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_OK);
-            $destination = tempnam(sys_get_temp_dir(), 'wfl_dest_test');
+            $destination = tempnam(directory: sys_get_temp_dir(), prefix: 'wfl_dest_test');
+            static::assertIsString($destination);
             $file->moveTo($destination);
 
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Cannot move file; already moved.');
-            $file->moveTo(tempnam(sys_get_temp_dir(), 'wfl_dest_test_2'));
+            $dest2 = tempnam(directory: sys_get_temp_dir(), prefix: 'wfl_dest_test_2');
+            static::assertIsString($dest2);
+            $file->moveTo($dest2);
 
             unlink($destination);
         }

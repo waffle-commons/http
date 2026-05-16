@@ -36,9 +36,10 @@ class ServerRequestTest extends AbstractTestCase
 
     public function testConstructorAcceptsResourceBody(): void
     {
-        $resource = fopen('php://memory', 'r+');
-        fwrite($resource, 'Resource Body');
-        fseek($resource, 0);
+        $resource = fopen(filename: 'php://memory', mode: 'r+');
+        static::assertIsResource($resource);
+        fwrite(stream: $resource, data: 'Resource Body');
+        fseek(stream: $resource, offset: 0);
 
         $request = new ServerRequest('POST', new Uri('/'), [], $resource);
 
@@ -51,7 +52,7 @@ class ServerRequestTest extends AbstractTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid body type');
 
-        new ServerRequest('POST', new Uri('/'), [], 12345); // Int is invalid
+        new ServerRequest('POST', new Uri('/'), [], 12_345); // Int is invalid
     }
 
     public function testRequestTargetDefaultsToSlash(): void
@@ -128,7 +129,7 @@ class ServerRequestTest extends AbstractTestCase
 
     public function testGetServerParams(): void
     {
-        $params = ['REQUEST_TIME' => 123456];
+        $params = ['REQUEST_TIME' => 123_456];
         $request = $this->createTestRequest('GET', '/', $params);
         static::assertSame($params, $request->getServerParams());
     }
@@ -255,5 +256,41 @@ class ServerRequestTest extends AbstractTestCase
         static::assertSame(['user' => 123, 'role' => 'admin'], $r1->getAttributes());
         static::assertSame(['role' => 'admin'], $r2->getAttributes());
         static::assertNull($r2->getAttribute('user'));
+    }
+
+    public function testWithoutAttributeReturnsCloneWhenAttributeAbsent(): void
+    {
+        $r1 = $this->createTestRequest();
+
+        $r2 = $r1->withoutAttribute('never-set');
+
+        // PSR-7 compliance: still returns a new instance even when no-op
+        static::assertNotSame($r1, $r2);
+        static::assertSame([], $r2->getAttributes());
+    }
+
+    public function testWithUriReturnsCloneWithoutHostUpdateWhenNoHost(): void
+    {
+        $r1 = $this->createTestRequest();
+        $noHostUri = new \Waffle\Commons\Http\Uri('/relative/only');
+
+        $r2 = $r1->withUri($noHostUri, false);
+
+        static::assertNotSame($r1, $r2);
+        static::assertSame($noHostUri, $r2->getUri());
+    }
+
+    public function testWithUriPreservingHost(): void
+    {
+        $r1 = $this->createTestRequest();
+        $r1 = $r1->withHeader('Host', 'preserved.example');
+        $newUri = new \Waffle\Commons\Http\Uri('http://other.example.org/api');
+
+        $r2 = $r1->withUriPreservingHost($newUri);
+
+        static::assertNotSame($r1, $r2);
+        static::assertSame($newUri, $r2->getUri());
+        // Host header is preserved
+        static::assertSame('preserved.example', $r2->getHeaderLine('Host'));
     }
 }

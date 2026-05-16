@@ -23,7 +23,7 @@ abstract class AbstractTestCase extends TestCase
      */
     protected function createStream(string $content = ''): Stream
     {
-        $resource = fopen('php://temp', 'r+');
+        $resource = fopen(filename: 'php://temp', mode: 'r+');
         if (false === $resource) {
             $this->fail('Failed to open php://temp stream for testing.');
         }

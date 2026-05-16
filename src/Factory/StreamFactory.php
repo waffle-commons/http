@@ -14,12 +14,13 @@ class StreamFactory implements StreamFactoryInterface
     #[\Override]
     public function createStream(string $content = ''): StreamInterface
     {
-        $resource = fopen('php://temp', 'r+');
+        $resource = fopen(filename: 'php://temp', mode: 'r+');
         if (false === $resource) {
             throw new RuntimeException('Unable to open php://temp stream.');
         }
-        fwrite($resource, $content);
-        fseek($resource, 0);
+        assert(is_resource($resource), description: 'fopen php://temp must return a resource after false-check guard.');
+        fwrite(stream: $resource, data: $content);
+        fseek(stream: $resource, offset: 0);
 
         return new Stream($resource);
     }

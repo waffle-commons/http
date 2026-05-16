@@ -7,9 +7,12 @@
 [![Packagist License](https://img.shields.io/packagist/l/waffle-commons/http)](https://github.com/waffle-commons/http/blob/main/LICENSE.md)
 
 Waffle HTTP Component
-===============================
+=====================
 
-A strict, lightweight, and high-performance implementation of PSR-7 (HTTP Message) and PSR-17 (HTTP Factories).
+> **Release:** `v0.1.0-beta0`
+> **PSR Compliance:** PSR-7 (HTTP Messages), PSR-17 (HTTP Factories)
+
+A strict, immutable PSR-7/17 implementation tuned for FrankenPHP worker mode. No singletons, no superglobal touching outside the explicit `GlobalsFactory`. Streams are seekable-aware; the `ResponseEmitter` chunks bodies to avoid loading large payloads into memory.
 
 ## 📦 Installation
 
@@ -17,117 +20,77 @@ A strict, lightweight, and high-performance implementation of PSR-7 (HTTP Messag
 composer require waffle-commons/http
 ```
 
-## 🚀 Usage
+## 🧱 Surface
 
-### 1\. Creating a Request from Globals (Bootstrap)
+| Class | PSR | Role |
+| :--- | :--- | :--- |
+| `Waffle\Commons\Http\Request` | PSR-7 | Outbound HTTP request message. |
+| `Waffle\Commons\Http\ServerRequest` | PSR-7 | Inbound HTTP request (the kernel input). |
+| `Waffle\Commons\Http\Response` | PSR-7 | HTTP response message. |
+| `Waffle\Commons\Http\Stream` | PSR-7 | Resource-backed `StreamInterface`. |
+| `Waffle\Commons\Http\Uri` | PSR-7 | Immutable URI. |
+| `Waffle\Commons\Http\UploadedFile` | PSR-7 | File-upload representation. |
+| `Waffle\Commons\Http\Abstract\AbstractMessage` | — | Shared base for `Request` / `ServerRequest` / `Response`. |
+| `Waffle\Commons\Http\Factory\RequestFactory` | PSR-17 | `createRequest()`. |
+| `Waffle\Commons\Http\Factory\ServerRequestFactory` | PSR-17 | `createServerRequest()`. |
+| `Waffle\Commons\Http\Factory\ResponseFactory` | PSR-17 | `createResponse()`. |
+| `Waffle\Commons\Http\Factory\StreamFactory` | PSR-17 | `createStream()`, `createStreamFromFile()`, `createStreamFromResource()`. |
+| `Waffle\Commons\Http\Factory\UriFactory` | PSR-17 | `createUri()`. |
+| `Waffle\Commons\Http\Factory\UploadedFileFactory` | PSR-17 | `createUploadedFile()`. |
+| `Waffle\Commons\Http\Factory\GlobalsFactory` | — | Framework-specific: builds a PSR-7 `ServerRequest` from `$_SERVER`, `$_GET`, `$_POST`, `$_COOKIE`, `$_FILES`, and `php://input`. |
+| `Waffle\Commons\Http\Emitter\ResponseEmitter` | — | Implements `ResponseEmitterInterface`: sends status line, headers and chunked body. |
 
-The GlobalsFactory is designed to capture the current PHP environment (superglobals like `$_SERVER`, `$_POST`, `$_FILES`) and convert it into a PSR-7 ServerRequestInterface. This is typically used at the entry point of your application (index.php).
+## 🚀 Bootstrap a server request
 
 ```php
 use Waffle\Commons\Http\Factory\GlobalsFactory;
 
-// Create the factory
 $factory = new GlobalsFactory();
-// Capture the current request
-$request = $factory->createFromGlobals();
-
-echo $request->getMethod();
-// e.g., "GET"  echo $request->getUri()->getPath();
-// e.g., "/api/users"
+$request = $factory->createFromGlobals(); // PSR-7 ServerRequestInterface
 ```
 
-### 2\. Creating Responses
-
-You can create responses manually or using the PSR-17 ResponseFactory.
-
-**Manual Instantiation:**
+The factory takes an optional `(callable(): StreamInterface) $bodyStreamFactory` so tests can inject a synthetic body without touching `php://input`:
 
 ```php
-use Waffle\Commons\Http\Response;
-
-// Create a 200 OK response with JSON content
-$response = new Response(
-    200,
-    ['Content-Type' => 'application/json'],
-    json_encode(['status' => 'ok'])
-);
+public function __construct(?callable $bodyStreamFactory = null)
 ```
 
-**Using Factory (Recommended for decoupling):**
+> **Security note.** `GlobalsFactory` does **not** enforce trusted hosts. Host-header anti-poisoning is handled one layer up by `Waffle\Commons\Pipeline\Middleware\TrustedHostMiddleware`, which sits between `ErrorHandlerMiddleware` and `CoreRoutingMiddleware` in the PSR-15 stack.
 
-```php
-use Waffle\Commons\Http\Factory\ResponseFactory;
-
-$factory = new ResponseFactory();
-$response = $factory->createResponse(404, 'Resource Not Found');
-```
-
-### 3\. Emitting a Response
-
-To send the response to the client (browser), use the ResponseEmitter.
+## 📤 Emit a response
 
 ```php
 use Waffle\Commons\Http\Emitter\ResponseEmitter;
+use Waffle\Commons\Http\Factory\ResponseFactory;
 
-$emitter = new ResponseEmitter();
-$emitter->emit($response);
+$response = (new ResponseFactory())
+    ->createResponse(200)
+    ->withHeader('Content-Type', 'application/json');
+
+(new ResponseEmitter())->emit($response);
 ```
 
-### 4\. Using PSR-17 Factories
+The emitter:
 
-This package provides implementations for all PSR-17 factory interfaces, allowing you to create HTTP objects in a standard way.
+- Throws `\RuntimeException` if headers are already sent.
+- Sends one `header()` per header value (combining for non-`Set-Cookie` headers).
+- Reads the response body in 8 KiB chunks via `StreamInterface::read()`, so streaming large payloads is memory-bounded.
 
-*   **Waffle\\Commons\\Http\\Factory\\RequestFactory**: Creates client-side requests.
+## 🐘 PHP 8.5 features used
 
-*   **Waffle\\Commons\\Http\\Factory\\ServerRequestFactory**: Creates server-side requests.
+- **Immutable, named-argument-friendly factories** — every `with…()` accessor returns a clone.
+- **Typed properties + constructor promotion** across messages.
+- **Strict types** in every file (`declare(strict_types=1);`).
+- The `ResponseEmitter::emit()` signature uses `#[\Override]` to assert the contract.
 
-*   **Waffle\\Commons\\Http\\Factory\\ResponseFactory**: Creates responses.
+## 🧪 Testing
 
-*   **Waffle\\Commons\\Http\\Factory\\StreamFactory**: Creates streams from strings, files, or resources.
-
-*   **Waffle\\Commons\\Http\\Factory\\UriFactory**: Creates URI objects.
-
-*   **Waffle\\Commons\\Http\\Factory\\UploadedFileFactory**: Creates uploaded file objects.
-
-
-Example creating a stream:
-
-```php
-use Waffle\Commons\Http\Factory\StreamFactory;
-
-$factory = new StreamFactory();
-$stream = $factory->createStream('Hello World');
-
-echo $stream->getContents(); // "Hello World"
+```bash
+docker exec -w /waffle-commons/http waffle-dev composer tests
 ```
 
-Features
---------
+Mock-bootstrap files under `tests/src/StreamTest.php`, `tests/src/UploadedFileTest.php`, `tests/src/Factory/StreamFactoryTest.php`, and `tests/src/Emitter/ResponseEmitterTest.php` intentionally declare the production namespace to override built-in PHP functions via `php-mock-phpunit`. They are listed in `mago.toml [guard].excludes` for that reason.
 
-*   **PSR-7:** Full implementation of `Request`, `Response`, `ServerRequest`, `Stream`, `Uri`, `UploadedFile`.
-*   **PSR-17:** Full implementation of Factories for all HTTP objects.
-*   **Response Emitter:** A simple emitter to output PSR-7 responses to the browser.
-*   **Lightweight:** Minimal dependencies, focused on performance.
-*   **Strict Typing:** Built with PHP 8.4+ strict types for reliability.
-*   **Zero Dependencies:** No external dependencies other than psr/http-message and psr/http-factory.
-*   **Secure by Design:** Robust handling of headers, file uploads, and streams.
+## 📄 License
 
-
-Testing
--------
-
-This component is fully tested with PHPUnit.
-
-```shell
-composer tests
-```
-
-Contributing
-------------
-
-Contributions are welcome! Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
-
-License
--------
-
-This project is licensed under the MIT License. See the [LICENSE.md](./LICENSE.md) file for details.
+MIT — see [LICENSE.md](./LICENSE.md).

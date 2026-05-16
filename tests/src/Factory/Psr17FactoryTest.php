@@ -47,13 +47,15 @@ class Psr17FactoryTest extends AbstractTestCase
         $stream = $factory->createStream('content');
         static::assertSame('content', (string) $stream);
 
-        $file = tempnam(sys_get_temp_dir(), 'wfl_stream_factory');
-        file_put_contents($file, 'file content');
+        $file = tempnam(directory: sys_get_temp_dir(), prefix: 'wfl_stream_factory');
+        static::assertIsString($file);
+        file_put_contents(filename: $file, data: 'file content');
         $streamFile = $factory->createStreamFromFile($file);
         static::assertSame('file content', (string) $streamFile);
         unlink($file);
 
-        $resource = fopen('php://temp', 'r+');
+        $resource = fopen(filename: 'php://temp', mode: 'r+');
+        static::assertIsResource($resource);
         $streamRes = $factory->createStreamFromResource($resource);
         static::assertSame($resource, $streamRes->detach());
     }

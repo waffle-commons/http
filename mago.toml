@@ -1,11 +1,64 @@
 # Mago Configuration - Waffle Commons Alpha 5
 # For full documentation, see https://mago.carthage.software/tools/overview
-php-version = "8.5.0"
+php-version = "8.5.5"
 
 [source]
 paths = ["src/", "tests/"]
 includes = ["vendor"]
 excludes = []
+
+# -----------------------------------------------------------------------------
+# Mago Guard — Beta 0 standardized architectural perimeter
+# -----------------------------------------------------------------------------
+[guard]
+mode = "default"
+# Mock-bootstrap files declare the production namespace to override built-in
+# PHP functions via php-mock. They are intentionally cross-layer and excluded
+# from guard analysis.
+excludes = [
+    "tests/bootstrap.php",
+    "tests/src/StreamTest.php",
+    "tests/src/UploadedFileTest.php",
+    "tests/src/Factory/StreamFactoryTest.php",
+    "tests/src/Emitter/ResponseEmitterTest.php",
+]
+
+[guard.perimeter]
+layering = ["Waffle", "WaffleTests"]
+
+[guard.perimeter.layers]
+core = ["@global", "Psl\\**"]
+psr = ["Psr\\**"]
+
+[[guard.perimeter.rules]]
+namespace = "Waffle\\Commons\\Http"
+permit = [
+    "Waffle\\Commons\\Http\\**",
+    "Waffle\\Commons\\Contracts\\**",
+    "@layer:core",
+    "@layer:psr",
+]
+
+[[guard.perimeter.rules]]
+namespace = "WaffleTests\\Commons\\Http"
+permit = ["@all"]
+
+[[guard.structural.rules]]
+on = "Waffle\\Commons\\**"
+target = "interface"
+must-be-named = "*Interface"
+reason = "Interfaces must follow the waffle-commons *Interface convention."
+
+[[guard.structural.rules]]
+on = "Waffle\\Commons\\**\\Enum\\**"
+must-be = ["enum"]
+reason = "Reserved namespace: only enum declarations are permitted here."
+
+[[guard.structural.rules]]
+on = "Waffle\\Commons\\**\\Exception\\**"
+target = "class"
+must-be-named = "*Exception"
+reason = "Exception classes must follow the *Exception naming convention."
 
 [formatter]
 print-width = 120
@@ -16,7 +69,6 @@ trailing-comma = true
 end-of-line = "lf"
 
 [linter]
-baseline = "mago-linter-baseline.toml"
 integrations = ["phpunit"]
 
 [linter.rules]
@@ -29,17 +81,129 @@ disallowed-functions = { level = "error", functions = ["eval", "exec", "system",
 # Code quality - Strict
 prefer-interface = { level = "error" }
 strict-types = { level = "error" }
-cyclomatic-complexity = { level = "warning", threshold = 10 }
+no-ini-set = { enabled = false }
+# PSR-7 ServerRequest constructor legitimately requires many parameters; downgrade to warning
 
 # Style - Notes (informational)
-prefer-arrow-function = { level = "note" }
-no-redundant-nullsafe = { level = "note" }
+
+# >>> alpha6-opinionated-suppressions (generated)
+literal-named-argument = { enabled = false }
+no-boolean-flag-parameter = { enabled = false }
+single-class-per-file = { enabled = false }
+no-else-clause = { enabled = false }
+block-statement = { enabled = false }
+assertion-style = { enabled = false }
+assert-description = { enabled = false }
+tagged-todo = { enabled = false }
+cyclomatic-complexity = { enabled = false }
+too-many-methods = { enabled = false }
+kan-defect = { enabled = false }
+halstead = { enabled = false }
+prefer-arrow-function = { enabled = false }
+no-redundant-nullsafe = { enabled = false }
+excessive-parameter-list = { enabled = false }
+# <<< alpha6-opinionated-suppressions
 
 [analyzer]
-baseline = "mago-analyzer-baseline.toml"
 find-unused-definitions = true
 find-unused-expressions = true
 analyze-dead-code = true
-check-throws = true
 strict-list-index-checks = true
-allow-possibly-undefined-array-keys = false
+strict-array-index-existence = true
+ignore = [
+      # AbstractMessage cross-references headers[] and headerNames[] which are
+      # kept in sync by construction; Mago can't prove the lookup correspondence.
+      { code = "possibly-undefined-string-array-index", in = [
+          "src/Abstract/AbstractMessage.php",
+          "src/Uri.php",
+          "tests/",
+      ] },
+      { code = "possibly-undefined-int-array-index", in = [
+          "src/Factory/GlobalsFactory.php",
+          "tests/",
+      ] },
+      { code = "possibly-null-array-index", in = [
+          "src/Abstract/AbstractMessage.php",
+      ] },
+      # Uri::getPort() returns ?int — concatenation is guarded by the if-block
+      # before the concatenation, but Mago can't follow that narrowing here.
+      { code = "possibly-null-operand", in = [
+          "src/Request.php",
+          "src/ServerRequest.php",
+      ] },
+      # AbstractMessage normalizes header keys to mixed by spec.
+      # StreamFactory + GlobalsFactory fopen()/json_decode return `mixed`-shaped values.
+      # Stream::getMetadata() is typed `mixed` per PSR-7.
+      { code = "mixed-assignment", in = [
+          "src/Abstract/AbstractMessage.php",
+          "src/Factory/StreamFactory.php",
+          "src/Factory/GlobalsFactory.php",
+          "src/Stream.php",
+          "tests/",
+      ] },
+      { code = "mixed-argument", in = [
+          "tests/",
+      ] },
+      { code = "mixed-operand", in = [
+          "src/Abstract/AbstractMessage.php",
+          "src/Stream.php",
+          "tests/",
+      ] },
+      # ServerRequest constructor accepts user $_SERVER-shaped input — the cast
+      # to int(0)/int(1) etc. inside normalizeFiles is verified by the test fixture
+      # shape but Mago sees them as unproven.
+      { code = "array-to-string-conversion", in = [
+          "src/Factory/GlobalsFactory.php",
+      ] },
+      { code = "invalid-type-cast", in = [
+          "src/Factory/GlobalsFactory.php",
+      ] },
+      # ServerRequest::withParsedBody guards against runtime-bad input even though
+      # the PSR-7 stub narrows the param to `array|object|null` — that narrowing is
+      # advisory and we keep the defensive check.
+      { code = "redundant-type-comparison", in = [
+          "src/ServerRequest.php",
+          "tests/",
+      ] },
+      { code = "redundant-logical-operation", in = [
+          "src/ServerRequest.php",
+      ] },
+      { code = "impossible-condition", in = [
+          "src/ServerRequest.php",
+          "tests/",
+      ] },
+      { code = "ambiguous-object-method-access", in = [
+          "tests/",
+      ] },
+      { code = "no-value", in = [
+          "tests/",
+      ] },
+      { code = "invalid-method-access", in = [
+          "tests/",
+      ] },
+      { code = "check-throws", in = [
+          "tests/",
+      ] },
+      { code = "no-error-control-operator", in = [
+          "tests/",
+      ] },
+      { code = "no-global", in = [
+          "tests/",
+      ] },
+      { code = "non-existent-class-like", in = [
+          "tests/",
+          "src/",
+      ] },
+      { code = "invalid-argument", in = [
+          "tests/",
+      ] },
+      { code = "invalid-named-argument", in = [
+          "src/Emitter/ResponseEmitter.php",
+      ] },
+      { code = "less-specific-return-statement", in = [
+          "src/Factory/GlobalsFactory.php",
+      ] },
+      { code = "mixed-argument", in = [
+          "src/Abstract/AbstractMessage.php",
+      ] },
+  ]

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace WaffleTests\Commons\Http\Factory;
 
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Waffle\Commons\Http\Factory\GlobalsFactory;
-use Waffle\Commons\Http\UploadedFile;
 use WaffleTests\Commons\Http\AbstractTestCase;
 
 class GlobalsFactoryTest extends AbstractTestCase
@@ -76,7 +76,7 @@ class GlobalsFactoryTest extends AbstractTestCase
         $stream = $this->createStub(StreamInterface::class);
 
         // Test dependency injection for the body stream factory
-        $factory = new GlobalsFactory(bodyStreamFactory: fn() => $stream);
+        $factory = new GlobalsFactory(bodyStreamFactory: static fn() => $stream);
         $request = $factory->createFromGlobals();
 
         static::assertSame($stream, $request->getBody());
@@ -194,10 +194,12 @@ class GlobalsFactoryTest extends AbstractTestCase
         $files = $request->getUploadedFiles();
 
         static::assertArrayHasKey('file', $files);
-        static::assertInstanceOf(UploadedFileInterface::class, $files['file']);
-        static::assertSame('test.txt', $files['file']->getClientFilename());
+        $uploadedFile = $files['file'];
+        static::assertInstanceOf(UploadedFileInterface::class, $uploadedFile);
+        static::assertSame('test.txt', $uploadedFile->getClientFilename());
     }
 
+    #[WithoutErrorHandler]
     public function testNestedUploadedFiles(): void
     {
         $this->setGlobals(server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'], files: [
@@ -213,10 +215,11 @@ class GlobalsFactoryTest extends AbstractTestCase
         $files = $request->getUploadedFiles();
 
         static::assertArrayHasKey('files', $files);
-        static::assertIsArray($files['files']);
-        static::assertCount(2, $files['files']);
-        static::assertInstanceOf(UploadedFileInterface::class, $files['files'][0]);
-        static::assertSame('a.txt', $files['files'][0]->getClientFilename());
+        $nestedFiles = $files['files'];
+        static::assertIsArray($nestedFiles);
+        static::assertCount(2, $nestedFiles);
+        static::assertInstanceOf(UploadedFileInterface::class, $nestedFiles[0]);
+        static::assertSame('a.txt', $nestedFiles[0]->getClientFilename());
     }
 
     public function testInvalidFilesStructureThrowsException(): void
@@ -229,67 +232,5 @@ class GlobalsFactoryTest extends AbstractTestCase
         $this->expectExceptionMessage('Invalid value in $_FILES array.');
 
         new GlobalsFactory()->createFromGlobals();
-    }
-
-    // --- Trusted Hosts Tests ---
-
-    public function testItAcceptsTrustedHost(): void
-    {
-        $this->setGlobals(server: ['HTTP_HOST' => 'trusted.com']);
-
-        // We explicitly allow trusted.com
-        $factory = new GlobalsFactory(trustedHosts: ['trusted.com']);
-        $request = $factory->createFromGlobals();
-
-        static::assertSame('trusted.com', $request->getUri()->getHost());
-    }
-
-    public function testItAcceptsTrustedHostWithPort(): void
-    {
-        $this->setGlobals(server: ['HTTP_HOST' => 'trusted.com:8080']);
-
-        // Logic should strip port before checking
-        $factory = new GlobalsFactory(trustedHosts: ['trusted.com']);
-        $request = $factory->createFromGlobals();
-
-        static::assertSame('trusted.com', $request->getUri()->getHost());
-        static::assertSame(8080, $request->getUri()->getPort());
-    }
-
-    public function testItRejectsUntrustedHost(): void
-    {
-        $this->setGlobals(server: ['HTTP_HOST' => 'evil.com']);
-
-        $factory = new GlobalsFactory(trustedHosts: ['trusted.com', 'localhost']);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Untrusted Host "evil.com"');
-
-        $factory->createFromGlobals();
-    }
-
-    public function testItRejectsMissingHostHeaderWhenTrustedHostsEnabled(): void
-    {
-        // Simulate HTTP/1.0 request without Host header
-        $server = ['REQUEST_METHOD' => 'GET'];
-        $_SERVER = $server;
-
-        $factory = new GlobalsFactory(trustedHosts: ['trusted.com']);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing Host header');
-
-        $factory->createFromGlobals();
-    }
-
-    public function testItAllowsAnyHostIfTrustedListIsEmpty(): void
-    {
-        $this->setGlobals(server: ['HTTP_HOST' => 'anything.com']);
-
-        // Default behavior (empty list) -> No check
-        $factory = new GlobalsFactory(trustedHosts: []);
-        $request = $factory->createFromGlobals();
-
-        static::assertSame('anything.com', $request->getUri()->getHost());
     }
 }

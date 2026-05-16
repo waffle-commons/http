@@ -94,7 +94,7 @@ class UriTest extends AbstractTestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $uri = new Uri('https://example.com');
-        $uri->withPort(70000); // Port out of range
+        $uri->withPort(70_000); // Port out of range
     }
 
     public function testWithPath(): void
