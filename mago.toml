@@ -7,6 +7,59 @@ paths = ["src/", "tests/"]
 includes = ["vendor"]
 excludes = []
 
+# -----------------------------------------------------------------------------
+# Mago Guard — Beta 0 standardized architectural perimeter
+# -----------------------------------------------------------------------------
+[guard]
+mode = "default"
+# Mock-bootstrap files declare the production namespace to override built-in
+# PHP functions via php-mock. They are intentionally cross-layer and excluded
+# from guard analysis.
+excludes = [
+    "tests/bootstrap.php",
+    "tests/src/StreamTest.php",
+    "tests/src/UploadedFileTest.php",
+    "tests/src/Factory/StreamFactoryTest.php",
+    "tests/src/Emitter/ResponseEmitterTest.php",
+]
+
+[guard.perimeter]
+layering = ["Waffle", "WaffleTests"]
+
+[guard.perimeter.layers]
+core = ["@global", "Psl\\**"]
+psr = ["Psr\\**"]
+
+[[guard.perimeter.rules]]
+namespace = "Waffle\\Commons\\Http"
+permit = [
+    "Waffle\\Commons\\Http\\**",
+    "Waffle\\Commons\\Contracts\\**",
+    "@layer:core",
+    "@layer:psr",
+]
+
+[[guard.perimeter.rules]]
+namespace = "WaffleTests\\Commons\\Http"
+permit = ["@all"]
+
+[[guard.structural.rules]]
+on = "Waffle\\Commons\\**"
+target = "interface"
+must-be-named = "*Interface"
+reason = "Interfaces must follow the waffle-commons *Interface convention."
+
+[[guard.structural.rules]]
+on = "Waffle\\Commons\\**\\Enum\\**"
+must-be = ["enum"]
+reason = "Reserved namespace: only enum declarations are permitted here."
+
+[[guard.structural.rules]]
+on = "Waffle\\Commons\\**\\Exception\\**"
+target = "class"
+must-be-named = "*Exception"
+reason = "Exception classes must follow the *Exception naming convention."
+
 [formatter]
 print-width = 120
 tab-width = 4
