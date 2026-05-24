@@ -1,6 +1,5 @@
 {
     "name": "waffle-commons/http",
-    "version": "0.1.0-beta0",
     "description": "Http component for Waffle framework.",
     "type": "library",
     "license": "MIT",
