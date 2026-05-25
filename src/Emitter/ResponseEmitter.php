@@ -54,7 +54,6 @@ class ResponseEmitter implements ResponseEmitterInterface
      *
      * @param array<array-key, string[]> $headers
      */
-    // @mago-ignore analysis:unused-method -- invoked via $this->emitHeaders() in emit()
     private function emitHeaders(array $headers): void
     {
         foreach ($headers as $name => $values) {
@@ -85,7 +84,6 @@ class ResponseEmitter implements ResponseEmitterInterface
     /**
      * Emits the response body.
      */
-    // @mago-ignore analysis:unused-method -- invoked via $this->emitBody() in emit()
     private function emitBody(ResponseInterface $response): void
     {
         $body = $response->getBody();

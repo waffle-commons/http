@@ -210,6 +210,11 @@ class GlobalsFactory
     /**
      * Retrieves the parsed body (e.g., $_POST or decoded JSON).
      *
+     * Dispatches to a per-content-type helper so the top-level method stays a
+     * flat decision table (Beta-1 hardening: reduce cyclomatic complexity per
+     * Roadmap §1.5).
+     *
+     * @param array<string, string> $headers
      * @return array|object|null
      */
     private function getParsedBody(string $method, array $headers, StreamInterface $body): array|object|null
@@ -218,32 +223,57 @@ class GlobalsFactory
             return null;
         }
 
-        $contentType = (string) ($headers['content-type'] ?? '');
-        $parts = explode(separator: ';', string: $contentType);
-        $mime = trim(strtolower($parts[0]));
+        $mime = $this->extractMimeType($headers);
 
-        if ('application/x-www-form-urlencoded' === $mime) {
-            return $_POST;
-        }
-
-        if ('multipart/form-data' === $mime) {
+        if ($this->isFormPostMime($mime)) {
             return $_POST;
         }
 
         if ('application/json' === $mime) {
-            try {
-                $bodyContents = $body->getContents();
-                if ($bodyContents === '') {
-                    return null;
-                }
-                $decoded = json_decode(json: $bodyContents, associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
-                return is_array($decoded) || is_object($decoded) ? $decoded : null;
-            } catch (\Exception $e) {
-                return null;
-            }
+            return $this->parseJsonBody($body);
         }
 
         return null;
+    }
+
+    /**
+     * Extracts the bare MIME type from a Content-Type header value
+     * (strips charset, boundary, and any other parameters).
+     *
+     * @param array<string, string> $headers
+     */
+    private function extractMimeType(array $headers): string
+    {
+        $contentType = $headers['content-type'] ?? '';
+        $parts = explode(separator: ';', string: $contentType);
+        return trim(strtolower($parts[0]));
+    }
+
+    /**
+     * @return bool Whether the MIME type belongs to the form-POST family
+     *              (urlencoded or multipart) — both bodies are parsed into $_POST.
+     */
+    private function isFormPostMime(string $mime): bool
+    {
+        return $mime === 'application/x-www-form-urlencoded' || $mime === 'multipart/form-data';
+    }
+
+    /**
+     * Decodes a JSON request body into an array/object. Returns `null` on empty
+     * body, malformed JSON, or scalar/null payloads.
+     */
+    private function parseJsonBody(StreamInterface $body): array|object|null
+    {
+        try {
+            $bodyContents = $body->getContents();
+            if ($bodyContents === '') {
+                return null;
+            }
+            $decoded = json_decode(json: $bodyContents, associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
+            return is_array($decoded) || is_object($decoded) ? $decoded : null;
+        } catch (\Exception) {
+            return null;
+        }
     }
 
     /**
@@ -303,28 +333,49 @@ class GlobalsFactory
     }
 
     /**
-     * Handles the nested structure of <input name="files[]">.
+     * Handles the nested structure of <input name="files[]">. The per-index spec
+     * extraction is delegated to {@see self::nestedSpecAt()} so this method
+     * stays a simple loop (Beta-1 hardening: reduce cyclomatic complexity per
+     * Roadmap §1.5).
      */
     private function normalizeNestedFileSpec(array $files): array
     {
         $normalized = [];
         $tmpNames = (array) ($files['tmp_name'] ?? []);
         foreach (array_keys($tmpNames) as $key) {
-            $spec = [
-                'tmp_name' => $tmpNames[$key],
-                'size' => array_key_exists('size', $files) && is_array($files['size']) ? $files['size'][$key] ?? 0 : 0,
-                'error' => array_key_exists('error', $files) && is_array($files['error'])
-                    ? $files['error'][$key] ?? UPLOAD_ERR_OK
-                    : UPLOAD_ERR_OK,
-                'name' => array_key_exists('name', $files) && is_array($files['name'])
-                    ? $files['name'][$key] ?? null
-                    : null,
-                'type' => array_key_exists('type', $files) && is_array($files['type'])
-                    ? $files['type'][$key] ?? null
-                    : null,
-            ];
-            $normalized[$key] = $this->createUploadedFileFromSpec($spec);
+            $normalized[$key] = $this->createUploadedFileFromSpec($this->nestedSpecAt($files, $key));
         }
         return $normalized;
+    }
+
+    /**
+     * Reads the per-index slice ($key) of a nested PHP $_FILES spec into a flat
+     * `array{tmp_name, size, error, name, type}` ready to feed back into
+     * {@see self::createUploadedFileFromSpec()}.
+     */
+    private function nestedSpecAt(array $files, int|string $key): array
+    {
+        $tmpNames = (array) ($files['tmp_name'] ?? []);
+
+        return [
+            'tmp_name' => $tmpNames[$key] ?? null,
+            'size' => $this->nestedField($files, 'size', $key, default: 0),
+            'error' => $this->nestedField($files, 'error', $key, default: UPLOAD_ERR_OK),
+            'name' => $this->nestedField($files, 'name', $key, default: null),
+            'type' => $this->nestedField($files, 'type', $key, default: null),
+        ];
+    }
+
+    /**
+     * Reads a single nested field at $key from a $_FILES spec, returning $default
+     * when the field is missing or not an array.
+     */
+    private function nestedField(array $files, string $field, int|string $key, mixed $default): mixed
+    {
+        $bucket = $files[$field] ?? null;
+        if (!is_array($bucket)) {
+            return $default;
+        }
+        return $bucket[$key] ?? $default;
     }
 }
