@@ -9,7 +9,7 @@
 Waffle HTTP Component
 =====================
 
-> **Release:** `v0.1.0-beta1`
+> **Release:** `v0.1.0-beta2` &nbsp;|&nbsp; [`CHANGELOG.md`](./CHANGELOG.md)
 > **PSR Compliance:** PSR-7 (HTTP Messages), PSR-17 (HTTP Factories)
 
 A strict, immutable PSR-7/17 implementation tuned for FrankenPHP worker mode. No singletons, no superglobal touching outside the explicit `GlobalsFactory`. Streams are seekable-aware; the `ResponseEmitter` chunks bodies to avoid loading large payloads into memory.
@@ -82,6 +82,21 @@ The emitter:
 - **Typed properties + constructor promotion** across messages.
 - **Strict types** in every file (`declare(strict_types=1);`).
 - The `ResponseEmitter::emit()` signature uses `#[\Override]` to assert the contract.
+
+## 🧭 Architectural boundary (`mago guard`)
+
+An active dependency **perimeter** is enforced on every CI run by `vendor/bin/mago guard` (bundled into `composer mago`; zero baselines). The rules live in [`mago.toml`](./mago.toml) under `[guard.perimeter]` — a forbidden `use` statement fails the build, not a reviewer.
+
+Production code under `Waffle\Commons\Http` may depend **only** on:
+
+- `Waffle\Commons\Http\**` — itself
+- `Waffle\Commons\Contracts\**` — the shared contracts package, the **only** Waffle dependency permitted
+- `Psr\**` — PSR interfaces (PSR-7 / PSR-17)
+- `@global` + `Psl\**` — PHP core and the PHP Standard Library
+
+Test code under `WaffleTests\Commons\Http` is unrestricted (`@all`); the `php-mock` bootstrap fixtures noted under Testing are listed in `[guard].excludes` because they intentionally re-declare the production namespace. Structural rules are guarded too: interfaces must be named `*Interface`, `Exception\**` classes must end in `*Exception`, and any `Enum\**` namespace may hold only `enum` declarations.
+
+Contract-first, component-agnostic by construction: components compose through `waffle-commons/contracts`, never directly through one another.
 
 ## 🧪 Testing
 
