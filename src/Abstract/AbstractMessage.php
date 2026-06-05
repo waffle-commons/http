@@ -243,6 +243,7 @@ abstract class AbstractMessage implements MessageInterface
     protected function normalizeHeaders(array $headers): array
     {
         $normalizedHeaders = [];
+        // @igor-ignore: constructor-time header normalisation; with* methods clone
         $this->headerNames = [];
 
         foreach ($headers as $name => $value) {
@@ -257,6 +258,7 @@ abstract class AbstractMessage implements MessageInterface
             $normalizedName = strtolower($name);
 
             // Stores the original case and values
+            // @igor-ignore: constructor-time header normalisation; with* methods clone
             $this->headerNames[$normalizedName] = $name;
             $normalizedHeaders[$name] = $value;
         }
