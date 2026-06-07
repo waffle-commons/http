@@ -55,6 +55,7 @@ class UploadedFile implements UploadedFileInterface
             if (false === $resource) {
                 throw new RuntimeException('Failed to open uploaded file for reading.');
             }
+            // @igor-ignore: per-request value object; lazy stream is instance-scoped, never shared
             $this->stream = new Stream($resource);
         }
         return $this->stream;
@@ -81,6 +82,7 @@ class UploadedFile implements UploadedFileInterface
             if (!move_uploaded_file($this->tmpName, $targetPath)) {
                 throw new RuntimeException('Failed to move uploaded file.');
             }
+            // @igor-ignore: per-request value object; one-shot moved-latch, never shared
             $this->hasMoved = true;
             return;
         }
@@ -90,6 +92,7 @@ class UploadedFile implements UploadedFileInterface
             throw new RuntimeException('Failed to move file.');
         }
 
+        // @igor-ignore: per-request value object; one-shot moved-latch, never shared
         $this->hasMoved = true;
     }
 

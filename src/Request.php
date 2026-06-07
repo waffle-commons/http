@@ -147,7 +147,9 @@ class Request extends AbstractMessage implements RequestInterface
             unset($this->headers[$this->headerNames[$normalizedName]]);
         }
 
+        // @igor-ignore: ctor + clone (withUri) only; per-request message, never shared
         $this->headerNames[$normalizedName] = $headerName;
+        // @igor-ignore: ctor + clone (withUri) only; per-request message, never shared
         $this->headers[$headerName] = [$host];
     }
 

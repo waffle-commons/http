@@ -46,37 +46,27 @@ class Uri implements UriInterface
      */
     public function __construct(string $uri = '')
     {
-        if ('' !== $uri) {
-            $parts = parse_url($uri);
-            if (false === $parts) {
-                throw new InvalidArgumentException(sprintf('Unable to parse URI: "%s".', $uri));
-            }
-            // Applies the parsed parts to the object properties
-            $this->applyParts($parts);
+        if ('' === $uri) {
+            return;
         }
-    }
 
-    /**
-     * Applies parsed parts (from parse_url) to the instance properties.
-     *
-     * @param array $parts Associative array from parse_url.
-     */
-    private function applyParts(array $parts): void
-    {
-        $this->scheme = array_key_exists('scheme', $parts) ? $this->filterScheme((string) $parts['scheme']) : '';
+        $parts = parse_url($uri);
+        if (false === $parts) {
+            throw new InvalidArgumentException(sprintf('Unable to parse URI: "%s".', $uri));
+        }
+
+        // Apply parsed parts (from parse_url) directly to the instance properties.
+        // Inlined into the constructor on purpose: these are one-time, construction-time
+        // initialisations — not cross-request shared-state writes.
+        $this->scheme = array_key_exists('scheme', $parts) ? $this->filterScheme($parts['scheme']) : '';
         $this->userInfo = array_key_exists('user', $parts)
-            ? $this->filterUserInfo(
-                (string) $parts['user'],
-                array_key_exists('pass', $parts) ? (string) $parts['pass'] : null,
-            )
+            ? $this->filterUserInfo($parts['user'], array_key_exists('pass', $parts) ? $parts['pass'] : null)
             : '';
-        $this->host = array_key_exists('host', $parts) ? $this->filterHost((string) $parts['host']) : '';
+        $this->host = array_key_exists('host', $parts) ? $this->filterHost($parts['host']) : '';
         $this->port = array_key_exists('port', $parts) ? $this->filterPort((int) $parts['port']) : null;
-        $this->path = array_key_exists('path', $parts) ? $this->filterPath((string) $parts['path']) : '';
-        $this->query = array_key_exists('query', $parts) ? $this->filterQuery((string) $parts['query']) : '';
-        $this->fragment = array_key_exists('fragment', $parts)
-            ? $this->filterFragment((string) $parts['fragment'])
-            : '';
+        $this->path = array_key_exists('path', $parts) ? $this->filterPath($parts['path']) : '';
+        $this->query = array_key_exists('query', $parts) ? $this->filterQuery($parts['query']) : '';
+        $this->fragment = array_key_exists('fragment', $parts) ? $this->filterFragment($parts['fragment']) : '';
     }
 
     // --- Filter Methods for normalization ---

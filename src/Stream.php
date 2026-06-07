@@ -120,12 +120,15 @@ class Stream implements StreamInterface
         }
 
         $resource = $this->resource;
+        // @igor-ignore: per-request stream; resource/meta are instance-scoped, never shared
         $this->resource = null;
 
         // Saves metadata in case it's needed after detachment
         if (null === $this->detachedMeta) {
+            // @igor-ignore: per-request stream; resource/meta are instance-scoped, never shared
             $this->detachedMeta = $this->meta;
         }
+        // @igor-ignore: per-request stream; resource/meta are instance-scoped, never shared
         $this->meta = null; // Clears metadata cache
 
         return $resource;
@@ -253,6 +256,7 @@ class Stream implements StreamInterface
         }
 
         // Invalidate metadata cache as size might have changed
+        // @igor-ignore: per-request stream; resource/meta are instance-scoped, never shared
         $this->meta = null;
 
         return $result;
@@ -329,6 +333,7 @@ class Stream implements StreamInterface
 
         // Fills cache if empty
         if (null === $this->meta) {
+            // @igor-ignore: per-request stream; memoised metadata is instance-scoped, never shared
             $this->meta = stream_get_meta_data($this->resource);
         }
 
