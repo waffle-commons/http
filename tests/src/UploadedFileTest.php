@@ -18,6 +18,7 @@ namespace WaffleTests\Commons\Http {
     use RuntimeException;
     use Waffle\Commons\Http\Stream;
     use Waffle\Commons\Http\UploadedFile;
+    use Waffle\Commons\Utils\Exception\ValidationException;
 
     class UploadedFileTest extends AbstractTestCase
     {
@@ -147,6 +148,17 @@ namespace WaffleTests\Commons\Http {
             $this->expectExceptionMessage('Failed to move file');
 
             $file->moveTo($destination);
+        }
+
+        public function testMoveToRejectsTraversalPath(): void
+        {
+            // SEC-05: a destination containing `..` is refused before any move.
+            $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_OK);
+
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('directory-traversal');
+
+            $file->moveTo('/var/uploads/../../etc/cron.d/evil');
         }
     }
 }

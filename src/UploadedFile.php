@@ -7,6 +7,7 @@ namespace Waffle\Commons\Http;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use RuntimeException;
+use Waffle\Commons\Utils\Assert;
 
 /**
  * PSR-7 UploadedFileInterface implementation.
@@ -73,6 +74,12 @@ class UploadedFile implements UploadedFileInterface
         if ($this->hasMoved) {
             throw new RuntimeException('Cannot move file; already moved.');
         }
+
+        // SEC-05: reject a directory-traversal or null-byte destination before
+        // any transfer, so attacker-influenced metadata can never escape the
+        // intended storage location. Throws a ValidationException (an
+        // InvalidArgumentException, per the PSR-7 moveTo() contract).
+        $targetPath = Assert::safePath($targetPath);
 
         // Determines if environment is SAPI (e.g., FPM, Apache) or not (CLI)
         $isSapi = !in_array(needle: PHP_SAPI, haystack: ['cli', 'phpdbg'], strict: true);
