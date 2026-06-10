@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http\Abstract;
 
+use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use InvalidArgumentException;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
@@ -240,10 +241,10 @@ abstract class AbstractMessage implements MessageInterface
      * @param array $headers Associative array of headers.
      * @return array<string, string[]> Normalized array of headers.
      */
+    #[WorkerSafe(scope: 'constructor-time', reason: 'header normalisation at construction; with* methods clone')]
     protected function normalizeHeaders(array $headers): array
     {
         $normalizedHeaders = [];
-        // @igor-ignore: constructor-time header normalisation; with* methods clone
         $this->headerNames = [];
 
         foreach ($headers as $name => $value) {
@@ -258,7 +259,6 @@ abstract class AbstractMessage implements MessageInterface
             $normalizedName = strtolower($name);
 
             // Stores the original case and values
-            // @igor-ignore: constructor-time header normalisation; with* methods clone
             $this->headerNames[$normalizedName] = $name;
             $normalizedHeaders[$name] = $value;
         }

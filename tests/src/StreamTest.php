@@ -178,6 +178,56 @@ namespace WaffleTests\Commons\Http {
             static::assertFalse($stream->isSeekable());
         }
 
+        public function testOwnedResourceIsClosedOnClose(): void
+        {
+            $resource = fopen(filename: 'php://temp', mode: 'r+');
+            static::assertIsResource($resource);
+
+            // Default ownership: the Stream fclose()s the underlying handle.
+            $stream = new Stream($resource);
+            $stream->close();
+
+            static::assertFalse(is_resource($resource));
+        }
+
+        public function testBorrowedResourceIsNotClosedOnClose(): void
+        {
+            $resource = fopen(filename: 'php://temp', mode: 'r+');
+            static::assertIsResource($resource);
+
+            $stream = new Stream($resource, 'r+', ownsResource: false);
+            $stream->close();
+
+            // close() releases our reference (the Stream is now detached) but the
+            // borrowed handle stays open for its real owner (STB-01).
+            static::assertFalse($stream->isReadable());
+            static::assertIsResource($resource);
+
+            fclose($resource);
+        }
+
+        public function testBorrowedResourceIsNotClosedOnDestruct(): void
+        {
+            $resource = fopen(filename: 'php://temp', mode: 'r+');
+            static::assertIsResource($resource);
+
+            $stream = new Stream($resource, 'r+', ownsResource: false);
+            unset($stream); // force __destruct()
+
+            static::assertIsResource($resource);
+
+            fclose($resource);
+        }
+
+        public function testCloseIsIdempotentForOwnedResource(): void
+        {
+            $stream = $this->createStream('payload');
+            $stream->close();
+            $stream->close(); // second close() must be a harmless no-op
+
+            static::assertFalse($stream->isReadable());
+        }
+
         public function testGetSize(): void
         {
             $stream = $this->createStream('Hello World');
