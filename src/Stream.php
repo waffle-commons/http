@@ -8,6 +8,8 @@ use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
+use Waffle\Commons\Contracts\Data\Connection\ConnectionKind;
+use Waffle\Commons\Contracts\Data\Connection\ConnectionTrackerInterface;
 
 /**
  * PSR-7 StreamInterface implementation.
@@ -58,11 +60,18 @@ class Stream implements StreamInterface
      * @param bool $ownsResource When false, a passed-in resource is treated as
      *        borrowed: it is never `fclose()`d by this Stream (STB-01). Ignored
      *        for the path form, where the Stream always owns the handle it opens.
+     * @param ?ConnectionTrackerInterface $tracker DIAG-03 orphaned-connection tracer.
+     *        Null (the default) disables tracing — zero overhead in production; a dev
+     *        wiring injects a tracker so a stream still open at request end is surfaced.
      * @throws InvalidArgumentException if $stream is not a resource or string.
      * @throws RuntimeException if $stream is a string and cannot be opened.
      */
-    public function __construct($stream, string $mode = 'r', bool $ownsResource = true)
-    {
+    public function __construct(
+        $stream,
+        string $mode = 'r',
+        bool $ownsResource = true,
+        private readonly ?ConnectionTrackerInterface $tracker = null,
+    ) {
         if (is_string($stream)) {
             // If it's a string, assume it's a file path
             $resource = fopen($stream, $mode);
@@ -72,16 +81,26 @@ class Stream implements StreamInterface
             $this->resource = $resource;
             // A handle we open ourselves is always owned (and must be closed).
             $this->ownsResource = true;
+            $this->tracker?->trackOpen($this->traceId(), ConnectionKind::Stream);
             return;
         }
         if (is_resource($stream)) {
             // If it's already a resource
             $this->resource = $stream;
             $this->ownsResource = $ownsResource;
+            $this->tracker?->trackOpen($this->traceId(), ConnectionKind::Stream);
             return;
         }
         // Invalid type
         throw new InvalidArgumentException('Invalid stream provided; must be a string (path) or resource.');
+    }
+
+    /**
+     * Stable per-instance trace id for the DIAG-03 ledger.
+     */
+    private function traceId(): string
+    {
+        return 'stream:' . spl_object_id($this);
     }
 
     /**
@@ -142,6 +161,9 @@ class Stream implements StreamInterface
 
         $resource = $this->resource;
         $this->resource = null;
+        // DIAG-03: the descriptor is released here (close() funnels through detach()),
+        // so the tracer ledger no longer counts it as open.
+        $this->tracker?->trackClose($this->traceId());
 
         // Saves metadata in case it's needed after detachment
         if (null === $this->detachedMeta) {
