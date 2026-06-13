@@ -9,6 +9,7 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use RuntimeException;
+use Waffle\Commons\Contracts\Http\GlobalsFactoryInterface;
 use Waffle\Commons\Http\ServerRequest;
 use Waffle\Commons\Http\Stream;
 use Waffle\Commons\Http\Uri;
@@ -22,7 +23,7 @@ use Waffle\Commons\Http\Uri;
  * Host Header Injection is rejected by `Waffle\Commons\Pipeline\Middleware\TrustedHostMiddleware`
  * which sits between ErrorHandlerMiddleware and CoreRoutingMiddleware in the PSR-15 stack.
  */
-class GlobalsFactory
+class GlobalsFactory implements GlobalsFactoryInterface
 {
     /**
      * @var callable(): StreamInterface
@@ -56,6 +57,7 @@ class GlobalsFactory
      *
      * @return ServerRequestInterface
      */
+    #[\Override]
     public function createFromGlobals(): ServerRequestInterface
     {
         // Method, URI, Headers, Body, Version
