@@ -38,7 +38,7 @@ composer require waffle-commons/http
 | `Waffle\Commons\Http\Factory\StreamFactory` | PSR-17 | `createStream()`, `createStreamFromFile()`, `createStreamFromResource()`. |
 | `Waffle\Commons\Http\Factory\UriFactory` | PSR-17 | `createUri()`. |
 | `Waffle\Commons\Http\Factory\UploadedFileFactory` | PSR-17 | `createUploadedFile()`. |
-| `Waffle\Commons\Http\Factory\GlobalsFactory` | — | Framework-specific: builds a PSR-7 `ServerRequest` from `$_SERVER`, `$_GET`, `$_POST`, `$_COOKIE`, `$_FILES`, and `php://input`. |
+| `Waffle\Commons\Http\Factory\GlobalsFactory` | — | Implements `GlobalsFactoryInterface`: builds a PSR-7 `ServerRequest` from `$_SERVER`, `$_GET`, `$_POST`, `$_COOKIE`, `$_FILES`, and `php://input`. |
 | `Waffle\Commons\Http\Emitter\ResponseEmitter` | — | Implements `ResponseEmitterInterface`: sends status line, headers and chunked body. |
 
 ## 🚀 Bootstrap a server request
