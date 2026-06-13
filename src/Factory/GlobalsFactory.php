@@ -250,7 +250,7 @@ class GlobalsFactory
     {
         $contentType = $headers['content-type'] ?? '';
         $parts = explode(separator: ';', string: $contentType);
-        return trim(strtolower($parts[0]));
+        return mb_trim(strtolower($parts[0]));
     }
 
     /**
