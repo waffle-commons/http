@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http;
 
+use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use RuntimeException;
+use Waffle\Commons\Utils\Assert;
 
 /**
  * PSR-7 UploadedFileInterface implementation.
@@ -16,8 +18,10 @@ use RuntimeException;
 class UploadedFile implements UploadedFileInterface
 {
     /** @var StreamInterface|null */
+    #[WorkerSafe(reason: 'per-request value object; lazy stream is instance-scoped, never shared')]
     private ?StreamInterface $stream = null;
     /** @var bool Indicates if moveTo() has been called. */
+    #[WorkerSafe(reason: 'per-request value object; one-shot moved-latch, never shared')]
     private bool $hasMoved = false;
 
     /**
@@ -55,7 +59,6 @@ class UploadedFile implements UploadedFileInterface
             if (false === $resource) {
                 throw new RuntimeException('Failed to open uploaded file for reading.');
             }
-            // @igor-ignore: per-request value object; lazy stream is instance-scoped, never shared
             $this->stream = new Stream($resource);
         }
         return $this->stream;
@@ -74,6 +77,12 @@ class UploadedFile implements UploadedFileInterface
             throw new RuntimeException('Cannot move file; already moved.');
         }
 
+        // SEC-05: reject a directory-traversal or null-byte destination before
+        // any transfer, so attacker-influenced metadata can never escape the
+        // intended storage location. Throws a ValidationException (an
+        // InvalidArgumentException, per the PSR-7 moveTo() contract).
+        $targetPath = Assert::safePath($targetPath);
+
         // Determines if environment is SAPI (e.g., FPM, Apache) or not (CLI)
         $isSapi = !in_array(needle: PHP_SAPI, haystack: ['cli', 'phpdbg'], strict: true);
 
@@ -82,7 +91,6 @@ class UploadedFile implements UploadedFileInterface
             if (!move_uploaded_file($this->tmpName, $targetPath)) {
                 throw new RuntimeException('Failed to move uploaded file.');
             }
-            // @igor-ignore: per-request value object; one-shot moved-latch, never shared
             $this->hasMoved = true;
             return;
         }
@@ -92,7 +100,6 @@ class UploadedFile implements UploadedFileInterface
             throw new RuntimeException('Failed to move file.');
         }
 
-        // @igor-ignore: per-request value object; one-shot moved-latch, never shared
         $this->hasMoved = true;
     }
 

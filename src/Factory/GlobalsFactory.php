@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http\Factory;
 
-use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use RuntimeException;
+use Waffle\Commons\Contracts\Http\GlobalsFactoryInterface;
 use Waffle\Commons\Http\ServerRequest;
 use Waffle\Commons\Http\Stream;
-use Waffle\Commons\Http\UploadedFile;
 use Waffle\Commons\Http\Uri;
 
 /**
@@ -24,18 +23,23 @@ use Waffle\Commons\Http\Uri;
  * Host Header Injection is rejected by `Waffle\Commons\Pipeline\Middleware\TrustedHostMiddleware`
  * which sits between ErrorHandlerMiddleware and CoreRoutingMiddleware in the PSR-15 stack.
  */
-class GlobalsFactory
+class GlobalsFactory implements GlobalsFactoryInterface
 {
     /**
      * @var callable(): StreamInterface
      */
     private $bodyStreamFactory;
 
+    private UploadedFilesNormalizer $uploadedFilesNormalizer;
+
     /**
      * @param (callable(): StreamInterface)|null $bodyStreamFactory Factory to create a Stream for php://input.
+     * @param UploadedFilesNormalizer|null $uploadedFilesNormalizer Normalizes the $_FILES tree (defaults to a fresh instance).
      */
-    public function __construct(?callable $bodyStreamFactory = null)
-    {
+    public function __construct(
+        ?callable $bodyStreamFactory = null,
+        ?UploadedFilesNormalizer $uploadedFilesNormalizer = null,
+    ) {
         // Provides a default factory if none is given
         $this->bodyStreamFactory = $bodyStreamFactory ?? static function (): Stream {
             $resource = fopen('php://input', mode: 'r');
@@ -45,6 +49,7 @@ class GlobalsFactory
             assert(is_resource($resource), description: 'fopen must return a resource after false check.');
             return new Stream($resource);
         };
+        $this->uploadedFilesNormalizer = $uploadedFilesNormalizer ?? new UploadedFilesNormalizer();
     }
 
     /**
@@ -52,6 +57,7 @@ class GlobalsFactory
      *
      * @return ServerRequestInterface
      */
+    #[\Override]
     public function createFromGlobals(): ServerRequestInterface
     {
         // Method, URI, Headers, Body, Version
@@ -246,7 +252,7 @@ class GlobalsFactory
     {
         $contentType = $headers['content-type'] ?? '';
         $parts = explode(separator: ';', string: $contentType);
-        return trim(strtolower($parts[0]));
+        return mb_trim(strtolower($parts[0]));
     }
 
     /**
@@ -283,99 +289,6 @@ class GlobalsFactory
      */
     private function createUploadedFilesFromGlobals(): array
     {
-        if ($_FILES === []) {
-            return [];
-        }
-        return $this->normalizeFiles($_FILES);
-    }
-
-    /**
-     * Normalizes the $_FILES structure.
-     */
-    private function normalizeFiles(array $files): array
-    {
-        $normalized = [];
-        foreach ($files as $key => $value) {
-            if ($value instanceof UploadedFileInterface) {
-                $normalized[$key] = $value;
-                continue;
-            }
-            if (is_array($value) && array_key_exists('tmp_name', $value)) {
-                $normalized[$key] = $this->createUploadedFileFromSpec($value);
-                continue;
-            }
-            if (is_array($value)) {
-                $normalized[$key] = $this->normalizeFiles($value);
-                continue;
-            }
-            throw new InvalidArgumentException('Invalid value in $_FILES array.');
-        }
-        return $normalized;
-    }
-
-    /**
-     * Creates UploadedFile instances from a normalized $_FILES spec.
-     */
-    private function createUploadedFileFromSpec(array $spec): UploadedFileInterface|array
-    {
-        if (is_array($spec['tmp_name'] ?? null)) {
-            return $this->normalizeNestedFileSpec($spec);
-        }
-        $tmpName = (string) ($spec['tmp_name'] ?? '');
-
-        return new UploadedFile(
-            $tmpName,
-            (int) ($spec['size'] ?? 0),
-            (int) ($spec['error'] ?? UPLOAD_ERR_OK),
-            array_key_exists('name', $spec) ? (string) $spec['name'] : null,
-            array_key_exists('type', $spec) ? (string) $spec['type'] : null,
-        );
-    }
-
-    /**
-     * Handles the nested structure of <input name="files[]">. The per-index spec
-     * extraction is delegated to {@see self::nestedSpecAt()} so this method
-     * stays a simple loop (Beta-1 hardening: reduce cyclomatic complexity per
-     * Roadmap §1.5).
-     */
-    private function normalizeNestedFileSpec(array $files): array
-    {
-        $normalized = [];
-        $tmpNames = (array) ($files['tmp_name'] ?? []);
-        foreach (array_keys($tmpNames) as $key) {
-            $normalized[$key] = $this->createUploadedFileFromSpec($this->nestedSpecAt($files, $key));
-        }
-        return $normalized;
-    }
-
-    /**
-     * Reads the per-index slice ($key) of a nested PHP $_FILES spec into a flat
-     * `array{tmp_name, size, error, name, type}` ready to feed back into
-     * {@see self::createUploadedFileFromSpec()}.
-     */
-    private function nestedSpecAt(array $files, int|string $key): array
-    {
-        $tmpNames = (array) ($files['tmp_name'] ?? []);
-
-        return [
-            'tmp_name' => $tmpNames[$key] ?? null,
-            'size' => $this->nestedField($files, 'size', $key, default: 0),
-            'error' => $this->nestedField($files, 'error', $key, default: UPLOAD_ERR_OK),
-            'name' => $this->nestedField($files, 'name', $key, default: null),
-            'type' => $this->nestedField($files, 'type', $key, default: null),
-        ];
-    }
-
-    /**
-     * Reads a single nested field at $key from a $_FILES spec, returning $default
-     * when the field is missing or not an array.
-     */
-    private function nestedField(array $files, string $field, int|string $key, mixed $default): mixed
-    {
-        $bucket = $files[$field] ?? null;
-        if (!is_array($bucket)) {
-            return $default;
-        }
-        return $bucket[$key] ?? $default;
+        return $this->uploadedFilesNormalizer->normalize($_FILES);
     }
 }

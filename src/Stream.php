@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http;
 
+use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
+use Waffle\Commons\Contracts\Data\Connection\ConnectionKind;
+use Waffle\Commons\Contracts\Data\Connection\ConnectionTrackerInterface;
 
 /**
  * PSR-7 StreamInterface implementation.
@@ -18,17 +21,28 @@ class Stream implements StreamInterface
     /**
      * @var resource|null A resource handle.
      */
+    #[WorkerSafe(reason: 'per-request stream resource; instance-scoped, never shared across requests')]
     private $resource;
 
     /**
      * @var array|null Known stream metadata.
      */
+    #[WorkerSafe(reason: 'memoised per-request stream metadata; instance-scoped, never shared')]
     private ?array $meta = null;
 
     /**
      * @var array|null Detached resource metadata cache.
      */
+    #[WorkerSafe(reason: 'detached-resource metadata cache; instance-scoped, never shared')]
     private ?array $detachedMeta = null;
+
+    /**
+     * Whether this Stream owns its underlying resource and may therefore
+     * `fclose()` it on {@see self::close()} / destruction. A borrowed resource
+     * (one opened and still used elsewhere) is left open so its real owner can
+     * keep using it — only our reference is released (STB-01).
+     */
+    private readonly bool $ownsResource;
 
     /**
      * Stream modes considered readable.
@@ -43,11 +57,21 @@ class Stream implements StreamInterface
     /**
      * @param resource|string $stream Stream resource or file path.
      * @param string $mode Mode with which to open stream (used if $stream is a path).
+     * @param bool $ownsResource When false, a passed-in resource is treated as
+     *        borrowed: it is never `fclose()`d by this Stream (STB-01). Ignored
+     *        for the path form, where the Stream always owns the handle it opens.
+     * @param ?ConnectionTrackerInterface $tracker DIAG-03 orphaned-connection tracer.
+     *        Null (the default) disables tracing — zero overhead in production; a dev
+     *        wiring injects a tracker so a stream still open at request end is surfaced.
      * @throws InvalidArgumentException if $stream is not a resource or string.
      * @throws RuntimeException if $stream is a string and cannot be opened.
      */
-    public function __construct($stream, string $mode = 'r')
-    {
+    public function __construct(
+        $stream,
+        string $mode = 'r',
+        bool $ownsResource = true,
+        private readonly ?ConnectionTrackerInterface $tracker = null,
+    ) {
         if (is_string($stream)) {
             // If it's a string, assume it's a file path
             $resource = fopen($stream, $mode);
@@ -55,11 +79,16 @@ class Stream implements StreamInterface
                 throw new RuntimeException('Failed to open stream: ' . $stream);
             }
             $this->resource = $resource;
+            // A handle we open ourselves is always owned (and must be closed).
+            $this->ownsResource = true;
+            $this->tracker?->trackOpen($this->traceId(), ConnectionKind::Stream);
             return;
         }
         if (is_resource($stream)) {
             // If it's already a resource
             $this->resource = $stream;
+            $this->ownsResource = $ownsResource;
+            $this->tracker?->trackOpen($this->traceId(), ConnectionKind::Stream);
             return;
         }
         // Invalid type
@@ -67,7 +96,16 @@ class Stream implements StreamInterface
     }
 
     /**
-     * Destructor. Automatically closes the stream if it's still attached.
+     * Stable per-instance trace id for the DIAG-03 ledger.
+     */
+    private function traceId(): string
+    {
+        return 'stream:' . spl_object_id($this);
+    }
+
+    /**
+     * Destructor. Releases the stream if still attached — closing the underlying
+     * resource only when this Stream owns it (see {@see self::close()}).
      */
     public function __destruct()
     {
@@ -103,8 +141,10 @@ class Stream implements StreamInterface
             return;
         }
 
+        $owns = $this->ownsResource;
         $resource = $this->detach();
-        if (is_resource($resource)) {
+        // Only close a resource we own; a borrowed handle is merely released.
+        if ($owns && is_resource($resource)) {
             fclose($resource);
         }
     }
@@ -120,15 +160,15 @@ class Stream implements StreamInterface
         }
 
         $resource = $this->resource;
-        // @igor-ignore: per-request stream; resource/meta are instance-scoped, never shared
         $this->resource = null;
+        // DIAG-03: the descriptor is released here (close() funnels through detach()),
+        // so the tracer ledger no longer counts it as open.
+        $this->tracker?->trackClose($this->traceId());
 
         // Saves metadata in case it's needed after detachment
         if (null === $this->detachedMeta) {
-            // @igor-ignore: per-request stream; resource/meta are instance-scoped, never shared
             $this->detachedMeta = $this->meta;
         }
-        // @igor-ignore: per-request stream; resource/meta are instance-scoped, never shared
         $this->meta = null; // Clears metadata cache
 
         return $resource;
@@ -256,7 +296,6 @@ class Stream implements StreamInterface
         }
 
         // Invalidate metadata cache as size might have changed
-        // @igor-ignore: per-request stream; resource/meta are instance-scoped, never shared
         $this->meta = null;
 
         return $result;
@@ -333,7 +372,6 @@ class Stream implements StreamInterface
 
         // Fills cache if empty
         if (null === $this->meta) {
-            // @igor-ignore: per-request stream; memoised metadata is instance-scoped, never shared
             $this->meta = stream_get_meta_data($this->resource);
         }
 

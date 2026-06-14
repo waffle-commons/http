@@ -10,7 +10,7 @@
 Waffle HTTP Component
 =====================
 
-> **Release:** `0.1.0-beta3` &nbsp;|&nbsp; [`CHANGELOG.md`](./CHANGELOG.md)
+> **Release:** `0.1.0-beta4` &nbsp;|&nbsp; [`CHANGELOG.md`](./CHANGELOG.md)
 > **PSR Compliance:** PSR-7 (HTTP Messages), PSR-17 (HTTP Factories)
 
 A strict, immutable PSR-7/17 implementation tuned for FrankenPHP worker mode. No singletons, no superglobal touching outside the explicit `GlobalsFactory`. Streams are seekable-aware; the `ResponseEmitter` chunks bodies to avoid loading large payloads into memory.
@@ -38,7 +38,7 @@ composer require waffle-commons/http
 | `Waffle\Commons\Http\Factory\StreamFactory` | PSR-17 | `createStream()`, `createStreamFromFile()`, `createStreamFromResource()`. |
 | `Waffle\Commons\Http\Factory\UriFactory` | PSR-17 | `createUri()`. |
 | `Waffle\Commons\Http\Factory\UploadedFileFactory` | PSR-17 | `createUploadedFile()`. |
-| `Waffle\Commons\Http\Factory\GlobalsFactory` | — | Framework-specific: builds a PSR-7 `ServerRequest` from `$_SERVER`, `$_GET`, `$_POST`, `$_COOKIE`, `$_FILES`, and `php://input`. |
+| `Waffle\Commons\Http\Factory\GlobalsFactory` | — | Implements `GlobalsFactoryInterface`: builds a PSR-7 `ServerRequest` from `$_SERVER`, `$_GET`, `$_POST`, `$_COOKIE`, `$_FILES`, and `php://input`. |
 | `Waffle\Commons\Http\Emitter\ResponseEmitter` | — | Implements `ResponseEmitterInterface`: sends status line, headers and chunked body. |
 
 ## 🚀 Bootstrap a server request

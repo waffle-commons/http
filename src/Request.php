@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http;
 
+use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\UriInterface;
@@ -125,6 +126,10 @@ class Request extends AbstractMessage implements RequestInterface
     /**
      * Updates the Host header from the URI.
      */
+    #[WorkerSafe(
+        scope: 'per-request-message',
+        reason: 'ctor + clone (withUri) Host sync; per-request message, never shared',
+    )]
     private function updateHostFromUri(UriInterface $uri): void
     {
         $host = $uri->getHost();
@@ -147,9 +152,7 @@ class Request extends AbstractMessage implements RequestInterface
             unset($this->headers[$this->headerNames[$normalizedName]]);
         }
 
-        // @igor-ignore: ctor + clone (withUri) only; per-request message, never shared
         $this->headerNames[$normalizedName] = $headerName;
-        // @igor-ignore: ctor + clone (withUri) only; per-request message, never shared
         $this->headers[$headerName] = [$host];
     }
 
