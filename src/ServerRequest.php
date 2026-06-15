@@ -15,7 +15,7 @@ use Waffle\Commons\Http\Abstract\AbstractMessage;
  *
  * @see https://www.php-fig.org/psr/psr-7/#321-psrhttpmessageserverrequestinterface
  */
-class ServerRequest extends AbstractMessage implements ServerRequestInterface
+final class ServerRequest extends AbstractMessage implements ServerRequestInterface
 {
     private array $attributes = [];
     private array $cookieParams = [];

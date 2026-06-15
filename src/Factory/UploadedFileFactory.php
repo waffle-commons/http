@@ -9,7 +9,7 @@ use Psr\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Waffle\Commons\Http\UploadedFile;
 
-class UploadedFileFactory implements UploadedFileFactoryInterface
+final class UploadedFileFactory implements UploadedFileFactoryInterface
 {
     #[\Override]
     public function createUploadedFile(
@@ -23,22 +23,13 @@ class UploadedFileFactory implements UploadedFileFactoryInterface
             $size = $stream->getSize();
         }
 
-        // We need a temporary file path for UploadedFile because its constructor expects one
-        // This is a slight limitation of relying on native $_FILES structure which uses paths
+        // STATE-02: never create a temporary file in the shared system temp dir. If
+        // the stream already wraps a real on-disk file, hand its path to UploadedFile so
+        // a move can use rename()/move_uploaded_file(); otherwise keep the stream
+        // itself — its content is copied straight to the destination on moveTo().
         $meta = $stream->getMetadata('uri');
+        $streamOrFile = is_string($meta) && $meta !== '' && file_exists($meta) ? $meta : $stream;
 
-        // If stream is a real file, use its path
-        if (is_string($meta) && file_exists($meta)) {
-            $path = $meta;
-        } else {
-            // Otherwise, copy stream content to a temp file
-            $path = tempnam(sys_get_temp_dir(), 'waffle_upload_factory');
-            if ($path === false) {
-                throw new \RuntimeException('Unable to create temporary file for UploadedFile.');
-            }
-            file_put_contents($path, (string) $stream);
-        }
-
-        return new UploadedFile($path, (int) $size, $error, $clientFilename, $clientMediaType);
+        return new UploadedFile($streamOrFile, (int) $size, $error, $clientFilename, $clientMediaType);
     }
 }

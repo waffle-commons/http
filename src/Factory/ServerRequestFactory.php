@@ -9,7 +9,7 @@ use Waffle\Commons\Contracts\Http\ServerRequestFactoryInterface;
 use Waffle\Commons\Http\ServerRequest;
 use Waffle\Commons\Http\Uri;
 
-class ServerRequestFactory implements ServerRequestFactoryInterface
+final class ServerRequestFactory implements ServerRequestFactoryInterface
 {
     #[\Override]
     public function createServerRequest(string $method, $uri, array $serverParams = []): ServerRequestInterface

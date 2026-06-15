@@ -10,7 +10,7 @@ use RuntimeException;
 use Waffle\Commons\Contracts\Data\Connection\ConnectionTrackerInterface;
 use Waffle\Commons\Http\Stream;
 
-class StreamFactory implements StreamFactoryInterface
+final class StreamFactory implements StreamFactoryInterface
 {
     /**
      * @param ?ConnectionTrackerInterface $tracker DIAG-03 tracer threaded into every

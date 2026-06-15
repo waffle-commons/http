@@ -9,7 +9,7 @@ use Psr\Http\Message\RequestInterface;
 use Waffle\Commons\Http\Request;
 use Waffle\Commons\Http\Uri;
 
-class RequestFactory implements RequestFactoryInterface
+final class RequestFactory implements RequestFactoryInterface
 {
     #[\Override]
     public function createRequest(string $method, $uri): RequestInterface

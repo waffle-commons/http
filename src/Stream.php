@@ -16,7 +16,7 @@ use Waffle\Commons\Contracts\Data\Connection\ConnectionTrackerInterface;
  *
  * @see https://www.php-fig.org/psr/psr-7/#34-psrhttpmessagestreaminterface
  */
-class Stream implements StreamInterface
+final class Stream implements StreamInterface
 {
     /**
      * @var resource|null A resource handle.
