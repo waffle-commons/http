@@ -13,7 +13,7 @@ use Waffle\Commons\Http\Abstract\AbstractMessage;
 /**
  * PSR-7 Request implementation (Client-side).
  */
-class Request extends AbstractMessage implements RequestInterface
+final class Request extends AbstractMessage implements RequestInterface
 {
     private string $method;
     private UriInterface $uri;

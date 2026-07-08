@@ -8,7 +8,7 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Waffle\Commons\Http\Uri;
 
-class UriFactory implements UriFactoryInterface
+final class UriFactory implements UriFactoryInterface
 {
     #[\Override]
     public function createUri(string $uri = ''): UriInterface

@@ -7,12 +7,10 @@ namespace Waffle\Commons\Http\Factory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use Psr\Http\Message\UriInterface;
 use RuntimeException;
 use Waffle\Commons\Contracts\Http\GlobalsFactoryInterface;
 use Waffle\Commons\Http\ServerRequest;
 use Waffle\Commons\Http\Stream;
-use Waffle\Commons\Http\Uri;
 
 /**
  * Creates a ServerRequestInterface (PSR-7) instance from PHP superglobals.
@@ -32,13 +30,21 @@ class GlobalsFactory implements GlobalsFactoryInterface
 
     private UploadedFilesNormalizer $uploadedFilesNormalizer;
 
+    private ServerRequestHeadersMapper $headersMapper;
+
+    private ServerRequestUriMapper $uriMapper;
+
     /**
      * @param (callable(): StreamInterface)|null $bodyStreamFactory Factory to create a Stream for php://input.
      * @param UploadedFilesNormalizer|null $uploadedFilesNormalizer Normalizes the $_FILES tree (defaults to a fresh instance).
+     * @param ServerRequestHeadersMapper|null $headersMapper Maps $_SERVER into the PSR-7 header set (defaults to a fresh instance).
+     * @param ServerRequestUriMapper|null $uriMapper Reconstructs the PSR-7 URI from $_SERVER (defaults to a fresh instance).
      */
     public function __construct(
         ?callable $bodyStreamFactory = null,
         ?UploadedFilesNormalizer $uploadedFilesNormalizer = null,
+        ?ServerRequestHeadersMapper $headersMapper = null,
+        ?ServerRequestUriMapper $uriMapper = null,
     ) {
         // Provides a default factory if none is given
         $this->bodyStreamFactory = $bodyStreamFactory ?? static function (): Stream {
@@ -50,6 +56,8 @@ class GlobalsFactory implements GlobalsFactoryInterface
             return new Stream($resource);
         };
         $this->uploadedFilesNormalizer = $uploadedFilesNormalizer ?? new UploadedFilesNormalizer();
+        $this->headersMapper = $headersMapper ?? new ServerRequestHeadersMapper();
+        $this->uriMapper = $uriMapper ?? new ServerRequestUriMapper();
     }
 
     /**
@@ -60,12 +68,15 @@ class GlobalsFactory implements GlobalsFactoryInterface
     #[\Override]
     public function createFromGlobals(): ServerRequestInterface
     {
+        /** @var array<string, string> $server The CGI/SAPI server parameters; values are strings. */
+        $server = $_SERVER;
+
         // Method, URI, Headers, Body, Version
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $uri = $this->createUriFromGlobals();
-        $headers = $this->getHeadersFromGlobals();
+        $method = $server['REQUEST_METHOD'] ?? 'GET';
+        $uri = $this->uriMapper->map($server);
+        $headers = $this->headersMapper->map($server);
         $body = ($this->bodyStreamFactory)(); // Creates the body stream
-        $protocol = str_replace(search: 'HTTP/', replace: '', subject: $_SERVER['SERVER_PROTOCOL'] ?? '1.1');
+        $protocol = str_replace(search: 'HTTP/', replace: '', subject: $server['SERVER_PROTOCOL'] ?? '1.1');
 
         // ServerRequest-specific parameters
         $cookies = $_COOKIE;
@@ -80,137 +91,12 @@ class GlobalsFactory implements GlobalsFactoryInterface
             $headers,
             $body,
             $protocol,
-            $_SERVER,
+            $server,
             $cookies,
             $queryParams,
             $parsedBody,
             $uploadedFiles,
         ); // serverParams
-    }
-
-    /**
-     * Creates a Uri object from globals.
-     *
-     * @return UriInterface
-     */
-    private function createUriFromGlobals(): UriInterface
-    {
-        $scheme = $this->detectScheme();
-        [$host, $port] = $this->extractHostAndPort($scheme);
-
-        $path = $_SERVER['REQUEST_URI'] ?? '/';
-        // Removes query string from path
-        $path = explode(separator: '?', string: $path, limit: 2)[0];
-
-        $query = $_SERVER['QUERY_STRING'] ?? '';
-
-        // Basic/Digest authentication handling
-        $user = array_key_exists('PHP_AUTH_USER', $_SERVER) ? $_SERVER['PHP_AUTH_USER'] : null;
-        $pass = array_key_exists('PHP_AUTH_PW', $_SERVER) ? $_SERVER['PHP_AUTH_PW'] : null;
-        $userInfo = '';
-        if (null !== $user) {
-            $userInfo = $user . (null !== $pass ? ':' . $pass : '');
-        }
-
-        // Reconstructs a full URI string
-        $uriString = $scheme . '://';
-        if ('' !== $userInfo) {
-            $uriString .= $userInfo . '@';
-        }
-        $uriString .= $host;
-        if (!('http' === $scheme && 80 === $port || 'https' === $scheme && 443 === $port)) {
-            $uriString .= ':' . $port;
-        }
-        $uriString .= $path;
-        if ('' !== $query) {
-            $uriString .= '?' . $query;
-        }
-
-        return new Uri($uriString);
-    }
-
-    /**
-     * Detects the request scheme (http or https) from $_SERVER.
-     */
-    private function detectScheme(): string
-    {
-        if (array_key_exists('HTTPS', $_SERVER) && ('on' === $_SERVER['HTTPS'] || 1 === (int) $_SERVER['HTTPS'])) {
-            return 'https';
-        }
-        return 'http';
-    }
-
-    /**
-     * Extracts host and port from $_SERVER globals.
-     *
-     * @return array{0: string, 1: int}
-     */
-    private function extractHostAndPort(string $scheme): array
-    {
-        $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
-        $matches = [];
-
-        // Separates host and port if HTTP_HOST contains both
-        if (1 === preg_match('/^(.+):(\d+)$/', $host, $matches)) {
-            return [$matches[1] ?? $host, (int) ($matches[2] ?? 80)];
-        }
-
-        // Otherwise, use SERVER_PORT or standard port
-        $port = (int) ($_SERVER['SERVER_PORT'] ?? ('http' === $scheme ? 80 : 443));
-        return [$host, $port];
-    }
-
-    /**
-     * Retrieves HTTP headers from $_SERVER.
-     *
-     * @return array<string, string>
-     */
-    private function getHeadersFromGlobals(): array
-    {
-        $headers = [];
-        foreach ($_SERVER as $name => $value) {
-            if (str_starts_with($name, 'HTTP_')) {
-                $headerName = str_replace(
-                    search: '_',
-                    replace: '-',
-                    subject: strtolower(substr(string: $name, offset: 5)),
-                );
-                $headers[$headerName] = (string) $value;
-                continue;
-            }
-            if (in_array(needle: $name, haystack: ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], strict: true)) {
-                $headerName = str_replace(search: '_', replace: '-', subject: strtolower($name));
-                $headers[$headerName] = (string) $value;
-            }
-        }
-
-        $this->resolveAuthorizationHeader($headers);
-
-        return $headers;
-    }
-
-    /**
-     * Resolves the authorization header from various $_SERVER sources.
-     *
-     * @param array<string, string> $headers
-     */
-    private function resolveAuthorizationHeader(array &$headers): void
-    {
-        if (array_key_exists('authorization', $headers)) {
-            return;
-        }
-        if (array_key_exists('REDIRECT_HTTP_AUTHORIZATION', $_SERVER)) {
-            $headers['authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-            return;
-        }
-        if (array_key_exists('PHP_AUTH_USER', $_SERVER)) {
-            $basicAuth = base64_encode($_SERVER['PHP_AUTH_USER'] . ':' . ($_SERVER['PHP_AUTH_PW'] ?? ''));
-            $headers['authorization'] = 'Basic ' . $basicAuth;
-            return;
-        }
-        if (array_key_exists('PHP_AUTH_DIGEST', $_SERVER)) {
-            $headers['authorization'] = $_SERVER['PHP_AUTH_DIGEST'];
-        }
     }
 
     /**

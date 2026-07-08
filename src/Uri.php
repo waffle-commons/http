@@ -12,7 +12,7 @@ use Psr\Http\Message\UriInterface;
  *
  * @see https://www.php-fig.org/psr/psr-7/#35-psrhttpmessageuriinterface
  */
-class Uri implements UriInterface
+final class Uri implements UriInterface
 {
     private string $scheme = '';
     private string $userInfo = '';

@@ -15,7 +15,7 @@ use Waffle\Commons\Http\Abstract\AbstractMessage;
  *
  * @see https://www.php-fig.org/psr/psr-7/#33-psrhttpmessageresponseinterface
  */
-class Response extends AbstractMessage implements ResponseInterface
+final class Response extends AbstractMessage implements ResponseInterface
 {
     private int $statusCode = 200;
     private string $reasonPhrase = 'OK';
