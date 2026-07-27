@@ -160,5 +160,49 @@ namespace WaffleTests\Commons\Http {
 
             $file->moveTo('/var/uploads/../../etc/cron.d/evil');
         }
+
+        public function testMoveToWithBaseDirAllowsLegitimateMoveInsideBase(): void
+        {
+            // SEC-03: a configured base directory does not block a legitimate
+            // move to a destination that genuinely lives inside it.
+            $baseDir = sys_get_temp_dir() . '/wfl_upload_base_' . uniqid();
+            static::assertTrue(mkdir($baseDir));
+
+            $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_OK, 'avatar.png', 'image/png', $baseDir);
+            $destination = $baseDir . '/avatar.png';
+
+            $file->moveTo($destination);
+
+            static::assertFileExists($destination);
+            static::assertSame('Test content', file_get_contents($destination));
+
+            unlink($destination);
+            rmdir($baseDir);
+        }
+
+        public function testMoveToWithBaseDirRejectsPathOutsideBase(): void
+        {
+            // SEC-03: Assert::safePath() alone only rejects literal `..`
+            // segments — a fully-qualified destination with no traversal
+            // markers at all (e.g. attacker-influenced metadata used verbatim)
+            // still needs to be caught. Assert::within() closes that gap once a
+            // base directory is configured.
+            $baseDir = sys_get_temp_dir() . '/wfl_upload_base_' . uniqid();
+            static::assertTrue(mkdir($baseDir));
+            $outsideDir = sys_get_temp_dir() . '/wfl_upload_outside_' . uniqid();
+            static::assertTrue(mkdir($outsideDir));
+
+            $file = new UploadedFile($this->tempFile, 12, UPLOAD_ERR_OK, 'evil.txt', 'text/plain', $baseDir);
+
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('escapes the permitted base directory');
+
+            try {
+                $file->moveTo($outsideDir . '/evil.txt');
+            } finally {
+                rmdir($outsideDir);
+                rmdir($baseDir);
+            }
+        }
     }
 }

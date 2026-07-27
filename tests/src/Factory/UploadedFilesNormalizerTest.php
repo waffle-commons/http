@@ -160,4 +160,63 @@ class UploadedFilesNormalizerTest extends TestCase
 
         $this->normalizer->normalize(['bad' => 'not-a-file']);
     }
+
+    public function testBaseDirIsForwardedToAFlatlyCreatedUploadedFile(): void
+    {
+        // SEC-03 (Beta6 audit): a configured base dir must reach every
+        // UploadedFile this normalizer creates, so moveTo() enforces real
+        // containment via Assert::within() instead of a caller silently
+        // getting the unconfigured (safePath()-only) default.
+        [$baseDir, $outsideDir] = $this->makeBaseAndOutsideDirs();
+
+        try {
+            $result = new UploadedFilesNormalizer($baseDir)->normalize([
+                'flat' => ['tmp_name' => '/tmp/php-flat'],
+            ]);
+
+            /** @var UploadedFileInterface $flat */
+            $flat = $result['flat'];
+
+            $this->expectException(InvalidArgumentException::class);
+            $flat->moveTo($outsideDir . '/escaped.txt');
+        } finally {
+            rmdir($baseDir);
+            rmdir($outsideDir);
+        }
+    }
+
+    public function testBaseDirIsForwardedToANestedlyCreatedUploadedFile(): void
+    {
+        [$baseDir, $outsideDir] = $this->makeBaseAndOutsideDirs();
+
+        try {
+            $result = new UploadedFilesNormalizer($baseDir)->normalize([
+                'files' => ['tmp_name' => ['/tmp/php-nested-a']],
+            ]);
+
+            $files = $result['files'];
+            static::assertIsArray($files);
+            $nested = $files[0];
+            static::assertInstanceOf(UploadedFileInterface::class, $nested);
+
+            $this->expectException(InvalidArgumentException::class);
+            $nested->moveTo($outsideDir . '/escaped.txt');
+        } finally {
+            rmdir($baseDir);
+            rmdir($outsideDir);
+        }
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function makeBaseAndOutsideDirs(): array
+    {
+        $baseDir = sys_get_temp_dir() . '/wfl_normalizer_base_' . uniqid();
+        mkdir($baseDir);
+        $outsideDir = sys_get_temp_dir() . '/wfl_normalizer_outside_' . uniqid();
+        mkdir($outsideDir);
+
+        return [$baseDir, $outsideDir];
+    }
 }

@@ -36,6 +36,15 @@ final class UploadedFile implements UploadedFileInterface
      * @param int $error PHP UPLOAD_ERR_* error code.
      * @param string|null $clientFilename Original filename on client side.
      * @param string|null $clientMediaType MIME type as sent by client.
+     * @param string|null $baseDir SEC-03: an existing directory `moveTo()`
+     *        destinations must resolve inside, enforced via
+     *        {@see Assert::within()}. `Assert::safePath()` alone only rejects
+     *        literal `..` traversal segments — it does not stop a fully
+     *        qualified destination (e.g. attacker-influenced metadata used
+     *        verbatim as the target) from pointing outside the directory the
+     *        caller actually intends. Left `null` (the default) preserves prior
+     *        behaviour for callers with no configured upload root; callers that
+     *        DO have one should always supply it.
      */
     public function __construct(
         string|StreamInterface $streamOrFile,
@@ -43,6 +52,7 @@ final class UploadedFile implements UploadedFileInterface
         private int $error,
         private ?string $clientFilename = null,
         private ?string $clientMediaType = null,
+        private ?string $baseDir = null,
     ) {
         if (is_string($streamOrFile)) {
             $this->file = $streamOrFile;
@@ -97,6 +107,15 @@ final class UploadedFile implements UploadedFileInterface
         // intended storage location. Throws a ValidationException (an
         // InvalidArgumentException, per the PSR-7 moveTo() contract).
         $targetPath = Assert::safePath($targetPath);
+
+        // SEC-03: safePath() only screens the literal string for `..` segments;
+        // it cannot tell a legitimate absolute destination from one that fully
+        // replaces the intended location (e.g. unsanitized client-supplied
+        // metadata used as-is). When a base directory is configured, additionally
+        // require the resolved target to stay lexically inside it.
+        if ($this->baseDir !== null) {
+            $targetPath = Assert::within($this->baseDir, $targetPath);
+        }
 
         if ($this->file !== null) {
             $this->moveBackingFile($this->file, $targetPath);

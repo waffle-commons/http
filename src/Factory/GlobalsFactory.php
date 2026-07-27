@@ -36,15 +36,23 @@ class GlobalsFactory implements GlobalsFactoryInterface
 
     /**
      * @param (callable(): StreamInterface)|null $bodyStreamFactory Factory to create a Stream for php://input.
-     * @param UploadedFilesNormalizer|null $uploadedFilesNormalizer Normalizes the $_FILES tree (defaults to a fresh instance).
+     * @param UploadedFilesNormalizer|null $uploadedFilesNormalizer Normalizes the $_FILES tree (defaults to a fresh
+     *        instance). When given explicitly, it is used as-is — $uploadBaseDir below is ignored, since a
+     *        caller-supplied normalizer is assumed to already be fully configured.
      * @param ServerRequestHeadersMapper|null $headersMapper Maps $_SERVER into the PSR-7 header set (defaults to a fresh instance).
      * @param ServerRequestUriMapper|null $uriMapper Reconstructs the PSR-7 URI from $_SERVER (defaults to a fresh instance).
+     * @param string|null $uploadBaseDir SEC-03: an upload root every `$_FILES`-derived {@see UploadedFile} should
+     *        enforce containment against (see {@see UploadedFilesNormalizer}). Only takes effect when
+     *        $uploadedFilesNormalizer is left null (the default normalizer is built with it). Created on disk
+     *        if it does not already exist — {@see \Waffle\Commons\Utils\Assert::within()} requires the base to
+     *        be resolvable.
      */
     public function __construct(
         ?callable $bodyStreamFactory = null,
         ?UploadedFilesNormalizer $uploadedFilesNormalizer = null,
         ?ServerRequestHeadersMapper $headersMapper = null,
         ?ServerRequestUriMapper $uriMapper = null,
+        ?string $uploadBaseDir = null,
     ) {
         // Provides a default factory if none is given
         $this->bodyStreamFactory = $bodyStreamFactory ?? static function (): Stream {
@@ -55,9 +63,30 @@ class GlobalsFactory implements GlobalsFactoryInterface
             assert(is_resource($resource), description: 'fopen must return a resource after false check.');
             return new Stream($resource);
         };
-        $this->uploadedFilesNormalizer = $uploadedFilesNormalizer ?? new UploadedFilesNormalizer();
+        $this->uploadedFilesNormalizer =
+            $uploadedFilesNormalizer ?? new UploadedFilesNormalizer($this->ensureUploadBaseDir($uploadBaseDir));
         $this->headersMapper = $headersMapper ?? new ServerRequestHeadersMapper();
         $this->uriMapper = $uriMapper ?? new ServerRequestUriMapper();
+    }
+
+    /**
+     * Creates $uploadBaseDir on disk when it does not already exist, so a
+     * boot-time-configured upload root is always ready for
+     * {@see \Waffle\Commons\Utils\Assert::within()} (which requires an
+     * existing, `realpath()`-resolvable base) the first time an upload lands
+     * — no separate provisioning step for the app to remember.
+     */
+    private function ensureUploadBaseDir(?string $uploadBaseDir): ?string
+    {
+        if ($uploadBaseDir === null) {
+            return null;
+        }
+
+        if (!is_dir($uploadBaseDir)) {
+            mkdir($uploadBaseDir, 0o775, true);
+        }
+
+        return $uploadBaseDir;
     }
 
     /**
