@@ -5,6 +5,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Released in lockstep with the Waffle Commons umbrella tag.
 
+## [0.1.0-beta6] — 2026-08-03
+
+**Theme: upload path containment.**
+
+### Fixed
+- `UploadedFile::moveTo()` enforces containment with `Assert::within()` against an optional constructor-injected upload root, closing absolute-path escapes that `Assert::safePath()` alone does not catch (Beta6 audit FIX-01/SEC-03).
+
+### Documentation
+- The README now links into the central Diátaxis documentation tree (DOC-02).
+
 ## [0.1.0-beta5] — 2026-07-08
 
 **Theme: stateless uploads & PSR-7 factory refactor.**
