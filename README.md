@@ -107,6 +107,13 @@ docker exec -w /waffle-commons/http waffle-dev composer tests
 
 Mock-bootstrap files under `tests/src/StreamTest.php`, `tests/src/UploadedFileTest.php`, `tests/src/Factory/StreamFactoryTest.php`, and `tests/src/Emitter/ResponseEmitterTest.php` intentionally declare the production namespace to override built-in PHP functions via `php-mock-phpunit`. They are listed in `mago.toml [guard].excludes` for that reason.
 
+## 📚 Documentation
+
+Full guides live in the central Diátaxis documentation tree:
+
+- [Reference — `waffle-commons/http`](https://github.com/waffle-commons/documentation/blob/main/reference/http.md)
+- [Documentation home](https://github.com/waffle-commons/documentation)
+
 ## 📄 License
 
 MIT — see [LICENSE.md](./LICENSE.md).
