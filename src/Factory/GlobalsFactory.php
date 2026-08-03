@@ -82,8 +82,17 @@ class GlobalsFactory implements GlobalsFactoryInterface
             return null;
         }
 
-        if (!is_dir($uploadBaseDir)) {
-            mkdir($uploadBaseDir, 0o775, true);
+        // Race-safe and fail-fast. Discarding mkdir()'s result meant a failed
+        // or concurrent creation was swallowed here and resurfaced much later,
+        // on the first upload, as "Base directory does not exist" from
+        // Assert::within() — an error that names the symptom and hides the
+        // cause. The second is_dir() covers the benign race where a parallel
+        // worker created the directory between the check and the call.
+        if (!is_dir($uploadBaseDir) && !mkdir($uploadBaseDir, 0o775, true) && !is_dir($uploadBaseDir)) {
+            throw new RuntimeException(sprintf(
+                'Upload base directory "%s" does not exist and could not be created.',
+                $uploadBaseDir,
+            ));
         }
 
         return $uploadBaseDir;
