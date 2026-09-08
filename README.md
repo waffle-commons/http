@@ -10,7 +10,7 @@
 Waffle HTTP Component
 =====================
 
-> **Release:** `0.1.0-beta5` &nbsp;|&nbsp; [`CHANGELOG.md`](./CHANGELOG.md)
+> **Release:** `0.1.0-beta6` &nbsp;|&nbsp; [`CHANGELOG.md`](./CHANGELOG.md)
 > **PSR Compliance:** PSR-7 (HTTP Messages), PSR-17 (HTTP Factories)
 
 A strict, immutable PSR-7/17 implementation tuned for FrankenPHP worker mode. No singletons, no superglobal touching outside the explicit `GlobalsFactory`. Streams are seekable-aware; the `ResponseEmitter` chunks bodies to avoid loading large payloads into memory.
@@ -106,6 +106,13 @@ docker exec -w /waffle-commons/http waffle-dev composer tests
 ```
 
 Mock-bootstrap files under `tests/src/StreamTest.php`, `tests/src/UploadedFileTest.php`, `tests/src/Factory/StreamFactoryTest.php`, and `tests/src/Emitter/ResponseEmitterTest.php` intentionally declare the production namespace to override built-in PHP functions via `php-mock-phpunit`. They are listed in `mago.toml [guard].excludes` for that reason.
+
+## 📚 Documentation
+
+Full guides live in the central Diátaxis documentation tree:
+
+- [Reference — `waffle-commons/http`](https://github.com/waffle-commons/documentation/blob/main/reference/http.md)
+- [Documentation home](https://github.com/waffle-commons/documentation)
 
 ## 📄 License
 

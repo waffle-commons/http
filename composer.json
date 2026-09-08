@@ -1,6 +1,6 @@
 {
     "name": "waffle-commons/http",
-    "description": "Http component for Waffle framework.",
+    "description": "PSR-7 HTTP messages and PSR-17 factories for Waffle Commons: immutable request/response objects, streams, and contained file uploads.",
     "type": "library",
     "license": "MIT",
     "autoload": {

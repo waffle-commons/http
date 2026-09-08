@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Waffle\Commons\Http\Factory\GlobalsFactory;
+use Waffle\Commons\Http\Factory\UploadedFilesNormalizer;
 use WaffleTests\Commons\Http\AbstractTestCase;
 
 class GlobalsFactoryTest extends AbstractTestCase
@@ -220,6 +221,57 @@ class GlobalsFactoryTest extends AbstractTestCase
         static::assertCount(2, $nestedFiles);
         static::assertInstanceOf(UploadedFileInterface::class, $nestedFiles[0]);
         static::assertSame('a.txt', $nestedFiles[0]->getClientFilename());
+    }
+
+    public function testUploadBaseDirIsCreatedWhenMissingAndReachesUploadedFiles(): void
+    {
+        // SEC-03 (Beta6 audit): the whole point of $uploadBaseDir is that a
+        // real deployment doesn't have to remember a separate provisioning
+        // step — the directory must exist by the time an upload lands, and
+        // the resulting UploadedFile must actually enforce containment
+        // against it (not just accept the option and ignore it).
+        $baseDir = sys_get_temp_dir() . '/wfl_globals_base_' . uniqid();
+        $outsideDir = sys_get_temp_dir() . '/wfl_globals_outside_' . uniqid();
+        mkdir($outsideDir);
+        self::assertDirectoryDoesNotExist($baseDir);
+
+        try {
+            $this->setGlobals(server: ['REQUEST_METHOD' => 'POST', 'CONTENT_TYPE' => 'multipart/form-data'], files: [
+                'file' => [
+                    'name' => 'test.txt',
+                    'type' => 'text/plain',
+                    'tmp_name' => '/tmp/phpYcfZnq',
+                    'error' => 0,
+                    'size' => 123,
+                ],
+            ]);
+
+            $factory = new GlobalsFactory(uploadBaseDir: $baseDir);
+            self::assertDirectoryExists($baseDir);
+
+            $request = $factory->createFromGlobals();
+            $uploadedFile = $request->getUploadedFiles()['file'];
+            static::assertInstanceOf(UploadedFileInterface::class, $uploadedFile);
+
+            $this->expectException(InvalidArgumentException::class);
+            $uploadedFile->moveTo($outsideDir . '/escaped.txt');
+        } finally {
+            rmdir($baseDir);
+            rmdir($outsideDir);
+        }
+    }
+
+    public function testUploadBaseDirIsIgnoredWhenACustomNormalizerIsSupplied(): void
+    {
+        // A caller-supplied UploadedFilesNormalizer is assumed to already be
+        // fully configured — $uploadBaseDir must not override it (and, since
+        // it's never consumed in that branch, must not create the directory
+        // either).
+        $baseDir = sys_get_temp_dir() . '/wfl_globals_unused_base_' . uniqid();
+
+        new GlobalsFactory(uploadedFilesNormalizer: new UploadedFilesNormalizer(), uploadBaseDir: $baseDir);
+
+        self::assertDirectoryDoesNotExist($baseDir);
     }
 
     public function testInvalidFilesStructureThrowsException(): void

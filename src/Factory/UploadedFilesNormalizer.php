@@ -22,6 +22,17 @@ use Waffle\Commons\Http\UploadedFile;
 final class UploadedFilesNormalizer
 {
     /**
+     * @param string|null $baseDir SEC-03: forwarded to every {@see UploadedFile}
+     *        this normalizer creates, so `moveTo()` enforces containment via
+     *        {@see \Waffle\Commons\Utils\Assert::within()}. Left `null` (the
+     *        default) preserves prior behaviour for callers with no configured
+     *        upload root.
+     */
+    public function __construct(
+        private readonly ?string $baseDir = null,
+    ) {}
+
+    /**
      * Normalizes a `$_FILES`-shaped array into a (possibly nested) map of
      * uploaded files. An empty input yields an empty array. Each leaf is an
      * {@see UploadedFileInterface}; branches are nested arrays of the same.
@@ -74,6 +85,7 @@ final class UploadedFilesNormalizer
             (int) ($spec['error'] ?? UPLOAD_ERR_OK),
             array_key_exists('name', $spec) ? (string) $spec['name'] : null,
             array_key_exists('type', $spec) ? (string) $spec['type'] : null,
+            $this->baseDir,
         );
     }
 

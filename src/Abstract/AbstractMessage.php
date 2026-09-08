@@ -199,7 +199,7 @@ abstract class AbstractMessage implements MessageInterface
     protected function validateHeaderName(string $name): void
     {
         // Complies with RFC 7230, section 3.2.
-        if (1 !== preg_match('/^[a-zA-Z0-9\'`#$%&*+.^~_|-]+$/', $name)) {
+        if (1 !== preg_match('/^[a-zA-Z0-9\'`#$%&*+.^~_|-]+$/D', $name)) {
             throw new InvalidArgumentException(sprintf('Invalid header name "%s".', $name));
         }
     }
@@ -226,7 +226,7 @@ abstract class AbstractMessage implements MessageInterface
             // Validates that each value is scalar or null
 
             // Validates header value characters (RFC 7230, section 3.2)
-            if (1 !== preg_match('/^[ \t\x21-\x7E\x80-\xFF]*$/', $v)) {
+            if (1 !== preg_match('/^[ \t\x21-\x7E\x80-\xFF]*$/D', $v)) {
                 throw new InvalidArgumentException(sprintf('Invalid header value: "%s".', $v));
             }
             $normalized[] = $v;
