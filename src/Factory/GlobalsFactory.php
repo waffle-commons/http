@@ -89,7 +89,7 @@ class GlobalsFactory implements GlobalsFactoryInterface
         // Assert::within() — an error that names the symptom and hides the
         // cause. The second is_dir() covers the benign race where a parallel
         // worker created the directory between the check and the call.
-        if (!is_dir($uploadBaseDir) && !mkdir($uploadBaseDir, 0o775, true) && !is_dir($uploadBaseDir)) {
+        if (!is_dir($uploadBaseDir) && !self::createDirectory($uploadBaseDir) && !is_dir($uploadBaseDir)) {
             throw new RuntimeException(sprintf(
                 'Upload base directory "%s" does not exist and could not be created.',
                 $uploadBaseDir,
@@ -97,6 +97,25 @@ class GlobalsFactory implements GlobalsFactoryInterface
         }
 
         return $uploadBaseDir;
+    }
+
+    /**
+     * mkdir() without its E_WARNING and without the `@` operator (POLICY-05, as in
+     * `FileCache::attempt()`). Workers that boot together race to create the same
+     * directory: the loser's mkdir() returns false AND emits "mkdir(): File exists",
+     * which reached the logs on every concurrent boot. The scoped handler turns
+     * that warning into the boolean result; the caller's is_dir() re-check
+     * decides, so a directory that really could not be created still throws.
+     */
+    private static function createDirectory(string $path): bool
+    {
+        set_error_handler(static fn(): bool => true);
+
+        try {
+            return mkdir($path, 0o775, true);
+        } finally {
+            restore_error_handler();
+        }
     }
 
     /**
