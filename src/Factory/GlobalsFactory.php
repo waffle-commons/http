@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http\Factory;
 
+use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -104,6 +105,9 @@ class GlobalsFactory implements GlobalsFactoryInterface
      * @return ServerRequestInterface
      */
     #[\Override]
+    #[WorkerSafe(
+        reason: 'the single superglobal boundary (AGENTS.md section 2): FrankenPHP repopulates the superglobals for every request and they are read at call time into locals',
+    )]
     public function createFromGlobals(): ServerRequestInterface
     {
         /** @var array<string, string> $server The CGI/SAPI server parameters; values are strings. */
@@ -147,6 +151,9 @@ class GlobalsFactory implements GlobalsFactoryInterface
      * @param array<string, string> $headers
      * @return array|object|null
      */
+    #[WorkerSafe(
+        reason: 'the single superglobal boundary (AGENTS.md section 2): $_POST is read at call time for the request being built',
+    )]
     private function getParsedBody(string $method, array $headers, StreamInterface $body): array|object|null
     {
         if ('POST' !== $method) {
@@ -211,6 +218,9 @@ class GlobalsFactory implements GlobalsFactoryInterface
      *
      * @return array<string, UploadedFileInterface>
      */
+    #[WorkerSafe(
+        reason: 'the single superglobal boundary (AGENTS.md section 2): $_FILES is read at call time for the request being built',
+    )]
     private function createUploadedFilesFromGlobals(): array
     {
         return $this->uploadedFilesNormalizer->normalize($_FILES);
