@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Waffle\Commons\Http\Factory;
 
+use IgorPhp\IgorBundle\Attribute\WorkerSafe;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -88,7 +89,7 @@ class GlobalsFactory implements GlobalsFactoryInterface
         // Assert::within() — an error that names the symptom and hides the
         // cause. The second is_dir() covers the benign race where a parallel
         // worker created the directory between the check and the call.
-        if (!is_dir($uploadBaseDir) && !mkdir($uploadBaseDir, 0o775, true) && !is_dir($uploadBaseDir)) {
+        if (!is_dir($uploadBaseDir) && !self::createDirectory($uploadBaseDir) && !is_dir($uploadBaseDir)) {
             throw new RuntimeException(sprintf(
                 'Upload base directory "%s" does not exist and could not be created.',
                 $uploadBaseDir,
@@ -99,11 +100,33 @@ class GlobalsFactory implements GlobalsFactoryInterface
     }
 
     /**
+     * mkdir() without its E_WARNING and without the `@` operator (POLICY-05, as in
+     * `FileCache::attempt()`). Workers that boot together race to create the same
+     * directory: the loser's mkdir() returns false AND emits "mkdir(): File exists",
+     * which reached the logs on every concurrent boot. The scoped handler turns
+     * that warning into the boolean result; the caller's is_dir() re-check
+     * decides, so a directory that really could not be created still throws.
+     */
+    private static function createDirectory(string $path): bool
+    {
+        set_error_handler(static fn(): bool => true);
+
+        try {
+            return mkdir($path, 0o775, true);
+        } finally {
+            restore_error_handler();
+        }
+    }
+
+    /**
      * Creates a ServerRequest from PHP superglobals.
      *
      * @return ServerRequestInterface
      */
     #[\Override]
+    #[WorkerSafe(
+        reason: 'the single superglobal boundary (AGENTS.md section 2): FrankenPHP repopulates the superglobals for every request and they are read at call time into locals',
+    )]
     public function createFromGlobals(): ServerRequestInterface
     {
         /** @var array<string, string> $server The CGI/SAPI server parameters; values are strings. */
@@ -147,6 +170,9 @@ class GlobalsFactory implements GlobalsFactoryInterface
      * @param array<string, string> $headers
      * @return array|object|null
      */
+    #[WorkerSafe(
+        reason: 'the single superglobal boundary (AGENTS.md section 2): $_POST is read at call time for the request being built',
+    )]
     private function getParsedBody(string $method, array $headers, StreamInterface $body): array|object|null
     {
         if ('POST' !== $method) {
@@ -211,6 +237,9 @@ class GlobalsFactory implements GlobalsFactoryInterface
      *
      * @return array<string, UploadedFileInterface>
      */
+    #[WorkerSafe(
+        reason: 'the single superglobal boundary (AGENTS.md section 2): $_FILES is read at call time for the request being built',
+    )]
     private function createUploadedFilesFromGlobals(): array
     {
         return $this->uploadedFilesNormalizer->normalize($_FILES);

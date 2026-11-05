@@ -107,6 +107,9 @@ final class Stream implements StreamInterface
      * Destructor. Releases the stream if still attached — closing the underlying
      * resource only when this Stream owns it (see {@see self::close()}).
      */
+    #[WorkerSafe(
+        reason: 'per-request PSR-7 value object, never a shared service: the destructor releases only the stream this instance owns',
+    )]
     public function __destruct()
     {
         $this->close();

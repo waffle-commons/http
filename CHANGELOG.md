@@ -5,6 +5,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Released in lockstep with the Waffle Commons umbrella tag.
 
+## [0.1.0-beta7] — 2026-11
+
+**Theme: the client address behind trusted proxies.**
+
+### Added
+- `ClientIp\TrustedProxyClientIpResolver` (NET-01) — implements `ClientIpResolverInterface`: `X-Forwarded-For` is read only when `REMOTE_ADDR` is an allow-listed proxy (addresses or CIDR ranges, IPv4 and IPv6), right to left, and the first hop that is not a trusted proxy is the client; a client-prepended hop cannot win, and a malformed hop falls back to `REMOTE_ADDR`.
+
+### Fixed
+- `GlobalsFactory` no longer emits `mkdir(): File exists` when workers that boot together race to create the upload root, a warning the EcoShield Gateway logged at every worker start. The creation runs under a scoped error handler (no `@` operator), and the `is_dir()` re-check still throws when the directory really cannot be created.
+
 ## [0.1.0-beta6] — 2026-09
 
 **Theme: upload path containment.**

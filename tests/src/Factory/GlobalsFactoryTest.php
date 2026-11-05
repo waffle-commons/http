@@ -5,20 +5,34 @@ declare(strict_types=1);
 namespace WaffleTests\Commons\Http\Factory;
 
 use InvalidArgumentException;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use RuntimeException;
 use Waffle\Commons\Http\Factory\GlobalsFactory;
 use Waffle\Commons\Http\Factory\UploadedFilesNormalizer;
 use WaffleTests\Commons\Http\AbstractTestCase;
 
 class GlobalsFactoryTest extends AbstractTestCase
 {
+    use PHPMock;
+
+    private const string FACTORY_NAMESPACE = 'Waffle\Commons\Http\Factory';
+
     private array $serverBackup;
     private array $getBackup;
     private array $postBackup;
     private array $cookieBackup;
     private array $filesBackup;
+
+    #[\Override]
+    public static function setUpBeforeClass(): void
+    {
+        // php-mock: the namespaced fallback must exist BEFORE the first unqualified
+        // is_dir() call in the factory namespace, or PHP binds the global for good.
+        self::defineFunctionMock(self::FACTORY_NAMESPACE, 'is_dir');
+    }
 
     #[\Override]
     protected function setUp(): void
@@ -272,6 +286,48 @@ class GlobalsFactoryTest extends AbstractTestCase
         new GlobalsFactory(uploadedFilesNormalizer: new UploadedFilesNormalizer(), uploadBaseDir: $baseDir);
 
         self::assertDirectoryDoesNotExist($baseDir);
+    }
+
+    public function testUploadBaseDirCreationRaceLostToAnotherWorkerIsSilent(): void
+    {
+        // Workers booting together race to create the same upload root. The
+        // loser's mkdir() fails with "File exists" — a warning that used to
+        // reach the logs on every concurrent boot. Replay that interleaving:
+        // is_dir() says "missing", another worker creates it, then mkdir() runs.
+        // failOnWarning (phpunit.xml) turns any escaped warning into a failure.
+        $baseDir = sys_get_temp_dir() . '/wfl_globals_race_' . uniqid();
+        mkdir($baseDir);
+
+        $isDir = $this->getFunctionMock(self::FACTORY_NAMESPACE, 'is_dir');
+        $isDir->expects($this->exactly(2))->willReturnOnConsecutiveCalls(false, true);
+
+        try {
+            new GlobalsFactory(uploadBaseDir: $baseDir);
+            self::assertDirectoryExists($baseDir);
+        } finally {
+            rmdir($baseDir);
+        }
+    }
+
+    public function testUploadBaseDirThatCannotBeCreatedThrowsWithoutAWarning(): void
+    {
+        // A regular file squats the path: mkdir() fails, and the re-check still
+        // finds no directory, so construction must fail loudly — through the
+        // exception, not through a PHP warning.
+        $squatter = sys_get_temp_dir() . '/wfl_globals_squatter_' . uniqid();
+        touch($squatter);
+
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage(sprintf(
+                'Upload base directory "%s" does not exist and could not be created.',
+                $squatter,
+            ));
+
+            new GlobalsFactory(uploadBaseDir: $squatter);
+        } finally {
+            unlink($squatter);
+        }
     }
 
     public function testInvalidFilesStructureThrowsException(): void
